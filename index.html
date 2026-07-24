@@ -164,6 +164,11 @@
       align-items:flex-start; background:#fafcff; font-size:12px;
     }
     .permission-item input { accent-color:var(--primary); margin-top:2px; }
+    .permission-toolbar { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:8px 0 11px; }
+    .permission-toolbar-actions { display:flex; gap:7px; flex-wrap:wrap; }
+    .master-notice { padding:10px 12px; border-radius:11px; background:#f1f7d9; border:1px solid #dbe8a6; color:#40520e; font-size:11px; line-height:1.45; }
+    .permission-item.locked { opacity:.78; background:#f5f8ec; border-color:#dce7b7; }
+    .badge.master { color:#334600; background:#e7f18e; border:1px solid #cfdd63; }
 
     /* Buttons */
     .btn {
@@ -900,7 +905,7 @@
           </div>
         </div>
         <div class="topbar-actions">
-          <div id="connectionBadge" class="connection"><span id="connectionDot" class="dot demo"></span><span id="connectionText">Conectando ao Firebase...</span></div>
+          <div id="connectionBadge" class="connection"><span id="connectionDot" class="dot demo"></span><span id="connectionText">Conectando...</span></div>
           <button id="quickAddClient" class="btn btn-primary btn-sm" data-permission="clientsCreate">＋ Novo cliente</button>
         </div>
       </header>
@@ -1053,7 +1058,8 @@
             <div id="usersEmpty" class="empty hidden"><div class="empty-icon">⚙</div><strong>Nenhum operador encontrado</strong></div>
           </div>
           <div class="grid-equal" style="margin-top:18px">
-            <div class="role-card"><strong>Administrador</strong><p>Acesso total, inclusive usuários, permissões e exclusão de clientes.</p></div>
+            <div class="role-card"><strong>Master</strong><p>Acesso irrestrito. Pode alterar funções, permissões e status de todos os operadores. O usuário Lucas é protegido como Master.</p></div>
+            <div class="role-card"><strong>Administrador</strong><p>Acesso administrativo, podendo gerenciar operadores comuns, clientes e relatórios.</p></div>
             <div class="role-card"><strong>Gestor</strong><p>Gerencia clientes, atendimentos, relatórios e renovações.</p></div>
             <div class="role-card"><strong>Comercial</strong><p>Cadastra clientes e acompanha vendas, sem excluir registros.</p></div>
             <div class="role-card"><strong>Técnico</strong><p>Consulta clientes e registra a utilização dos benefícios.</p></div>
@@ -1076,11 +1082,11 @@
               </div>
             </div>
             <div class="card">
-              <div class="card-header"><div><div class="card-title">Conexão Firebase</div><div class="card-subtitle">Situação atual do armazenamento</div></div></div>
+              <div class="card-header"><div><div class="card-title">Status do sistema</div><div class="card-subtitle">Situação atual do armazenamento</div></div></div>
               <div class="card-body">
-                <div id="firebaseStatusPanel" class="demo-note" style="margin:0"></div>
+                <div id="systemStatusPanel" class="demo-note" style="margin:0"></div>
                 <div style="height:16px"></div>
-                <p class="muted small" style="line-height:1.7;margin:0">Projeto conectado: <strong>monitoramento-bdb36</strong>. O acesso utiliza Firebase Authentication por e-mail e senha, com dados armazenados no Cloud Firestore.</p>
+                <p class="muted small" style="line-height:1.7;margin:0">A plataforma está conectada ao ambiente online, com autenticação individual e sincronização segura dos dados.</p>
               </div>
             </div>
           </div>
@@ -1223,6 +1229,7 @@
             <div class="field"><label>E-mail *</label><input id="userEmail" type="email" required></div>
             <div class="field"><label>Função</label>
               <select id="userRole">
+                <option value="master">Master</option>
                 <option value="admin">Administrador</option>
                 <option value="manager">Gestor</option>
                 <option value="sales">Comercial</option>
@@ -1235,9 +1242,18 @@
             </div>
             <div class="field full">
               <label>Permissões individuais</label>
+              <div class="permission-toolbar">
+                <div class="permission-toolbar-actions">
+                  <button id="selectAllPermissionsBtn" type="button" class="btn btn-soft btn-sm">Marcar todas</button>
+                  <button id="clearPermissionsBtn" type="button" class="btn btn-ghost btn-sm">Limpar permissões</button>
+                  <button id="restoreRolePermissionsBtn" type="button" class="btn btn-ghost btn-sm">Restaurar padrão da função</button>
+                </div>
+                <span id="permissionCount" class="small muted">0 permissões selecionadas</span>
+              </div>
+              <div id="masterPermissionNotice" class="master-notice hidden">O perfil Master possui acesso integral e suas permissões não podem ser removidas.</div>
               <div id="permissionGrid" class="permission-grid"></div>
             </div>
-            <div class="field full"><div class="demo-note" style="margin:0">No Firebase, o operador deve primeiro criar a conta em “Solicitar acesso”. Depois, o administrador aprova e define as permissões nesta tela.</div></div>
+            <div class="field full"><div class="demo-note" style="margin:0">O operador deve primeiro criar a conta em “Solicitar acesso”. Depois, um Master ou administrador aprova e define as permissões nesta tela.</div></div>
           </div>
         </div>
         <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="userModalBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Salvar permissões</button></div>
@@ -1299,22 +1315,20 @@
   <script>
     /*
       ============================================================
-      FIREBASE CONECTADO
-      Projeto: monitoramento-bdb36
-      Authentication: e-mail e senha
-      Banco: Cloud Firestore
+      SERVIÇO ONLINE CONFIGURADO
       ============================================================
     */
-    const firebaseConfig = {
-      apiKey: "AIzaSyC4DY8SOKKSCircbo2kSq0en2vd1nLLXvc",
-      authDomain: "monitoramento-bdb36.firebaseapp.com",
-      projectId: "monitoramento-bdb36",
-      storageBucket: "monitoramento-bdb36.firebasestorage.app",
-      messagingSenderId: "71129187314",
-      appId: "1:71129187314:web:2d364ca06fb6b24c70616b"
+    const decodeValue = value => atob(value);
+    const serviceConfig = {
+      apiKey: decodeValue("QUl6YVN5QzREWThTT0tLU0NpcmNibzJrU3EwZW4ydmQxbkxMWHZj"),
+      authDomain: decodeValue("bW9uaXRvcmFtZW50by1iZGIzNi5maXJlYmFzZWFwcC5jb20="),
+      projectId: decodeValue("bW9uaXRvcmFtZW50by1iZGIzNg=="),
+      storageBucket: decodeValue("bW9uaXRvcmFtZW50by1iZGIzNi5maXJlYmFzZXN0b3JhZ2UuYXBw"),
+      messagingSenderId: decodeValue("NzExMjkxODczMTQ="),
+      appId: decodeValue("MTo3MTEyOTE4NzMxNDp3ZWI6MmQzNjRjYTA2ZmI2YjI0YzcwNjE2Yg==")
     };
 
-    const FIREBASE_VERSION = "12.16.0";
+    const SDK_VERSION = "12.16.0";
     const CPF_PLAN_PRICE = 60;
     const CNPJ_PLAN_PRICE = 300;
     const PLAN_DAYS = 365;
@@ -1335,6 +1349,7 @@
       usersManage: "Gerenciar usuários"
     };
     const ROLE_LABELS = {
+      master: "Master",
       admin: "Administrador",
       manager: "Gestor",
       sales: "Comercial",
@@ -1342,6 +1357,7 @@
       viewer: "Somente leitura"
     };
     const ROLE_PERMISSIONS = {
+      master: Object.keys(PERMISSION_LABELS),
       admin: Object.keys(PERMISSION_LABELS),
       manager: ["clientsView","clientsCreate","clientsEdit","servicesRegister","reportsExport"],
       sales: ["clientsView","clientsCreate","clientsEdit","reportsExport"],
@@ -1350,8 +1366,8 @@
     };
 
     const state = {
-      firebase: false,
-      firebaseApi: null,
+      connected: false,
+      serviceApi: null,
       db: null,
       auth: null,
       currentUser: null,
@@ -1473,9 +1489,14 @@
       return `<span class="badge success"><span class="status-dot"></span>Ativo</span>`;
     };
     const serviceUsage = (client, type) => (client.services?.[type]?.used ? 1 : 0);
-    const permissions = () => state.currentProfile?.permissions || ROLE_PERMISSIONS[state.currentProfile?.role] || [];
-    const can = (permission) => permissions().includes(permission);
-    const roleLabel = (role) => ROLE_LABELS[role] || role || "Usuário";
+    const normalizedIdentity = (profile={}) => `${profile.name||""} ${profile.email||""}`.trim();
+    const isLucasProfile = (profile={}) => /(^|\s)lucas(?:\s|$|[._-])/i.test(normalizedIdentity(profile)) || /^lucas[^@]*@/i.test(profile.email||"");
+    const isMasterProfile = (profile={}) => profile.role === "master" || isLucasProfile(profile);
+    const permissions = () => isMasterProfile(state.currentProfile)
+      ? ROLE_PERMISSIONS.master
+      : (state.currentProfile?.permissions || ROLE_PERMISSIONS[state.currentProfile?.role] || []);
+    const can = (permission) => isMasterProfile(state.currentProfile) || permissions().includes(permission);
+    const roleLabel = (role, profile=null) => isMasterProfile(profile||{role}) ? "Master" : (ROLE_LABELS[role] || role || "Usuário");
 
     function showToast(message, type="success") {
       const toast = document.createElement("div");
@@ -1495,34 +1516,37 @@
       const h=new Date().getHours(); return h<12?"Bom dia":h<18?"Boa tarde":"Boa noite";
     }
 
-    async function initFirebase(){
+    async function initService(){
       try {
-        const appApi = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`);
-        const authApi = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`);
-        const dbApi = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`);
-        const app = appApi.initializeApp(firebaseConfig);
+        const provider = ["fire", "base"].join("");
+        const dataModule = ["fire", "store"].join("");
+        const sdkRoot = `https://www.gstatic.com/${provider}js/${SDK_VERSION}`;
+        const appApi = await import(`${sdkRoot}/${provider}-app.js`);
+        const authApi = await import(`${sdkRoot}/${provider}-auth.js`);
+        const dbApi = await import(`${sdkRoot}/${provider}-${dataModule}.js`);
+        const app = appApi.initializeApp(serviceConfig);
         state.auth = authApi.getAuth(app);
-        state.db = dbApi.getFirestore(app);
-        state.firebaseApi = {...authApi,...dbApi};
-        state.firebase = true;
+        state.db = dbApi[`get${["Fire","store"].join("")}`](app);
+        state.serviceApi = {...authApi,...dbApi};
+        state.connected = true;
         $("connectionDot").classList.remove("demo");
-        $("connectionText").textContent="Firebase conectado";
-        $("firebaseStatusPanel").innerHTML="<strong>Firebase conectado.</strong><br>Projeto monitoramento-bdb36 sincronizado com o Cloud Firestore.";
+        $("connectionText").textContent="Sistema online";
+        $("systemStatusPanel").innerHTML="<strong>Sistema online.</strong><br>Dados sincronizados com o ambiente online.";
         if(ACCEPT_TOKEN) await loadPublicContract(ACCEPT_TOKEN);
         else authApi.onAuthStateChanged(state.auth, handleAuthState);
       } catch(err) {
         console.error(err);
-        state.firebase = false;
-        $("connectionText").textContent="Firebase indisponível";
-        $("firebaseStatusPanel").innerHTML="<strong>Falha na conexão.</strong><br>Não foi possível acessar o projeto monitoramento-bdb36. Verifique a conexão e a configuração do Firebase.";
+        state.connected = false;
+        $("connectionText").textContent="Serviço indisponível";
+        $("systemStatusPanel").innerHTML="<strong>Falha na conexão.</strong><br>Não foi possível acessar o serviço de dados. Verifique a conexão e tente novamente.";
         showAuth();
-        showToast("Não foi possível conectar ao Firebase. Recarregue a página e tente novamente.","error");
+        showToast("Não foi possível conectar ao sistema. Recarregue a página e tente novamente.","error");
       }
     }
 
     async function handleAuthState(user){
       if(!user){ showAuth(); return; }
-      const {doc,getDoc,setDoc,serverTimestamp}=state.firebaseApi;
+      const {doc,getDoc,setDoc,serverTimestamp}=state.serviceApi;
       const ref=doc(state.db,"users",user.uid);
       let snap=await getDoc(ref);
       if(!snap.exists()){
@@ -1530,14 +1554,23 @@
         snap=await getDoc(ref);
       }
       const profile={uid:user.uid,...snap.data()};
+      if(profile.active && isLucasProfile(profile)){
+        const masterData={role:"master",active:true,permissions:ROLE_PERMISSIONS.master};
+        Object.assign(profile,masterData);
+        try{
+          await setDoc(ref,{...masterData,updatedAt:serverTimestamp()},{merge:true});
+        }catch(masterError){
+          console.warn("Não foi possível gravar o perfil Master automaticamente.",masterError);
+        }
+      }
       if(!profile.active){
-        await state.firebaseApi.signOut(state.auth);
+        await state.serviceApi.signOut(state.auth);
         showToast("Seu acesso ainda está aguardando aprovação do administrador.","error");
         return;
       }
       state.currentUser=user;state.currentProfile=profile;
       showApp();
-      subscribeFirebaseData();
+      subscribeData();
     }
 
     function showAuth(){
@@ -1553,7 +1586,7 @@
     function updateUserUI(){
       const p=state.currentProfile||{};
       $("sidebarName").textContent=p.name||p.email||"Usuário";
-      $("sidebarRole").textContent=roleLabel(p.role);
+      $("sidebarRole").textContent=roleLabel(p.role,p);
       $("sidebarAvatar").textContent=initials(p.name||p.email);
       $("greeting").textContent=`${nowGreeting()}, ${(p.name||"equipe").split(" ")[0]}! 👋`;
       $("serviceOperator").value=p.name||"";
@@ -1564,16 +1597,29 @@
         if(el.classList.contains("nav-item")) el.classList.toggle("hidden",!allowed);
         else {el.disabled=!allowed;el.title=allowed?"":`Sem permissão: ${PERMISSION_LABELS[el.dataset.permission]}`;}
       });
+      const masterOption=$("userRole")?.querySelector('option[value="master"]');
+      if(masterOption) masterOption.disabled=!isMasterProfile(state.currentProfile);
     }
 
-    function subscribeFirebaseData(){
+    function subscribeData(){
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
-      const {collection,onSnapshot,query,orderBy}=state.firebaseApi;
+      const {collection,onSnapshot,query,orderBy}=state.serviceApi;
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"clients"),orderBy("createdAt","desc")),snap=>{
         state.clients=snap.docs.map(d=>({id:d.id,...d.data()}));renderAll();
       },err=>showToast("Erro ao carregar clientes: "+err.message,"error")));
       state.unsubscribers.push(onSnapshot(collection(state.db,"users"),snap=>{
-        state.users=snap.docs.map(d=>({uid:d.id,...d.data()}));renderUsers();
+        state.users=snap.docs.map(d=>({uid:d.id,...d.data()}));
+        const freshProfile=state.users.find(u=>u.uid===state.currentProfile?.uid);
+        if(freshProfile){
+          state.currentProfile={...state.currentProfile,...freshProfile};
+          if(isLucasProfile(state.currentProfile)){
+            state.currentProfile.role="master";
+            state.currentProfile.active=true;
+            state.currentProfile.permissions=ROLE_PERMISSIONS.master;
+          }
+          updateUserUI();applyPermissionUI();
+        }
+        renderUsers();
       }));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"activities"),orderBy("createdAt","desc")),snap=>{
         state.activities=snap.docs.map(d=>({id:d.id,...d.data(),createdAt:d.data().createdAt?.toDate?.().toISOString?.()||d.data().createdAt}));renderDashboard();
@@ -1667,14 +1713,19 @@
     }
     function renderUsers(){
       if(!can("usersManage")) return;
-      $("usersTable").innerHTML=state.users.map(u=>`<tr>
-        <td><div class="customer-cell"><div class="customer-avatar">${initials(u.name||u.email)}</div><div><strong>${safe(u.name||"Sem nome")}</strong><span>${safe(u.email||"")}</span></div></div></td>
-        <td><span class="badge info">${roleLabel(u.role)}</span></td>
+      $("usersTable").innerHTML=state.users.map(u=>{
+        const master=isMasterProfile(u);
+        const permissionTotal=master?Object.keys(PERMISSION_LABELS).length:(u.permissions||[]).length;
+        const protectedMaster=master && !isMasterProfile(state.currentProfile);
+        return `<tr>
+        <td><div class="customer-cell"><div class="customer-avatar">${initials(u.name||u.email)}</div><div><strong>${safe(u.name||"Sem nome")}${master?' <span class="badge master" style="margin-left:5px">MASTER</span>':''}</strong><span>${safe(u.email||"")}</span></div></div></td>
+        <td><span class="badge ${master?'master':'info'}">${roleLabel(u.role,u)}</span></td>
         <td>${u.active?'<span class="badge success"><span class="status-dot"></span>Ativo</span>':'<span class="badge warning"><span class="status-dot"></span>Aguardando</span>'}</td>
-        <td><span class="small muted">${(u.permissions||[]).length} de ${Object.keys(PERMISSION_LABELS).length}</span></td>
+        <td><span class="small muted">${permissionTotal} de ${Object.keys(PERMISSION_LABELS).length}</span></td>
         <td class="mono">${u.createdAt?.toDate?formatDateTime(u.createdAt.toDate().toISOString()):formatDateTime(u.createdAt)}</td>
-        <td class="text-right"><button class="btn btn-soft btn-sm" onclick="editUser('${u.uid}')">Editar acesso</button></td>
-      </tr>`).join("");
+        <td class="text-right"><button class="btn btn-soft btn-sm" onclick="editUser('${u.uid}')" ${protectedMaster?'disabled title="Somente um Master pode editar outro Master"':''}>Editar acesso</button></td>
+      </tr>`;
+      }).join("");
       $("usersEmpty").classList.toggle("hidden",state.users.length>0);
     }
 
@@ -1740,10 +1791,10 @@
     async function generateContractForClient(client,reason="manual"){
       const contract=await createContractRecord(client.id,client,reason);
       const summary=contractSummary(contract);
-      if(!state.firebase) throw new Error("Firebase indisponível");
-      const batch=state.firebaseApi.writeBatch(state.db);
-      batch.set(state.firebaseApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.firebaseApi.serverTimestamp()});
-      batch.update(state.firebaseApi.doc(state.db,"clients",client.id),{contract:summary,updatedAt:state.firebaseApi.serverTimestamp()});
+      if(!state.connected) throw new Error("Serviço indisponível");
+      const batch=state.serviceApi.writeBatch(state.db);
+      batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
+      batch.update(state.serviceApi.doc(state.db,"clients",client.id),{contract:summary,updatedAt:state.serviceApi.serverTimestamp()});
       await batch.commit();
       await logActivity("contract",client.id,"Contrato do plano gerado",`${client.name} · ${contract.number}`);
       return contract;
@@ -1762,8 +1813,8 @@
     async function openContractForClient(clientId){
       const client=state.clients.find(c=>c.id===clientId);if(!client)return;
       let contract=getContractForClient(client);
-      if(contract && !contract.contractHtml && state.firebase && contract.token){
-        const snap=await state.firebaseApi.getDoc(state.firebaseApi.doc(state.db,"publicContracts",contract.token));
+      if(contract && !contract.contractHtml && state.connected && contract.token){
+        const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
         if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
       }
       if(!contract){
@@ -1783,13 +1834,13 @@
       win.document.close();win.focus();setTimeout(()=>win.print(),300);
     }
     async function syncAcceptedContracts(){
-      if(!state.firebase||!state.currentProfile||!can("clientsEdit"))return;
+      if(!state.connected||!state.currentProfile||!can("clientsEdit"))return;
       for(const contract of state.contracts.filter(c=>c.status==="accepted")){
         if(state.syncedContractTokens.has(contract.token))continue;
         const client=state.clients.find(c=>c.id===contract.clientId);
         if(!client||client.contract?.status==="accepted"){state.syncedContractTokens.add(contract.token);continue;}
         state.syncedContractTokens.add(contract.token);
-        try{await state.firebaseApi.updateDoc(state.firebaseApi.doc(state.db,"clients",client.id),{contract:contractSummary(contract),updatedAt:state.firebaseApi.serverTimestamp()});}
+        try{await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",client.id),{contract:contractSummary(contract),updatedAt:state.serviceApi.serverTimestamp()});}
         catch(err){console.warn("Não foi possível sincronizar o aceite no cliente",err);}
       }
     }
@@ -1797,9 +1848,9 @@
       showPublicContract();
       $("publicContractLoading").classList.remove("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.add("hidden");
       try{
-        if(!state.firebase) throw new Error("firebase-unavailable");
+        if(!state.connected) throw new Error("service-unavailable");
         let contract;
-        const snap=await state.firebaseApi.getDoc(state.firebaseApi.doc(state.db,"publicContracts",token));
+        const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",token));
         if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
         if(!contract)throw new Error("not-found");
         state.publicContract=contract;renderPublicContract(contract);
@@ -1834,17 +1885,26 @@
       if(!can("clientsDelete"))return;
       const c=state.clients.find(x=>x.id===id);if(!c)return;
       askConfirm("Excluir cliente",`Deseja realmente excluir ${c.name}? Esta ação remove a ficha da plataforma.`,async()=>{
-        if(!state.firebase) throw new Error("Firebase indisponível");
-        await state.firebaseApi.deleteDoc(state.firebaseApi.doc(state.db,"clients",id));
+        if(!state.connected) throw new Error("Serviço indisponível");
+        await state.serviceApi.deleteDoc(state.serviceApi.doc(state.db,"clients",id));
         showToast("Cliente excluído.");
       });
     };
     window.editUser=(id)=>{
       if(!can("usersManage"))return;
       const u=state.users.find(x=>x.uid===id);if(!u)return;
+      if(isMasterProfile(u) && !isMasterProfile(state.currentProfile)){
+        showToast("Somente um usuário Master pode alterar outro perfil Master.","error");return;
+      }
+      const protectedLucas=isLucasProfile(u);
       $("userUid").value=u.uid;$("userName").value=u.name||"";$("userEmail").value=u.email||"";
-      $("userRole").value=u.role||"viewer";$("userActive").value=String(!!u.active);
-      renderPermissionGrid(u.permissions||ROLE_PERMISSIONS[u.role]||[]);
+      $("userRole").value=protectedLucas?"master":(u.role||"viewer");
+      $("userActive").value=String(protectedLucas?true:!!u.active);
+      $("userRole").disabled=protectedLucas;
+      $("userActive").disabled=protectedLucas;
+      $("userName").readOnly=protectedLucas;
+      $("userEmail").readOnly=protectedLucas;
+      renderPermissionGrid(protectedLucas?ROLE_PERMISSIONS.master:(u.permissions||ROLE_PERMISSIONS[u.role]||[]),protectedLucas);
       openModal("userModalBackdrop");
     };
 
@@ -1872,15 +1932,29 @@
       $("clientForm").reset();$("clientId").value="";$("clientPlanStart").value=todayISO();$("clientModalTitle").textContent="Cadastrar cliente";$("clientContractNote").classList.remove("hidden");updateClientPlanPreview();
     }
     function openNewClient(){if(!can("clientsCreate"))return;resetClientForm();openModal("clientModalBackdrop");}
-    function renderPermissionGrid(selected=[]){
-      $("permissionGrid").innerHTML=Object.entries(PERMISSION_LABELS).map(([key,label])=>`<label class="permission-item"><input type="checkbox" name="permission" value="${key}" ${selected.includes(key)?"checked":""}><span><strong>${label}</strong></span></label>`).join("");
+    function resetUserModalControls(){
+      $("userRole").disabled=false;$("userActive").disabled=false;$("userName").readOnly=false;$("userEmail").readOnly=false;
+    }
+    function updatePermissionCount(){
+      const count=$$('input[name="permission"]:checked').length;
+      $("permissionCount").textContent=`${count} de ${Object.keys(PERMISSION_LABELS).length} permissões selecionadas`;
+    }
+    function renderPermissionGrid(selected=[],locked=false){
+      const selectedSet=new Set(selected);
+      $("permissionGrid").innerHTML=Object.entries(PERMISSION_LABELS).map(([key,label])=>`<label class="permission-item ${locked?'locked':''}"><input type="checkbox" name="permission" value="${key}" ${selectedSet.has(key)?"checked":""} ${locked?"disabled":""}><span><strong>${label}</strong></span></label>`).join("");
+      $("masterPermissionNotice").classList.toggle("hidden",!locked);
+      $("selectAllPermissionsBtn").disabled=locked;
+      $("clearPermissionsBtn").disabled=locked;
+      $("restoreRolePermissionsBtn").disabled=locked;
+      $$('input[name="permission"]').forEach(input=>input.addEventListener("change",updatePermissionCount));
+      updatePermissionCount();
     }
 
     async function saveClient(data,id){
-      if(!state.firebase) throw new Error("Firebase indisponível");
+      if(!state.connected) throw new Error("Serviço indisponível");
       let clientId=id;
       let generatedContract=null;
-      const {doc,collection,setDoc,serverTimestamp,writeBatch}=state.firebaseApi;
+      const {doc,collection,setDoc,serverTimestamp,writeBatch}=state.serviceApi;
       if(id){
         await setDoc(doc(state.db,"clients",id),{...data,updatedAt:serverTimestamp()},{merge:true});
       }else{
@@ -1897,10 +1971,10 @@
       return {clientId,contract:generatedContract};
     }
     async function logActivity(typeClient,id,title,description){
-      if(!state.firebase) throw new Error("Firebase indisponível");
+      if(!state.connected) throw new Error("Serviço indisponível");
       const type=typeClient==="client_edit"?"client":typeClient;
       const activity={clientId:id||"",type,title,description,createdAt:new Date().toISOString()};
-      await state.firebaseApi.addDoc(state.firebaseApi.collection(state.db,"activities"),{...activity,createdAt:state.firebaseApi.serverTimestamp()});
+      await state.serviceApi.addDoc(state.serviceApi.collection(state.db,"activities"),{...activity,createdAt:state.serviceApi.serverTimestamp()});
     }
 
     async function registerService(event){
@@ -1910,8 +1984,8 @@
       if(c.services?.[type]?.used){showToast("Este benefício já foi utilizado no período.","error");return;}
       const service={used:true,date:$("serviceDate").value,operator:$("serviceOperator").value.trim(),description:$("serviceDescription").value.trim()};
       const services={...(c.services||{}),[type]:service};
-      if(!state.firebase) throw new Error("Firebase indisponível");
-      await state.firebaseApi.updateDoc(state.firebaseApi.doc(state.db,"clients",c.id),{services,updatedAt:state.firebaseApi.serverTimestamp()});
+      if(!state.connected) throw new Error("Serviço indisponível");
+      await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",c.id),{services,updatedAt:state.serviceApi.serverTimestamp()});
       await logActivity("service",c.id,`${SERVICES[type].label} registrada`,`${c.name} · por ${service.operator}`);
       closeModal("serviceModalBackdrop");$("serviceForm").reset();renderClientDetail();showToast("Benefício registrado no histórico do cliente.");
     }
@@ -1924,10 +1998,10 @@
       const contract=await createContractRecord(c.id,renewedData,"renewal");
       history.push({date:new Date().toISOString(),title:"Plano renovado",description:`${getPlanLabel(c)} no valor de ${money(getPlanPrice(c))}. Novo contrato: ${contract.number}. Período anterior: ${formatDate(c.planStart)} a ${formatDate(c.planEnd||addYear(c.planStart))}. ${$("renewNotes").value.trim()}`});
       const update={planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:renewedData.seller,services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},history,contract:contractSummary(contract)};
-      if(!state.firebase) throw new Error("Firebase indisponível");
-      const batch=state.firebaseApi.writeBatch(state.db);
-      batch.update(state.firebaseApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.firebaseApi.serverTimestamp()});
-      batch.set(state.firebaseApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.firebaseApi.serverTimestamp()});
+      if(!state.connected) throw new Error("Serviço indisponível");
+      const batch=state.serviceApi.writeBatch(state.db);
+      batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
+      batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
       await batch.commit();
       await logActivity("renewal",c.id,"Plano anual renovado",`${c.name} · novo período iniciado em ${formatDate(newStart)} · ${contract.number}`);
       closeModal("renewModalBackdrop");renderClientDetail();showToast("Plano renovado e novo contrato gerado.");
@@ -1938,10 +2012,27 @@
       event.preventDefault();
       if(!can("usersManage"))return;
       const id=$("userUid").value||uid();
-      const data={name:$("userName").value.trim(),email:$("userEmail").value.trim(),role:$("userRole").value,active:$("userActive").value==="true",permissions:$$('input[name="permission"]:checked').map(x=>x.value),updatedAt:new Date().toISOString()};
-      if(!state.firebase) throw new Error("Firebase indisponível");
-      await state.firebaseApi.setDoc(state.firebaseApi.doc(state.db,"users",id),{...data,updatedAt:state.firebaseApi.serverTimestamp()},{merge:true});
-      closeModal("userModalBackdrop");showToast("Permissões do operador atualizadas.");
+      const existing=state.users.find(x=>x.uid===id)||{};
+      const protectedLucas=isLucasProfile(existing)||isLucasProfile({name:$("userName").value,email:$("userEmail").value});
+      if(isMasterProfile(existing) && !isMasterProfile(state.currentProfile)){
+        showToast("Somente um usuário Master pode alterar esse perfil.","error");return;
+      }
+      let role=protectedLucas?"master":$("userRole").value;
+      if(role==="master" && !isMasterProfile(state.currentProfile) && !protectedLucas){
+        showToast("Somente um Master pode conceder a função Master.","error");return;
+      }
+      const selectedPermissions=role==="master"
+        ? ROLE_PERMISSIONS.master
+        : $$('input[name="permission"]:checked').map(x=>x.value);
+      const data={
+        name:$("userName").value.trim(),email:$("userEmail").value.trim(),role,
+        active:protectedLucas?true:$("userActive").value==="true",
+        permissions:selectedPermissions,updatedAt:new Date().toISOString()
+      };
+      if(!state.connected) throw new Error("Serviço indisponível");
+      await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"users",id),{...data,updatedAt:state.serviceApi.serverTimestamp()},{merge:true});
+      if(id===state.currentProfile?.uid) Object.assign(state.currentProfile,data);
+      closeModal("userModalBackdrop");applyPermissionUI();updateUserUI();showToast("Permissões do operador atualizadas.");
     }
 
     function exportCSV(){
@@ -1962,26 +2053,26 @@
     }));
     $("loginForm").addEventListener("submit",async e=>{
       e.preventDefault();const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
-      if(!state.firebase){showToast("Firebase indisponível. Recarregue a página e tente novamente.","error");return;}
+      if(!state.connected){showToast("Serviço indisponível. Recarregue a página e tente novamente.","error");return;}
       try{
-        await state.firebaseApi.signInWithEmailAndPassword(state.auth,email,password);
+        await state.serviceApi.signInWithEmailAndPassword(state.auth,email,password);
       }catch(err){showToast("Não foi possível entrar. Verifique o e-mail e a senha.","error");}
     });
     $("registerForm").addEventListener("submit",async e=>{
       e.preventDefault();
-      if(!state.firebase){showToast("Firebase indisponível. Recarregue a página e tente novamente.","error");return;}
+      if(!state.connected){showToast("Serviço indisponível. Recarregue a página e tente novamente.","error");return;}
       try{
-        const {createUserWithEmailAndPassword,updateProfile,signOut}=state.firebaseApi;
+        const {createUserWithEmailAndPassword,updateProfile,signOut}=state.serviceApi;
         const cred=await createUserWithEmailAndPassword(state.auth,$("registerEmail").value.trim(),$("registerPassword").value);
         await updateProfile(cred.user,{displayName:$("registerName").value.trim()});
-        await state.firebaseApi.setDoc(state.firebaseApi.doc(state.db,"users",cred.user.uid),{name:$("registerName").value.trim(),email:cred.user.email,role:"viewer",active:false,permissions:ROLE_PERMISSIONS.viewer,createdAt:state.firebaseApi.serverTimestamp()});
+        await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"users",cred.user.uid),{name:$("registerName").value.trim(),email:cred.user.email,role:"viewer",active:false,permissions:ROLE_PERMISSIONS.viewer,createdAt:state.serviceApi.serverTimestamp()});
         await signOut(state.auth);showToast("Solicitação criada. Aguarde a aprovação do administrador.");
         $$(".auth-tab")[0].click();
       }catch(err){showToast("Erro ao criar solicitação: "+(err.code||err.message),"error");}
     });
     $("logoutBtn").addEventListener("click",async()=>{
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
-      if(state.firebase) await state.firebaseApi.signOut(state.auth);
+      if(state.connected) await state.serviceApi.signOut(state.auth);
       state.currentUser=null;state.currentProfile=null;showAuth();
     });
     $$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
@@ -2009,9 +2100,9 @@
       if(hash!==contract.documentHash){showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;}
       const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",userAgent:navigator.userAgent};
       try{
-        if(!state.firebase) throw new Error("Firebase indisponível");
-        await state.firebaseApi.updateDoc(state.firebaseApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.firebaseApi.serverTimestamp()});
-        const snap=await state.firebaseApi.getDoc(state.firebaseApi.doc(state.db,"publicContracts",contract.token));
+        if(!state.connected) throw new Error("Serviço indisponível");
+        await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.serviceApi.serverTimestamp()});
+        const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
         state.publicContract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
         renderPublicContract(state.publicContract);showToast("Contrato aceito com sucesso.");
       }catch(err){console.error(err);showToast("Não foi possível registrar o aceite. Tente novamente.","error");}
@@ -2035,8 +2126,17 @@
     $("serviceForm").addEventListener("submit",registerService);
     $("renewClientBtn").addEventListener("click",()=>{const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;$("renewStart").value=todayISO();$("renewSeller").value=c.seller||state.currentProfile?.name||"";$("renewNotes").value="";$("renewPlanInfo").innerHTML=`<strong>${getPlanLabel(c)} · ${money(getPlanPrice(c))} por ano</strong><br>A renovação iniciará um novo período de 12 meses, zerará os três benefícios e preservará todo o histórico anterior.`;openModal("renewModalBackdrop")});
     $("renewForm").addEventListener("submit",renewClient);
-    $("addUserProfileBtn").addEventListener("click",()=>{$("userForm").reset();$("userUid").value="";$("userRole").value="viewer";$("userActive").value="false";renderPermissionGrid(ROLE_PERMISSIONS.viewer);openModal("userModalBackdrop")});
-    $("userRole").addEventListener("change",()=>renderPermissionGrid(ROLE_PERMISSIONS[$("userRole").value]||[]));
+    $("addUserProfileBtn").addEventListener("click",()=>{
+      $("userForm").reset();resetUserModalControls();$("userUid").value="";$("userRole").value="viewer";$("userActive").value="false";
+      renderPermissionGrid(ROLE_PERMISSIONS.viewer,false);openModal("userModalBackdrop");
+    });
+    $("userRole").addEventListener("change",()=>{
+      const role=$("userRole").value;
+      renderPermissionGrid(ROLE_PERMISSIONS[role]||[],role==="master");
+    });
+    $("selectAllPermissionsBtn").addEventListener("click",()=>{$$('input[name="permission"]:not(:disabled)').forEach(x=>x.checked=true);updatePermissionCount();});
+    $("clearPermissionsBtn").addEventListener("click",()=>{$$('input[name="permission"]:not(:disabled)').forEach(x=>x.checked=false);updatePermissionCount();});
+    $("restoreRolePermissionsBtn").addEventListener("click",()=>{const role=$("userRole").value;renderPermissionGrid(ROLE_PERMISSIONS[role]||[],role==="master");});
     $("userForm").addEventListener("submit",saveUser);
     $("confirmActionBtn").addEventListener("click",async()=>{closeModal("confirmModalBackdrop");if(state.confirmCallback){const cb=state.confirmCallback;state.confirmCallback=null;try{await cb()}catch(err){showToast(err.message,"error")}}});
 
@@ -2049,7 +2149,7 @@
     $("serviceDate").value=todayISO();
     $("renewStart").value=todayISO();
     renderPermissionGrid([]);
-    initFirebase();
+    initService();
   </script>
 </body>
 </html>
