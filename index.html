@@ -1,0 +1,2055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07529c" />
+  <title>IG Energia | CRM Monitoramento</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #07529c;
+      --primary-2: #0d6fc4;
+      --primary-3: #eaf4ff;
+      --accent: #f7c928;
+      --accent-2: #ffe990;
+      --ink: #13233a;
+      --muted: #64748b;
+      --line: #dce6f0;
+      --surface: #ffffff;
+      --background: #f4f7fb;
+      --success: #15956d;
+      --success-bg: #e9f8f2;
+      --warning: #d58a00;
+      --warning-bg: #fff7dc;
+      --danger: #d54343;
+      --danger-bg: #fff0f0;
+      --info: #2764c5;
+      --shadow: 0 15px 45px rgba(16, 47, 80, .10);
+      --shadow-sm: 0 8px 24px rgba(16, 47, 80, .07);
+      --radius: 18px;
+      --sidebar: 270px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      color: var(--ink);
+      background: var(--background);
+      min-height: 100vh;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    .hidden { display: none !important; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .mono { font-variant-numeric: tabular-nums; }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .w-full { width: 100%; }
+    .text-right { text-align: right; }
+
+    /* Login */
+    .auth-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(420px, .85fr);
+      background:
+        radial-gradient(circle at 18% 25%, rgba(247, 201, 40, .18), transparent 28%),
+        linear-gradient(140deg, #06386d 0%, #07529c 52%, #1173c4 100%);
+    }
+    .auth-brand {
+      padding: 64px clamp(40px, 6vw, 100px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-brand::after {
+      content: "";
+      position: absolute;
+      width: 460px;
+      height: 460px;
+      right: -130px;
+      bottom: -160px;
+      border: 70px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+    }
+    .brand-lockup { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+    .brand-mark {
+      width: 58px; height: 58px;
+      background: var(--accent);
+      color: var(--primary);
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-family: Manrope, sans-serif;
+      font-weight: 800;
+      font-size: 24px;
+      letter-spacing: -2px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.16);
+    }
+    .brand-text strong { display:block; font-family: Manrope, sans-serif; font-size: 23px; letter-spacing: -.5px; }
+    .brand-text span { font-size: 12px; opacity: .75; text-transform: uppercase; letter-spacing: 1.8px; }
+    .auth-copy { max-width: 720px; position: relative; z-index: 1; padding: 50px 0; }
+    .auth-copy h1 {
+      font-family: Manrope, sans-serif;
+      font-size: clamp(38px, 5vw, 70px);
+      line-height: 1.02;
+      margin: 0 0 24px;
+      letter-spacing: -2.8px;
+    }
+    .auth-copy h1 span { color: var(--accent); }
+    .auth-copy p { font-size: 18px; line-height: 1.7; max-width: 630px; color: rgba(255,255,255,.78); }
+    .plan-showcase {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px;
+    }
+    .plan-pill {
+      padding: 12px 16px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      border-radius: 999px;
+      font-size: 13px;
+      backdrop-filter: blur(8px);
+    }
+    .auth-footer { color: rgba(255,255,255,.55); font-size: 12px; position:relative; z-index:1; }
+    .auth-panel {
+      background: #fff;
+      margin: 18px 18px 18px 0;
+      border-radius: 28px;
+      display: grid;
+      place-items: center;
+      padding: 36px;
+      box-shadow: -20px 0 70px rgba(0,0,0,.12);
+    }
+    .auth-card { width: min(430px, 100%); }
+    .auth-card h2 { font-family: Manrope, sans-serif; font-size: 30px; margin: 0 0 8px; letter-spacing: -1px; }
+    .auth-tabs { display:flex; gap:6px; background:#f1f5f9; padding:5px; border-radius:12px; margin:28px 0 22px; }
+    .auth-tab { flex:1; border:0; background:transparent; color:var(--muted); padding:10px; border-radius:9px; font-weight:700; }
+    .auth-tab.active { background:#fff; color:var(--primary); box-shadow:0 4px 12px rgba(30,50,80,.08); }
+    .demo-note {
+      margin-top: 20px; padding: 14px 16px; border:1px solid #cfe2f6; border-radius:12px;
+      background:#f3f9ff; color:#315a7e; font-size:12px; line-height:1.55;
+    }
+
+    /* Form */
+    .form-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:16px; }
+    .form-grid.one { grid-template-columns:1fr; }
+    .form-grid.three { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+    .field { display:flex; flex-direction:column; gap:7px; }
+    .field.full { grid-column:1/-1; }
+    .field label { font-size:12px; color:#526175; font-weight:700; }
+    .field input, .field select, .field textarea {
+      width:100%; border:1px solid var(--line); background:#fff; color:var(--ink);
+      border-radius:12px; padding:12px 13px; outline:none; transition:.2s;
+    }
+    .field textarea { resize:vertical; min-height:92px; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color:#72aee5; box-shadow:0 0 0 4px rgba(13,111,196,.10);
+    }
+    .input-icon { position:relative; }
+    .input-icon input { padding-left:40px; }
+    .input-icon span { position:absolute; left:13px; top:50%; transform:translateY(-50%); opacity:.55; }
+    .check-row { display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--muted); }
+    .check-row input { margin-top:2px; accent-color:var(--primary); }
+    .permission-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .permission-item {
+      padding:11px; border:1px solid var(--line); border-radius:12px; display:flex; gap:9px;
+      align-items:flex-start; background:#fafcff; font-size:12px;
+    }
+    .permission-item input { accent-color:var(--primary); margin-top:2px; }
+
+    /* Buttons */
+    .btn {
+      border:0; border-radius:12px; padding:11px 15px; font-weight:700; display:inline-flex;
+      align-items:center; justify-content:center; gap:8px; transition:.18s; white-space:nowrap;
+    }
+    .btn:hover { transform:translateY(-1px); }
+    .btn:active { transform:translateY(0); }
+    .btn-primary { color:#fff; background:linear-gradient(135deg,var(--primary),var(--primary-2)); box-shadow:0 8px 18px rgba(7,82,156,.22); }
+    .btn-accent { color:#273347; background:var(--accent); }
+    .btn-soft { color:var(--primary); background:var(--primary-3); }
+    .btn-danger { color:var(--danger); background:var(--danger-bg); }
+    .btn-ghost { color:var(--muted); background:transparent; border:1px solid var(--line); }
+    .btn-sm { padding:8px 10px; border-radius:9px; font-size:12px; }
+    .btn-icon { width:38px; height:38px; padding:0; }
+    .btn[disabled] { cursor:not-allowed; opacity:.5; transform:none; }
+
+    /* App */
+    .app-shell { min-height:100vh; display:grid; grid-template-columns:var(--sidebar) minmax(0,1fr); }
+    .sidebar {
+      position:fixed; inset:0 auto 0 0; width:var(--sidebar);
+      background:linear-gradient(180deg,#073f78 0%,#062f59 100%); color:#fff;
+      padding:24px 16px; display:flex; flex-direction:column; z-index:40;
+    }
+    .sidebar .brand-lockup { padding:2px 8px 25px; }
+    .sidebar .brand-mark { width:44px;height:44px;border-radius:12px;font-size:19px; }
+    .sidebar .brand-text strong { font-size:17px; }
+    .sidebar .brand-text span { font-size:9px; }
+    .nav-title { padding:12px 12px 8px; color:rgba(255,255,255,.42); font-size:9px; text-transform:uppercase; letter-spacing:1.5px; font-weight:800; }
+    .nav { display:flex; flex-direction:column; gap:5px; }
+    .nav-item {
+      border:0; width:100%; background:transparent; color:rgba(255,255,255,.68);
+      display:flex; align-items:center; gap:11px; padding:12px; border-radius:11px; text-align:left;
+      font-weight:600; font-size:13px;
+    }
+    .nav-item:hover { color:#fff; background:rgba(255,255,255,.07); }
+    .nav-item.active { color:#fff; background:rgba(255,255,255,.13); box-shadow:inset 3px 0 var(--accent); }
+    .nav-icon { width:22px; text-align:center; font-size:16px; }
+    .sidebar-bottom { margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,.09); }
+    .user-mini { display:flex; align-items:center; gap:10px; padding:10px 8px; }
+    .avatar {
+      width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--primary);
+      display:grid;place-items:center;font-weight:800;flex:0 0 auto;
+    }
+    .user-mini-info { min-width:0; flex:1; }
+    .user-mini-info strong { display:block;font-size:12px; }
+    .user-mini-info span { display:block;font-size:10px;color:rgba(255,255,255,.52);margin-top:3px; }
+    .main { grid-column:2; min-width:0; }
+    .topbar {
+      height:78px; background:rgba(255,255,255,.88); border-bottom:1px solid rgba(220,230,240,.9);
+      backdrop-filter:blur(14px); position:sticky;top:0;z-index:30; display:flex;align-items:center;
+      padding:0 clamp(20px,3vw,42px); justify-content:space-between;
+    }
+    .topbar-left { display:flex;align-items:center;gap:14px;min-width:0; }
+    .menu-toggle { display:none; }
+    .page-kicker { color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;font-weight:800; }
+    .page-title { font-family:Manrope,sans-serif;font-size:21px;font-weight:800;letter-spacing:-.6px;margin-top:2px; }
+    .topbar-actions { display:flex;align-items:center;gap:10px; }
+    .connection {
+      display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:10px;font-size:11px;color:var(--muted);
+    }
+    .dot { width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-bg); }
+    .dot.demo { background:var(--warning);box-shadow:0 0 0 3px var(--warning-bg); }
+    .content { padding:30px clamp(20px,3vw,42px) 60px; }
+    .page { display:none; animation:fade .22s ease; }
+    .page.active { display:block; }
+    @keyframes fade { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+    .hero {
+      background:linear-gradient(135deg,#06437e,#0a67b6);color:#fff;border-radius:24px;padding:28px;
+      display:flex;justify-content:space-between;align-items:center;gap:24px;box-shadow:var(--shadow);
+      position:relative;overflow:hidden;margin-bottom:22px;
+    }
+    .hero::before { content:"";position:absolute;width:260px;height:260px;border:48px solid rgba(255,255,255,.07);border-radius:50%;right:-60px;top:-110px; }
+    .hero-copy { position:relative;z-index:1; }
+    .hero-copy h2 { font-family:Manrope,sans-serif;margin:0 0 8px;font-size:25px;letter-spacing:-.8px; }
+    .hero-copy p { margin:0;color:rgba(255,255,255,.68);font-size:13px;max-width:650px;line-height:1.6; }
+    .hero-price { position:relative;z-index:1;text-align:right; }
+    .hero-price strong { font-family:Manrope,sans-serif;font-size:34px;color:var(--accent); }
+    .hero-price span { font-size:11px;color:rgba(255,255,255,.62);display:block; }
+
+    .stats-grid { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:22px; }
+    .stat-card { background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow-sm); }
+    .stat-top { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+    .stat-icon { width:42px;height:42px;border-radius:13px;background:var(--primary-3);display:grid;place-items:center;color:var(--primary);font-size:19px; }
+    .stat-card.accent .stat-icon { background:var(--warning-bg);color:var(--warning); }
+    .stat-card.success .stat-icon { background:var(--success-bg);color:var(--success); }
+    .stat-card.danger .stat-icon { background:var(--danger-bg);color:var(--danger); }
+    .stat-value { font-family:Manrope,sans-serif;font-size:28px;font-weight:800;margin:18px 0 4px;letter-spacing:-1px; }
+    .stat-label { color:var(--muted);font-size:11px; }
+    .stat-trend { font-size:10px;font-weight:700;padding:5px 8px;border-radius:999px;background:var(--success-bg);color:var(--success); }
+
+    .grid-2 { display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,.6fr);gap:18px; }
+    .grid-equal { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px; }
+    .card { background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm); }
+    .card-header { padding:18px 20px;border-bottom:1px solid #edf2f7;display:flex;align-items:center;justify-content:space-between;gap:14px; }
+    .card-title { font-family:Manrope,sans-serif;font-size:15px;font-weight:800;letter-spacing:-.25px; }
+    .card-subtitle { color:var(--muted);font-size:10px;margin-top:3px; }
+    .card-body { padding:20px; }
+
+    .toolbar { display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:17px;flex-wrap:wrap; }
+    .toolbar-left,.toolbar-right { display:flex;align-items:center;gap:9px;flex-wrap:wrap; }
+    .search-box { position:relative;min-width:280px; }
+    .search-box input { width:100%;border:1px solid var(--line);border-radius:11px;padding:11px 13px 11px 39px;background:#fff;outline:none; }
+    .search-box span { position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.5; }
+    .filter-select { border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:#fff;color:var(--ink);outline:none; }
+
+    .table-wrap { overflow:auto; }
+    table { width:100%;border-collapse:collapse;min-width:820px; }
+    th { text-align:left;padding:12px 14px;background:#f8fafc;color:#718096;font-size:9px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap; }
+    td { padding:14px;border-bottom:1px solid #edf2f7;font-size:12px;vertical-align:middle; }
+    tr:last-child td { border-bottom:0; }
+    tbody tr:hover { background:#fbfdff; }
+    .customer-cell { display:flex;align-items:center;gap:11px; }
+    .customer-avatar { width:37px;height:37px;border-radius:11px;background:var(--primary-3);color:var(--primary);display:grid;place-items:center;font-weight:800; }
+    .customer-cell strong { display:block;font-size:12px; }
+    .customer-cell span { display:block;color:var(--muted);font-size:10px;margin-top:3px; }
+    .badge { display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap; }
+    .badge.success { color:var(--success);background:var(--success-bg); }
+    .badge.warning { color:var(--warning);background:var(--warning-bg); }
+    .badge.danger { color:var(--danger);background:var(--danger-bg); }
+    .badge.info { color:var(--info);background:#edf4ff; }
+    .badge.gray { color:#64748b;background:#f1f5f9; }
+    .status-dot { width:6px;height:6px;border-radius:50%;background:currentColor; }
+    .progress-mini { width:130px; }
+    .progress-line { height:6px;background:#e9eef5;border-radius:999px;overflow:hidden; }
+    .progress-line > span { display:block;height:100%;background:linear-gradient(90deg,var(--primary),#3b91dc);border-radius:999px; }
+    .progress-meta { display:flex;justify-content:space-between;color:var(--muted);font-size:9px;margin-top:5px; }
+    .actions { display:flex;gap:6px;justify-content:flex-end; }
+
+    .activity-list { display:flex;flex-direction:column; }
+    .activity-item { display:grid;grid-template-columns:34px 1fr auto;gap:11px;padding:13px 0;border-bottom:1px solid #edf2f7;align-items:start; }
+    .activity-item:last-child { border-bottom:0; }
+    .activity-icon { width:34px;height:34px;border-radius:10px;background:var(--primary-3);display:grid;place-items:center;font-size:14px; }
+    .activity-text strong { display:block;font-size:11px;line-height:1.4; }
+    .activity-text span { display:block;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4; }
+    .activity-time { font-size:9px;color:#94a3b8;white-space:nowrap; }
+
+    .usage-bars { display:flex;flex-direction:column;gap:16px; }
+    .usage-row-head { display:flex;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:11px; }
+    .usage-row-head strong { font-size:11px; }
+    .usage-row-head span { color:var(--muted); }
+
+    .empty { text-align:center;padding:44px 20px;color:var(--muted); }
+    .empty-icon { width:64px;height:64px;background:#f1f5f9;border-radius:20px;display:grid;place-items:center;margin:0 auto 14px;font-size:28px; }
+    .empty strong { color:var(--ink);display:block;margin-bottom:6px; }
+
+    /* Client detail */
+    .detail-header { display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px;flex-wrap:wrap; }
+    .detail-identity { display:flex;align-items:center;gap:15px; }
+    .detail-avatar { width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:grid;place-items:center;font-family:Manrope;font-size:21px;font-weight:800; }
+    .detail-identity h2 { margin:0;font-family:Manrope;font-size:23px;letter-spacing:-.7px; }
+    .detail-identity p { margin:5px 0 0;color:var(--muted);font-size:11px; }
+    .plan-card { background:linear-gradient(135deg,#062f59,#07529c);color:#fff;border-radius:22px;padding:24px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:relative;overflow:hidden;box-shadow:var(--shadow);margin-bottom:18px; }
+    .plan-card::after { content:"";position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.06);right:-70px;bottom:-110px; }
+    .plan-name { color:var(--accent);font-size:10px;text-transform:uppercase;letter-spacing:1.4px;font-weight:800; }
+    .plan-card h3 { font-family:Manrope;margin:7px 0 10px;font-size:26px; }
+    .plan-dates { display:flex;gap:22px;flex-wrap:wrap;color:rgba(255,255,255,.7);font-size:10px; }
+    .plan-dates strong { color:#fff;display:block;font-size:12px;margin-top:4px; }
+    .days-ring { width:106px;height:106px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--accent) var(--ring),rgba(255,255,255,.16) 0);z-index:1; }
+    .days-ring::before { content:"";position:absolute;inset:8px;border-radius:50%;background:#074b8d; }
+    .days-ring-content { position:relative;text-align:center;z-index:2; }
+    .days-ring-content strong { display:block;font-family:Manrope;font-size:25px;line-height:1; }
+    .days-ring-content span { font-size:8px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.8px; }
+
+    .service-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:18px; }
+    .service-card { background:#fff;border:1px solid var(--line);border-radius:17px;padding:18px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden; }
+    .service-card.used { background:linear-gradient(180deg,#fff,#f9fffc);border-color:#c9eadf; }
+    .service-icon { width:42px;height:42px;border-radius:13px;background:var(--primary-3);display:grid;place-items:center;font-size:19px;margin-bottom:15px; }
+    .service-card.used .service-icon { background:var(--success-bg); }
+    .service-card h4 { margin:0 0 7px;font-size:13px; }
+    .service-card p { margin:0;color:var(--muted);font-size:10px;line-height:1.5;min-height:30px; }
+    .service-footer { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px; }
+    .service-count { font-family:Manrope;font-weight:800;font-size:19px; }
+    .timeline { position:relative;padding-left:22px; }
+    .timeline::before { content:"";position:absolute;left:6px;top:5px;bottom:5px;width:2px;background:#e2e8f0; }
+    .timeline-item { position:relative;padding:0 0 19px 18px; }
+    .timeline-item:last-child { padding-bottom:0; }
+    .timeline-dot { position:absolute;left:-20px;top:3px;width:13px;height:13px;border-radius:50%;background:var(--primary);border:3px solid #eaf4ff; }
+    .timeline-item strong { font-size:11px; }
+    .timeline-item p { margin:5px 0;color:var(--muted);font-size:10px;line-height:1.45; }
+    .timeline-item time { color:#94a3b8;font-size:9px; }
+
+    /* Users */
+    .role-card { border:1px solid var(--line);border-radius:14px;padding:14px;background:#fbfdff; }
+    .role-card strong { display:block;font-size:12px; }
+    .role-card p { color:var(--muted);font-size:10px;line-height:1.5;margin:6px 0 0; }
+
+    /* Modal / Toast */
+    .modal-backdrop { position:fixed;inset:0;background:rgba(5,23,42,.58);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px; }
+    .modal-backdrop.open { display:flex; }
+    .modal { width:min(720px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.25); }
+    .modal.sm { width:min(500px,100%); }
+    .modal-header { padding:20px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px;position:sticky;top:0;background:#fff;z-index:2; }
+    .modal-header h3 { margin:0;font-family:Manrope;font-size:18px; }
+    .modal-body { padding:22px; }
+    .modal-footer { padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:9px;position:sticky;bottom:0;background:#fff; }
+    .close-btn { border:0;background:#f1f5f9;width:34px;height:34px;border-radius:10px;font-size:18px;color:var(--muted); }
+    .toast-stack { position:fixed;right:20px;bottom:20px;z-index:200;display:flex;flex-direction:column;gap:10px;width:min(380px,calc(100vw - 40px)); }
+    .toast { padding:14px 16px;border-radius:13px;background:#13233a;color:#fff;box-shadow:0 15px 40px rgba(0,0,0,.2);display:flex;gap:10px;align-items:flex-start;animation:toastIn .25s ease; }
+    .toast.success { background:#116b53; }
+    .toast.error { background:#a83232; }
+    @keyframes toastIn { from{transform:translateY(15px);opacity:0}to{transform:none;opacity:1} }
+
+    .mobile-overlay { display:none;position:fixed;inset:0;background:rgba(3,20,36,.5);z-index:35; }
+
+    @media (max-width:1100px) {
+      .stats-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .grid-2 { grid-template-columns:1fr; }
+      .service-grid { grid-template-columns:1fr; }
+    }
+    @media (max-width:900px) {
+      :root { --sidebar:250px; }
+      .auth-shell { grid-template-columns:1fr; }
+      .auth-brand { display:none; }
+      .auth-panel { margin:0;min-height:100vh;border-radius:0; }
+      .app-shell { grid-template-columns:1fr; }
+      .sidebar { transform:translateX(-100%);transition:.25s; }
+      .sidebar.open { transform:none; }
+      .mobile-overlay.open { display:block; }
+      .main { grid-column:1; }
+      .menu-toggle { display:inline-flex; }
+      .connection span:last-child { display:none; }
+    }
+    @media (max-width:650px) {
+      .content { padding:20px 14px 50px; }
+      .topbar { padding:0 14px;height:68px; }
+      .page-title { font-size:17px; }
+      .stats-grid,.grid-equal,.form-grid,.form-grid.three { grid-template-columns:1fr; }
+      .hero { align-items:flex-start;flex-direction:column; }
+      .hero-price { text-align:left; }
+      .toolbar { align-items:stretch; }
+      .toolbar-left,.toolbar-right { width:100%; }
+      .search-box { min-width:0;width:100%; }
+      .filter-select { flex:1; }
+      .plan-card { grid-template-columns:1fr; }
+      .days-ring { width:94px;height:94px; }
+      .permission-grid { grid-template-columns:1fr; }
+      .modal-backdrop { padding:0;align-items:flex-end; }
+      .modal,.modal.sm { width:100%;max-height:94vh;border-radius:22px 22px 0 0; }
+      .detail-actions { width:100%;display:flex;gap:8px; }
+      .detail-actions .btn { flex:1; }
+    }
+
+    /* =========================================================
+       IDENTIDADE VISUAL IG ENERGIA RENOVÁVEL
+       Referência: verde institucional, verde-limão e branco
+       ========================================================= */
+    :root {
+      --primary: #043c09;
+      --primary-2: #075914;
+      --primary-3: #edf4e8;
+      --accent: #b1c903;
+      --accent-2: #d8e64f;
+      --ink: #12351a;
+      --muted: #657368;
+      --line: #dce6d8;
+      --surface: #ffffff;
+      --background: #f2f5ee;
+      --success: #0b7a33;
+      --success-bg: #e7f6e9;
+      --warning: #819100;
+      --warning-bg: #f7fad9;
+      --danger: #b63838;
+      --danger-bg: #fff0f0;
+      --info: #315f35;
+      --shadow: 0 15px 45px rgba(4, 60, 9, .10);
+      --shadow-sm: 0 8px 24px rgba(4, 60, 9, .07);
+    }
+
+    body {
+      background:
+        linear-gradient(rgba(177, 201, 3, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(177, 201, 3, .025) 1px, transparent 1px),
+        var(--background);
+      background-size: 34px 34px;
+    }
+
+    .brand-mark {
+      width: 170px;
+      height: 60px;
+      border-radius: 0;
+      background: url("ig-energia-logo.png") center / contain no-repeat;
+      box-shadow: none;
+      color: transparent;
+      font-size: 0;
+      letter-spacing: 0;
+      flex: 0 0 auto;
+    }
+    .brand-text { display: none; }
+
+    .auth-shell {
+      background:
+        linear-gradient(90deg, rgba(4,60,9,.97), rgba(4,60,9,.82)),
+        radial-gradient(circle at 20% 25%, rgba(177,201,3,.28), transparent 30%),
+        #043c09;
+    }
+    .auth-brand::after {
+      border-color: rgba(177, 201, 3, .12);
+    }
+    .auth-copy h1 {
+      font-family: "Barlow Condensed", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: -.8px;
+      line-height: .95;
+    }
+    .auth-copy h1 span { color: var(--accent); }
+    .plan-pill {
+      border-color: rgba(177,201,3,.30);
+      background: rgba(177,201,3,.10);
+    }
+    .auth-panel {
+      background: #f8faf5;
+    }
+    .auth-card h2,
+    .page-title,
+    .card-title,
+    .hero-copy h2,
+    .detail-identity h2,
+    .plan-card h3 {
+      font-family: "Barlow Condensed", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .25px;
+    }
+    .auth-tabs {
+      background: #e9efe4;
+    }
+    .auth-tab.active {
+      color: var(--primary);
+      box-shadow: 0 4px 12px rgba(4,60,9,.08);
+    }
+    .demo-note {
+      border-color: #d6e2b1;
+      background: #f6f9e8;
+      color: #45551a;
+    }
+
+    .btn {
+      border-radius: 999px;
+      letter-spacing: .25px;
+    }
+    .btn-primary {
+      color: var(--primary);
+      background: linear-gradient(135deg, var(--accent), #c7db17);
+      box-shadow: 0 8px 18px rgba(177,201,3,.26);
+    }
+    .btn-primary:hover { filter: brightness(1.03); }
+    .btn-accent {
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+    .btn-soft {
+      color: var(--primary);
+      background: #eef4df;
+    }
+    .btn-ghost {
+      color: var(--primary);
+      background: #fff;
+      border-color: var(--line);
+    }
+
+    .sidebar {
+      background:
+        linear-gradient(180deg, rgba(4,60,9,.98), rgba(2,43,7,.99)),
+        #043c09;
+      border-right: 1px solid rgba(177,201,3,.14);
+    }
+    .sidebar .brand-lockup {
+      padding: 0 8px 26px;
+    }
+    .sidebar .brand-mark {
+      width: 184px;
+      height: 58px;
+    }
+    .nav-title {
+      color: rgba(177,201,3,.66);
+    }
+    .nav-item {
+      color: rgba(255,255,255,.72);
+      border-radius: 8px;
+    }
+    .nav-item:hover {
+      background: rgba(177,201,3,.10);
+    }
+    .nav-item.active {
+      color: #fff;
+      background: rgba(177,201,3,.14);
+      box-shadow: inset 4px 0 var(--accent);
+    }
+    .avatar {
+      background: var(--accent);
+      color: var(--primary);
+      border-radius: 50%;
+    }
+
+    .topbar {
+      background: rgba(255,255,255,.94);
+      border-bottom: 3px solid var(--accent);
+    }
+    .page-kicker {
+      color: #788600;
+    }
+    .connection {
+      border-color: #dce6d8;
+      color: #536256;
+    }
+
+    .hero {
+      background:
+        linear-gradient(100deg, rgba(4,60,9,.99) 0%, rgba(4,60,9,.91) 58%, rgba(11,91,24,.88) 100%);
+      border-radius: 4px;
+      border-bottom: 7px solid var(--accent);
+    }
+    .hero::before {
+      border-color: rgba(177,201,3,.10);
+    }
+    .hero-copy h2 {
+      color: var(--accent);
+      font-size: 34px;
+    }
+    .hero-price strong {
+      color: var(--accent);
+      font-family: "Barlow Condensed", sans-serif;
+      letter-spacing: .5px;
+    }
+
+    .stat-card,
+    .card,
+    .service-card,
+    .role-card {
+      border-radius: 6px;
+    }
+    .stat-card {
+      border-top: 4px solid var(--accent);
+    }
+    .stat-icon,
+    .customer-avatar {
+      background: #edf4e8;
+      color: var(--primary);
+      border-radius: 50%;
+    }
+    .stat-card.accent .stat-icon {
+      background: #f4f7d6;
+      color: #718000;
+    }
+    .card-header {
+      border-bottom-color: #e7eee4;
+      position: relative;
+    }
+    .card-header::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 16px;
+      bottom: 16px;
+      width: 4px;
+      background: var(--accent);
+    }
+    th {
+      background: #edf2e9;
+      color: #58675a;
+    }
+    tbody tr:hover {
+      background: #f8faef;
+    }
+    .progress-line > span {
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .plan-card {
+      background:
+        linear-gradient(120deg, rgba(4,60,9,.99), rgba(6,86,18,.96));
+      border-radius: 5px;
+      border-bottom: 8px solid var(--accent);
+    }
+    .days-ring {
+      background: conic-gradient(var(--accent) var(--ring), rgba(255,255,255,.16) 0);
+    }
+    .days-ring::before {
+      background: #075112;
+    }
+    .service-card.used {
+      border-color: #bfcf6c;
+      background: linear-gradient(180deg,#fff,#fbfdec);
+    }
+    .timeline-dot {
+      background: var(--accent);
+      border-color: #f1f5de;
+    }
+
+    .badge.success {
+      color: #116a2d;
+      background: #e6f4e6;
+    }
+    .badge.warning {
+      color: #6d7900;
+      background: #f5f7d5;
+    }
+    .badge.info {
+      color: #315f35;
+      background: #ebf1e8;
+    }
+    .permission-item {
+      background: #f8faef;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: #a9bf1a;
+      box-shadow: 0 0 0 4px rgba(177,201,3,.13);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar .brand-mark { width: 170px; }
+    }
+
+
+
+    /* Contrato e aceite digital */
+    .contract-public {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 12% 10%, rgba(177,201,3,.15), transparent 27%),
+        linear-gradient(145deg, #f6f8f1, #eef3e9);
+      padding: 28px 16px 60px;
+    }
+    .contract-public-shell { width:min(920px,100%); margin:0 auto; }
+    .contract-public-header {
+      display:flex; align-items:center; justify-content:space-between; gap:18px;
+      background:#043c09; color:#fff; padding:20px 24px; border-radius:20px 20px 0 0;
+    }
+    .contract-public-brand strong { font-family:"Barlow Condensed",sans-serif; font-size:24px; text-transform:uppercase; letter-spacing:.5px; }
+    .contract-public-brand span { display:block; color:rgba(255,255,255,.65); font-size:11px; margin-top:3px; }
+    .contract-public-body { background:#fff; border:1px solid #dfe8db; border-top:0; border-radius:0 0 20px 20px; box-shadow:var(--shadow); overflow:hidden; }
+    .contract-public-content { padding:26px; }
+    .contract-document {
+      background:#fff; border:1px solid #dfe6dc; border-radius:16px; padding:clamp(20px,4vw,42px);
+      color:#202b22; line-height:1.68; font-family:Arial,sans-serif; font-size:13px;
+    }
+    .contract-document h1 { margin:0 0 5px; text-align:center; color:#043c09; font-size:21px; text-transform:uppercase; }
+    .contract-document .contract-number { text-align:center; color:#667266; font-size:11px; margin-bottom:26px; }
+    .contract-document h2 { color:#043c09; font-size:13px; text-transform:uppercase; margin:23px 0 8px; }
+    .contract-document p { margin:8px 0; text-align:justify; }
+    .contract-document ul { margin:8px 0 8px 20px; padding:0; }
+    .contract-document li { margin:5px 0; }
+    .contract-parties { background:#f6f9ef; border-left:4px solid var(--accent); padding:14px 16px; border-radius:8px; }
+    .contract-signature-evidence { margin-top:22px; border:1px solid #bdd477; background:#f7faeb; border-radius:12px; padding:15px; }
+    .contract-signature-evidence strong { color:#31520b; }
+    .acceptance-panel { margin-top:18px; border-top:1px solid var(--line); padding-top:20px; }
+    .acceptance-check { display:flex; align-items:flex-start; gap:10px; padding:13px; border:1px solid var(--line); border-radius:12px; background:#fafcf7; }
+    .acceptance-check input { margin-top:3px; accent-color:var(--primary); }
+    .contract-summary-card {
+      display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
+      background:#fff; border:1px solid var(--line); border-left:5px solid var(--accent);
+      border-radius:17px; padding:17px 19px; box-shadow:var(--shadow-sm); margin-bottom:18px;
+    }
+    .contract-summary-copy strong { display:block; font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; font-size:17px; color:var(--primary); }
+    .contract-summary-copy span { display:block; color:var(--muted); font-size:10px; margin-top:5px; }
+    .contract-summary-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .contract-link-row { display:flex; gap:8px; }
+    .contract-link-row input { flex:1; min-width:0; border:1px solid var(--line); border-radius:11px; padding:11px 12px; background:#f8faf7; }
+    .contract-modal-status { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:15px; }
+    .contract-accepted-box { border:1px solid #bde2d4; background:var(--success-bg); color:#176849; border-radius:13px; padding:14px 16px; margin-bottom:16px; }
+    .contract-loading { text-align:center; padding:70px 20px; color:var(--muted); }
+    .contract-public-success { text-align:center; padding:28px 20px; }
+    .contract-public-success .success-mark { width:72px; height:72px; border-radius:50%; background:var(--success-bg); color:var(--success); display:grid; place-items:center; font-size:34px; margin:0 auto 15px; }
+    @media (max-width:650px) {
+      .contract-public { padding:0; }
+      .contract-public-header { border-radius:0; padding:17px; }
+      .contract-public-body { border-radius:0; border-left:0; border-right:0; }
+      .contract-public-content { padding:14px; }
+      .contract-document { padding:20px 16px; border-radius:12px; }
+      .contract-link-row { flex-direction:column; }
+      .contract-summary-actions { width:100%; }
+      .contract-summary-actions .btn { flex:1; }
+    }
+
+  </style>
+</head>
+<body>
+
+
+  <!-- ACEITE PÚBLICO DO CONTRATO -->
+  <section id="contractAcceptanceScreen" class="contract-public hidden">
+    <div class="contract-public-shell">
+      <header class="contract-public-header">
+        <div class="contract-public-brand">
+          <strong>IG Energia Renovável</strong>
+          <span>Contrato digital do plano de monitoramento</span>
+        </div>
+        <span class="badge warning">Aceite eletrônico</span>
+      </header>
+      <div class="contract-public-body">
+        <div id="publicContractLoading" class="contract-loading">Carregando contrato...</div>
+        <div id="publicContractError" class="contract-loading hidden">
+          <div class="empty-icon">!</div>
+          <strong style="display:block;color:var(--ink);margin-bottom:7px">Contrato não localizado</strong>
+          <span>Confirme se o link recebido está completo ou solicite um novo link à IG Energia.</span>
+        </div>
+        <div id="publicContractContent" class="contract-public-content hidden">
+          <div id="publicAcceptedBanner" class="contract-public-success hidden">
+            <div class="success-mark">✓</div>
+            <h2 style="font-family:Barlow Condensed,sans-serif;text-transform:uppercase;margin:0 0 8px">Contrato aceito com sucesso</h2>
+            <p id="publicAcceptedText" class="muted" style="margin:0"></p>
+          </div>
+          <div id="publicContractDocument" class="contract-document"></div>
+          <form id="publicAcceptanceForm" class="acceptance-panel">
+            <div style="margin-bottom:17px">
+              <div class="card-title" style="font-size:19px">Aceite digital</div>
+              <p class="muted small" style="line-height:1.6;margin:5px 0 0">Preencha os dados abaixo para confirmar sua identidade e registrar o aceite deste contrato.</p>
+            </div>
+            <div class="form-grid">
+              <div class="field"><label>Nome completo do responsável *</label><input id="publicSignerName" required></div>
+              <div class="field"><label>CPF ou CNPJ do contratante *</label><input id="publicSignerDocument" required placeholder="Mesmo documento do cadastro"></div>
+              <div class="field full"><label>Confirmação *</label><input id="publicAcceptanceWord" required placeholder="Digite ACEITO"></div>
+              <label class="acceptance-check field full">
+                <input id="publicAcceptanceCheck" type="checkbox" required>
+                <span>Declaro que li o contrato, compreendi as condições do plano e concordo com o registro eletrônico deste aceite, incluindo data, hora e identificação do dispositivo.</span>
+              </label>
+            </div>
+            <button id="publicAcceptBtn" class="btn btn-primary w-full" type="submit" style="margin-top:16px;padding:14px">Aceitar e assinar eletronicamente</button>
+          </form>
+          <p class="muted small" style="text-align:center;line-height:1.6;margin:18px 0 0">O link é individual. Não o encaminhe a terceiros.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTENTICAÇÃO -->
+  <section id="authScreen" class="auth-shell">
+    <div class="auth-brand">
+      <div class="brand-lockup">
+        <div class="brand-mark">IG</div>
+        <div class="brand-text">
+          <strong>IG Energia</strong>
+          <span>CRM Monitoramento</span>
+        </div>
+      </div>
+      <div class="auth-copy">
+        <h1>Mais que energia,<br><span>uma solução.</span></h1>
+        <p>Gestão completa do plano de monitoramento, com clientes, benefícios, histórico de atendimento, equipe e renovações em um só lugar.</p>
+        <div class="plan-showcase">
+          <div class="plan-pill">✓ Verificação remota do aplicativo</div>
+          <div class="plan-pill">✓ Análise remota de fatura</div>
+          <div class="plan-pill">✓ Visita técnica anual</div>
+        </div>
+      </div>
+      <div class="auth-footer">© 2026 IG Energia Renovável · Plataforma interna de gestão</div>
+    </div>
+    <div class="auth-panel">
+      <div class="auth-card">
+        <h2 id="authTitle" style="margin-top:0">Entrar no CRM</h2>
+        <p class="muted" style="font-size:13px;margin:0">Use seu e-mail corporativo para continuar.</p>
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth-tab="login">Entrar</button>
+          <button class="auth-tab" data-auth-tab="register">Solicitar acesso</button>
+        </div>
+
+        <form id="loginForm" class="form-grid one">
+          <div class="field">
+            <label>E-mail</label>
+            <div class="input-icon"><span>✉</span><input id="loginEmail" type="email" placeholder="nome@igenergia.com.br" required></div>
+          </div>
+          <div class="field">
+            <label>Senha</label>
+            <div class="input-icon"><span>●</span><input id="loginPassword" type="password" placeholder="Sua senha" minlength="6" required></div>
+          </div>
+          <button class="btn btn-primary w-full" type="submit" style="margin-top:5px;padding:13px">Entrar na plataforma</button>
+        </form>
+
+        <form id="registerForm" class="form-grid one hidden">
+          <div class="field">
+            <label>Nome completo</label>
+            <input id="registerName" type="text" placeholder="Seu nome" required>
+          </div>
+          <div class="field">
+            <label>E-mail corporativo</label>
+            <input id="registerEmail" type="email" placeholder="nome@igenergia.com.br" required>
+          </div>
+          <div class="field">
+            <label>Senha</label>
+            <input id="registerPassword" type="password" placeholder="Mínimo de 6 caracteres" minlength="6" required>
+          </div>
+          <button class="btn btn-primary w-full" type="submit" style="margin-top:5px;padding:13px">Criar solicitação</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- APLICAÇÃO -->
+  <section id="appScreen" class="app-shell hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="brand-lockup">
+        <div class="brand-mark">IG</div>
+        <div class="brand-text">
+          <strong>IG Energia</strong>
+          <span>CRM Monitoramento</span>
+        </div>
+      </div>
+
+      <div class="nav-title">Gestão</div>
+      <nav class="nav">
+        <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span> Visão geral</button>
+        <button class="nav-item" data-page="clients" data-permission="clientsView"><span class="nav-icon">♙</span> Clientes</button>
+        <button class="nav-item" data-page="expirations" data-permission="clientsView"><span class="nav-icon">◷</span> Vencimentos</button>
+        <button class="nav-item" data-page="users" data-permission="usersManage"><span class="nav-icon">⚙</span> Usuários e permissões</button>
+      </nav>
+      <div class="nav-title">Ferramentas</div>
+      <nav class="nav">
+        <button class="nav-item" id="exportSidebar" data-permission="reportsExport"><span class="nav-icon">⇩</span> Exportar relatório</button>
+        <button class="nav-item" data-page="settings"><span class="nav-icon">☼</span> Configurações</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="user-mini">
+          <div id="sidebarAvatar" class="avatar">AD</div>
+          <div class="user-mini-info">
+            <strong id="sidebarName" class="truncate">Administrador</strong>
+            <span id="sidebarRole">Administrador</span>
+          </div>
+          <button id="logoutBtn" class="btn btn-sm" title="Sair" style="background:rgba(255,255,255,.08);color:#fff;padding:8px">↪</button>
+        </div>
+      </div>
+    </aside>
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menuToggle" class="btn btn-ghost btn-icon menu-toggle">☰</button>
+          <div>
+            <div class="page-kicker">IG Energia · Monitoramento</div>
+            <div id="topPageTitle" class="page-title">Visão geral</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div id="connectionBadge" class="connection"><span id="connectionDot" class="dot demo"></span><span id="connectionText">Conectando ao Firebase...</span></div>
+          <button id="quickAddClient" class="btn btn-primary btn-sm" data-permission="clientsCreate">＋ Novo cliente</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Dashboard -->
+        <section id="page-dashboard" class="page active">
+          <div class="hero">
+            <div class="hero-copy">
+              <h2 id="greeting">Bom dia! 👋</h2>
+              <p>Acompanhe os clientes do plano anual, serviços utilizados e renovações que precisam da atenção da equipe.</p>
+            </div>
+            <div class="hero-price">
+              <strong>CPF R$ 60</strong>
+              <span>CNPJ R$ 300 · valores anuais</span>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-top"><div class="stat-icon">♙</div><span class="stat-trend">Base ativa</span></div>
+              <div id="statActive" class="stat-value mono">0</div><div class="stat-label">Clientes com plano ativo</div>
+            </div>
+            <div class="stat-card success">
+              <div class="stat-top"><div class="stat-icon">R$</div><span class="stat-trend">Receita anual</span></div>
+              <div id="statRevenue" class="stat-value mono">R$ 0</div><div class="stat-label">Valor dos planos cadastrados</div>
+            </div>
+            <div class="stat-card accent">
+              <div class="stat-top"><div class="stat-icon">◷</div><span class="stat-trend" style="background:var(--warning-bg);color:var(--warning)">30 dias</span></div>
+              <div id="statExpiring" class="stat-value mono">0</div><div class="stat-label">Planos próximos do vencimento</div>
+            </div>
+            <div class="stat-card danger">
+              <div class="stat-top"><div class="stat-icon">!</div><span class="stat-trend" style="background:var(--danger-bg);color:var(--danger)">Atenção</span></div>
+              <div id="statExpired" class="stat-value mono">0</div><div class="stat-label">Planos vencidos</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div><div class="card-title">Clientes que exigem atenção</div><div class="card-subtitle">Próximos vencimentos e planos vencidos</div></div>
+                <button class="btn btn-soft btn-sm" data-go-page="expirations">Ver todos</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Cliente</th><th>Situação</th><th>Período</th><th>Progresso</th><th></th></tr></thead>
+                  <tbody id="attentionTable"></tbody>
+                </table>
+              </div>
+              <div id="attentionEmpty" class="empty hidden"><div class="empty-icon">✓</div><strong>Nenhum vencimento próximo</strong><span>Sua carteira está em dia.</span></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div><div class="card-title">Uso dos benefícios</div><div class="card-subtitle">Quantidade utilizada na carteira atual</div></div>
+              </div>
+              <div class="card-body">
+                <div class="usage-bars">
+                  <div>
+                    <div class="usage-row-head"><strong>Verificação do aplicativo</strong><span id="usageAppText">0 de 0</span></div>
+                    <div class="progress-line"><span id="usageAppBar" style="width:0%"></span></div>
+                  </div>
+                  <div>
+                    <div class="usage-row-head"><strong>Análise de fatura</strong><span id="usageInvoiceText">0 de 0</span></div>
+                    <div class="progress-line"><span id="usageInvoiceBar" style="width:0%"></span></div>
+                  </div>
+                  <div>
+                    <div class="usage-row-head"><strong>Visita técnica</strong><span id="usageVisitText">0 de 0</span></div>
+                    <div class="progress-line"><span id="usageVisitBar" style="width:0%"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:18px">
+            <div class="card-header">
+              <div><div class="card-title">Atividades recentes</div><div class="card-subtitle">Últimos registros efetuados na plataforma</div></div>
+            </div>
+            <div id="recentActivity" class="card-body activity-list"></div>
+          </div>
+        </section>
+
+        <!-- Clientes -->
+        <section id="page-clients" class="page">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <div class="search-box"><span>⌕</span><input id="clientSearch" placeholder="Buscar cliente, CPF, cidade ou telefone..."></div>
+              <select id="clientStatusFilter" class="filter-select">
+                <option value="">Todos os status</option>
+                <option value="active">Ativos</option>
+                <option value="expiring">Próximos do vencimento</option>
+                <option value="expired">Vencidos</option>
+              </select>
+            </div>
+            <div class="toolbar-right">
+              <button id="exportClients" class="btn btn-ghost btn-sm" data-permission="reportsExport">⇩ Exportar CSV</button>
+              <button id="addClientBtn" class="btn btn-primary btn-sm" data-permission="clientsCreate">＋ Cadastrar cliente</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Contato</th><th>Início do plano</th><th>Vencimento</th><th>Prazo</th><th>Contrato</th><th>Benefícios</th><th></th></tr></thead>
+                <tbody id="clientsTable"></tbody>
+              </table>
+            </div>
+            <div id="clientsEmpty" class="empty hidden"><div class="empty-icon">♙</div><strong>Nenhum cliente encontrado</strong><span>Cadastre o primeiro cliente do plano de monitoramento.</span></div>
+          </div>
+        </section>
+
+        <!-- Vencimentos -->
+        <section id="page-expirations" class="page">
+          <div class="stats-grid">
+            <div class="stat-card danger"><div class="stat-icon">!</div><div id="expExpiredCount" class="stat-value">0</div><div class="stat-label">Vencidos</div></div>
+            <div class="stat-card accent"><div class="stat-icon">7</div><div id="exp7Count" class="stat-value">0</div><div class="stat-label">Vencem em até 7 dias</div></div>
+            <div class="stat-card accent"><div class="stat-icon">30</div><div id="exp30Count" class="stat-value">0</div><div class="stat-label">Vencem em até 30 dias</div></div>
+            <div class="stat-card success"><div class="stat-icon">R$</div><div id="renewalPotential" class="stat-value">R$ 0</div><div class="stat-label">Potencial de renovação</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">Agenda de renovações</div><div class="card-subtitle">Ordenada por urgência</div></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Vencimento</th><th>Dias restantes</th><th>Responsável</th><th>Telefone</th><th></th></tr></thead>
+                <tbody id="expirationsTable"></tbody>
+              </table>
+            </div>
+            <div id="expirationsEmpty" class="empty hidden"><div class="empty-icon">✓</div><strong>Nenhuma renovação pendente</strong><span>Não há planos vencidos ou vencendo nos próximos 60 dias.</span></div>
+          </div>
+        </section>
+
+        <!-- Usuários -->
+        <section id="page-users" class="page">
+          <div class="toolbar">
+            <div>
+              <div class="card-title" style="font-size:19px">Equipe e acessos</div>
+              <div class="muted small" style="margin-top:5px">Aprove solicitações e determine o que cada operador pode fazer.</div>
+            </div>
+            <button id="addUserProfileBtn" class="btn btn-primary btn-sm">＋ Cadastrar operador</button>
+          </div>
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Operador</th><th>Função</th><th>Status</th><th>Permissões</th><th>Cadastro</th><th></th></tr></thead>
+                <tbody id="usersTable"></tbody>
+              </table>
+            </div>
+            <div id="usersEmpty" class="empty hidden"><div class="empty-icon">⚙</div><strong>Nenhum operador encontrado</strong></div>
+          </div>
+          <div class="grid-equal" style="margin-top:18px">
+            <div class="role-card"><strong>Administrador</strong><p>Acesso total, inclusive usuários, permissões e exclusão de clientes.</p></div>
+            <div class="role-card"><strong>Gestor</strong><p>Gerencia clientes, atendimentos, relatórios e renovações.</p></div>
+            <div class="role-card"><strong>Comercial</strong><p>Cadastra clientes e acompanha vendas, sem excluir registros.</p></div>
+            <div class="role-card"><strong>Técnico</strong><p>Consulta clientes e registra a utilização dos benefícios.</p></div>
+          </div>
+        </section>
+
+        <!-- Configurações -->
+        <section id="page-settings" class="page">
+          <div class="grid-equal">
+            <div class="card">
+              <div class="card-header"><div><div class="card-title">Plano de monitoramento</div><div class="card-subtitle">Condições padrão utilizadas no cadastro</div></div></div>
+              <div class="card-body form-grid one">
+                <div class="field"><label>Nome do plano</label><input value="Plano Anual de Monitoramento" disabled></div>
+                <div class="field"><label>Pessoa física — CPF</label><input value="R$ 60,00 por ano" disabled></div>
+                <div class="field"><label>Pessoa jurídica — CNPJ</label><input value="R$ 300,00 por ano" disabled></div>
+                <div class="field"><label>Validade</label><input value="12 meses a partir da contratação" disabled></div>
+                <div class="field"><label>Benefícios</label><textarea disabled>1 verificação remota do aplicativo
+1 análise remota de fatura
+1 visita técnica por ano</textarea></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div><div class="card-title">Conexão Firebase</div><div class="card-subtitle">Situação atual do armazenamento</div></div></div>
+              <div class="card-body">
+                <div id="firebaseStatusPanel" class="demo-note" style="margin:0"></div>
+                <div style="height:16px"></div>
+                <p class="muted small" style="line-height:1.7;margin:0">Projeto conectado: <strong>monitoramento-bdb36</strong>. O acesso utiliza Firebase Authentication por e-mail e senha, com dados armazenados no Cloud Firestore.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Detalhe do cliente -->
+        <section id="page-client-detail" class="page">
+          <div class="detail-header">
+            <div class="detail-identity">
+              <button id="backClients" class="btn btn-ghost btn-icon">←</button>
+              <div id="detailAvatar" class="detail-avatar">CL</div>
+              <div><h2 id="detailName">Cliente</h2><p id="detailMeta">CPF · Cidade</p></div>
+            </div>
+            <div class="detail-actions">
+              <button id="editDetailClient" class="btn btn-ghost btn-sm" data-permission="clientsEdit">✎ Editar ficha</button>
+              <button id="renewClientBtn" class="btn btn-accent btn-sm" data-permission="clientsEdit">↻ Renovar plano</button>
+            </div>
+          </div>
+
+          <div class="plan-card">
+            <div>
+              <div id="detailPlanLabel" class="plan-name">Plano anual de monitoramento</div>
+              <h3 id="detailPlanPrice">R$ 60,00 / ano</h3>
+              <div class="plan-dates">
+                <div>Início do plano<strong id="detailStart">—</strong></div>
+                <div>Fim do período<strong id="detailEnd">—</strong></div>
+                <div>Situação<strong id="detailStatus">—</strong></div>
+                <div>Responsável<strong id="detailSeller">—</strong></div>
+              </div>
+            </div>
+            <div id="detailDaysRing" class="days-ring" style="--ring:0%">
+              <div class="days-ring-content"><strong id="detailDays">0</strong><span>dias restantes</span></div>
+            </div>
+          </div>
+
+          <div id="detailContractCard" class="contract-summary-card">
+            <div class="contract-summary-copy">
+              <strong>Contrato do plano</strong>
+              <span id="detailContractMeta">Contrato ainda não gerado.</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <div id="detailContractStatus"><span class="badge gray">Não gerado</span></div>
+              <div class="contract-summary-actions">
+                <button id="primaryContractActionBtn" class="btn btn-soft btn-sm">Gerar contrato</button>
+                <button id="copyDetailContractLink" class="btn btn-ghost btn-sm" disabled>Copiar link</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="service-grid">
+            <div id="serviceCard-appCheck" class="service-card">
+              <div class="service-icon">▣</div><h4>Verificação do aplicativo</h4>
+              <p>Conferência remota do aplicativo e da geração do sistema.</p>
+              <div class="service-footer"><span id="serviceCount-appCheck" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="appCheck" data-permission="servicesRegister">Registrar uso</button></div>
+            </div>
+            <div id="serviceCard-invoiceAnalysis" class="service-card">
+              <div class="service-icon">▤</div><h4>Análise remota de fatura</h4>
+              <p>Análise da fatura para validar créditos, consumo e compensação.</p>
+              <div class="service-footer"><span id="serviceCount-invoiceAnalysis" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="invoiceAnalysis" data-permission="servicesRegister">Registrar uso</button></div>
+            </div>
+            <div id="serviceCard-technicalVisit" class="service-card">
+              <div class="service-icon">⌂</div><h4>Visita técnica anual</h4>
+              <p>Uma visita presencial incluída durante a vigência do plano.</p>
+              <div class="service-footer"><span id="serviceCount-technicalVisit" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="technicalVisit" data-permission="servicesRegister">Registrar uso</button></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header"><div><div class="card-title">Histórico do cliente</div><div class="card-subtitle">Atendimentos, alterações e renovações</div></div></div>
+              <div id="clientTimeline" class="card-body timeline"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div><div class="card-title">Ficha cadastral</div><div class="card-subtitle">Dados para contato e atendimento</div></div></div>
+              <div id="clientInfo" class="card-body"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </section>
+
+  <!-- MODAL CLIENTE -->
+  <div id="clientModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3 id="clientModalTitle">Cadastrar cliente</h3><button class="close-btn" data-close="clientModalBackdrop">×</button></div>
+      <form id="clientForm">
+        <div class="modal-body">
+          <input id="clientId" type="hidden">
+          <div class="form-grid">
+            <div class="field full"><label>Nome completo / Razão social *</label><input id="clientName" required></div>
+            <div class="field"><label>CPF / CNPJ *</label><input id="clientDocument" placeholder="Digite o CPF ou CNPJ" required><span id="clientPlanPreview" class="small muted">Informe o documento para definir o plano.</span></div>
+            <div class="field"><label>Telefone / WhatsApp</label><input id="clientPhone" placeholder="(47) 99999-9999"></div>
+            <div class="field"><label>E-mail</label><input id="clientEmail" type="email"></div>
+            <div class="field"><label>Cidade</label><input id="clientCity"></div>
+            <div class="field full"><label>Endereço</label><input id="clientAddress"></div>
+            <div class="field"><label>Data de início do plano *</label><input id="clientPlanStart" type="date" required></div>
+            <div class="field"><label>Responsável pela venda</label><input id="clientSeller" placeholder="Nome do vendedor"></div>
+            <div class="field"><label>Forma de pagamento</label>
+              <select id="clientPayment"><option>PIX</option><option>Dinheiro</option><option>Cartão</option><option>Boleto</option><option>Outro</option></select>
+            </div>
+            <div class="field"><label>Situação do pagamento</label>
+              <select id="clientPaymentStatus"><option value="paid">Pago</option><option value="pending">Pendente</option></select>
+            </div>
+            <div id="clientContractNote" class="field full"><div class="demo-note" style="margin:0"><strong>Contrato automático.</strong><br>Ao salvar um novo cliente, o sistema gerará o contrato do plano e abrirá a tela para copiar o link de aceite digital.</div></div>
+            <div class="field full"><label>Observações</label><textarea id="clientNotes" placeholder="Informações importantes sobre o cliente ou sistema..."></textarea></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="clientModalBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Salvar cliente</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL SERVIÇO -->
+  <div id="serviceModalBackdrop" class="modal-backdrop">
+    <div class="modal sm">
+      <div class="modal-header"><h3>Registrar utilização</h3><button class="close-btn" data-close="serviceModalBackdrop">×</button></div>
+      <form id="serviceForm">
+        <div class="modal-body form-grid one">
+          <input id="serviceType" type="hidden">
+          <div id="serviceModalInfo" class="demo-note" style="margin:0"></div>
+          <div class="field"><label>Data do atendimento *</label><input id="serviceDate" type="date" required></div>
+          <div class="field"><label>Responsável pelo atendimento *</label><input id="serviceOperator" required></div>
+          <div class="field"><label>Descrição do atendimento</label><textarea id="serviceDescription" placeholder="Descreva o que foi verificado ou realizado..."></textarea></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="serviceModalBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Confirmar utilização</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL USUÁRIO -->
+  <div id="userModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3>Usuário e permissões</h3><button class="close-btn" data-close="userModalBackdrop">×</button></div>
+      <form id="userForm">
+        <div class="modal-body">
+          <input id="userUid" type="hidden">
+          <div class="form-grid">
+            <div class="field"><label>Nome *</label><input id="userName" required></div>
+            <div class="field"><label>E-mail *</label><input id="userEmail" type="email" required></div>
+            <div class="field"><label>Função</label>
+              <select id="userRole">
+                <option value="admin">Administrador</option>
+                <option value="manager">Gestor</option>
+                <option value="sales">Comercial</option>
+                <option value="technical">Técnico</option>
+                <option value="viewer">Somente leitura</option>
+              </select>
+            </div>
+            <div class="field"><label>Status</label>
+              <select id="userActive"><option value="true">Ativo</option><option value="false">Aguardando / Bloqueado</option></select>
+            </div>
+            <div class="field full">
+              <label>Permissões individuais</label>
+              <div id="permissionGrid" class="permission-grid"></div>
+            </div>
+            <div class="field full"><div class="demo-note" style="margin:0">No Firebase, o operador deve primeiro criar a conta em “Solicitar acesso”. Depois, o administrador aprova e define as permissões nesta tela.</div></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="userModalBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Salvar permissões</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL RENOVAÇÃO -->
+  <div id="renewModalBackdrop" class="modal-backdrop">
+    <div class="modal sm">
+      <div class="modal-header"><h3>Renovar plano anual</h3><button class="close-btn" data-close="renewModalBackdrop">×</button></div>
+      <form id="renewForm">
+        <div class="modal-body form-grid one">
+          <div id="renewPlanInfo" class="demo-note" style="margin:0">A renovação iniciará um novo período de 12 meses, conforme o tipo de documento do cliente, e zerará a disponibilidade dos três benefícios. O histórico anterior será preservado.</div>
+          <div class="field"><label>Nova data de início *</label><input id="renewStart" type="date" required></div>
+          <div class="field"><label>Responsável pela renovação</label><input id="renewSeller"></div>
+          <div class="field"><label>Observação</label><textarea id="renewNotes"></textarea></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="renewModalBackdrop">Cancelar</button><button type="submit" class="btn btn-accent">Confirmar renovação</button></div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL CONTRATO -->
+  <div id="contractModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3>Contrato do plano</h3><button class="close-btn" data-close="contractModalBackdrop">×</button></div>
+      <div class="modal-body">
+        <div class="contract-modal-status">
+          <div><div class="small muted">Número do contrato</div><strong id="contractModalNumber">—</strong></div>
+          <div id="contractModalStatus"><span class="badge warning">Aguardando aceite</span></div>
+        </div>
+        <div id="contractModalAccepted" class="contract-accepted-box hidden"></div>
+        <div class="field" style="margin-bottom:16px">
+          <label>Link individual de aceite</label>
+          <div class="contract-link-row"><input id="contractLinkInput" readonly><button id="copyContractLinkBtn" class="btn btn-soft" type="button">Copiar link</button></div>
+        </div>
+        <div id="contractPreview" class="contract-document"></div>
+      </div>
+      <div class="modal-footer" style="flex-wrap:wrap">
+        <button id="printContractBtn" type="button" class="btn btn-ghost">Imprimir / salvar PDF</button>
+        <button id="openAcceptanceBtn" type="button" class="btn btn-primary">Abrir página de aceite</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAÇÃO -->
+  <div id="confirmModalBackdrop" class="modal-backdrop">
+    <div class="modal sm">
+      <div class="modal-header"><h3 id="confirmTitle">Confirmar ação</h3><button class="close-btn" data-close="confirmModalBackdrop">×</button></div>
+      <div class="modal-body"><p id="confirmMessage" class="muted" style="line-height:1.6;margin:0"></p></div>
+      <div class="modal-footer"><button class="btn btn-ghost" data-close="confirmModalBackdrop">Cancelar</button><button id="confirmActionBtn" class="btn btn-danger">Confirmar</button></div>
+    </div>
+  </div>
+
+  <div id="toastStack" class="toast-stack"></div>
+
+  <script>
+    /*
+      ============================================================
+      FIREBASE CONECTADO
+      Projeto: monitoramento-bdb36
+      Authentication: e-mail e senha
+      Banco: Cloud Firestore
+      ============================================================
+    */
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4DY8SOKKSCircbo2kSq0en2vd1nLLXvc",
+      authDomain: "monitoramento-bdb36.firebaseapp.com",
+      projectId: "monitoramento-bdb36",
+      storageBucket: "monitoramento-bdb36.firebasestorage.app",
+      messagingSenderId: "71129187314",
+      appId: "1:71129187314:web:2d364ca06fb6b24c70616b"
+    };
+
+    const FIREBASE_VERSION = "12.16.0";
+    const CPF_PLAN_PRICE = 60;
+    const CNPJ_PLAN_PRICE = 300;
+    const PLAN_DAYS = 365;
+    const CONTRACT_VERSION = "1.0";
+    const ACCEPT_TOKEN = new URLSearchParams(window.location.search).get("accept");
+    const SERVICES = {
+      appCheck: { label: "Verificação remota do aplicativo", icon: "▣" },
+      invoiceAnalysis: { label: "Análise remota de fatura", icon: "▤" },
+      technicalVisit: { label: "Visita técnica anual", icon: "⌂" }
+    };
+    const PERMISSION_LABELS = {
+      clientsView: "Visualizar clientes",
+      clientsCreate: "Cadastrar clientes",
+      clientsEdit: "Editar e renovar clientes",
+      clientsDelete: "Excluir clientes",
+      servicesRegister: "Registrar benefícios",
+      reportsExport: "Exportar relatórios",
+      usersManage: "Gerenciar usuários"
+    };
+    const ROLE_LABELS = {
+      admin: "Administrador",
+      manager: "Gestor",
+      sales: "Comercial",
+      technical: "Técnico",
+      viewer: "Somente leitura"
+    };
+    const ROLE_PERMISSIONS = {
+      admin: Object.keys(PERMISSION_LABELS),
+      manager: ["clientsView","clientsCreate","clientsEdit","servicesRegister","reportsExport"],
+      sales: ["clientsView","clientsCreate","clientsEdit","reportsExport"],
+      technical: ["clientsView","servicesRegister"],
+      viewer: ["clientsView"]
+    };
+
+    const state = {
+      firebase: false,
+      firebaseApi: null,
+      db: null,
+      auth: null,
+      currentUser: null,
+      currentProfile: null,
+      clients: [],
+      users: [],
+      activities: [],
+      contracts: [],
+      selectedClientId: null,
+      selectedContractToken: null,
+      publicContract: null,
+      confirmCallback: null,
+      syncedContractTokens: new Set(),
+      unsubscribers: []
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const $$ = (sel) => [...document.querySelectorAll(sel)];
+    const todayISO = () => {
+      const d = new Date();
+      return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    };
+    const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+    const safe = (value="") => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    const initials = (name="") => name.trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase() || "IG";
+    const parseDate = (dateStr) => dateStr ? new Date(dateStr + "T12:00:00") : new Date();
+    const formatDate = (dateStr) => dateStr ? new Intl.DateTimeFormat("pt-BR").format(parseDate(dateStr)) : "—";
+    const formatDateTime = (iso) => iso ? new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date(iso)) : "—";
+    const money = (v) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:2}).format(v||0);
+    const documentDigits = (value="") => String(value).replace(/\D/g, "");
+    const getClientType = (clientOrDocument) => {
+      const document = typeof clientOrDocument === "object" ? clientOrDocument?.document : clientOrDocument;
+      return documentDigits(document).length > 11 ? "cnpj" : "cpf";
+    };
+    const getPlanPrice = (clientOrDocument) => getClientType(clientOrDocument) === "cnpj" ? CNPJ_PLAN_PRICE : CPF_PLAN_PRICE;
+    const getPlanLabel = (clientOrDocument) => getClientType(clientOrDocument) === "cnpj" ? "Plano CNPJ · Pessoa Jurídica" : "Plano CPF · Pessoa Física";
+    const timestampISO = (value) => value?.toDate ? value.toDate().toISOString() : (value || null);
+    const makeContractToken = () => `${uid().replace(/-/g,"")}${Math.random().toString(36).slice(2,12)}`;
+    const maskDocument = (document) => {
+      const digits = documentDigits(document);
+      const last = digits.slice(-4);
+      return digits.length === 14 ? `**.***.***/****-${last.slice(-2)}` : `***.***.***-${last.slice(-2)}`;
+    };
+    async function hashText(value){
+      const normalized=String(value||"");
+      if(window.crypto?.subtle){
+        const bytes=new TextEncoder().encode(normalized);
+        const digest=await crypto.subtle.digest("SHA-256",bytes);
+        return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
+      }
+      return btoa(unescape(encodeURIComponent(normalized)));
+    }
+    const getContractForClient = (client) => {
+      const token=client?.contract?.token;
+      return (token && state.contracts.find(c=>c.token===token)) || client?.contract || null;
+    };
+    const contractBadge = (contract) => {
+      if(!contract) return '<span class="badge gray">Não gerado</span>';
+      if(contract.status==="accepted") return '<span class="badge success"><span class="status-dot"></span>Aceito</span>';
+      return '<span class="badge warning"><span class="status-dot"></span>Aguardando aceite</span>';
+    };
+    const getContractLink = (token) => `${window.location.href.split("?")[0].split("#")[0]}?accept=${encodeURIComponent(token)}`;
+    const contractSummary = (contract) => ({
+      token:contract.token, number:contract.number, status:contract.status,
+      generatedAt:timestampISO(contract.generatedAt), acceptedAt:timestampISO(contract.acceptedAt),
+      acceptedBy:contract.acceptedBy||"", acceptedDocumentMasked:contract.acceptedDocumentMasked||""
+    });
+    function contractEvidenceHtml(contract){
+      if(contract?.status!=="accepted") return "";
+      return `<div class="contract-signature-evidence"><strong>ACEITE ELETRÔNICO REGISTRADO</strong><br>Responsável: ${safe(contract.acceptedBy||"—")}<br>Documento confirmado: ${safe(contract.acceptedDocumentMasked||"—")}<br>Data e hora: ${formatDateTime(timestampISO(contract.acceptedAt))}<br>Registro: aceite expresso por meio do link individual deste contrato.</div>`;
+    }
+    function buildContractHtml(data, number){
+      const planLabel=getPlanLabel(data);
+      const price=money(getPlanPrice(data));
+      return `<h1>Contrato de adesão ao plano de monitoramento</h1>
+        <div class="contract-number">Contrato nº ${safe(number)} · Versão ${CONTRACT_VERSION}</div>
+        <div class="contract-parties"><strong>CONTRATADA:</strong> IG Energia Renovável.<br><strong>CONTRATANTE:</strong> ${safe(data.name)} — ${getClientType(data).toUpperCase()} ${safe(maskDocument(data.document))}${data.address?` — ${safe(data.address)}`:""}${data.city?` — ${safe(data.city)}`:""}.</div>
+        <h2>1. Objeto</h2><p>Este contrato formaliza a adesão do CONTRATANTE ao ${safe(planLabel)}, destinado ao acompanhamento básico do sistema de energia solar durante o período anual contratado.</p>
+        <h2>2. Serviços incluídos</h2><p>Durante a vigência, o plano concede direito a uma utilização de cada serviço abaixo:</p><ul><li>1 verificação remota do aplicativo de monitoramento;</li><li>1 análise remota de fatura de energia;</li><li>1 visita técnica presencial por ano.</li></ul>
+        <h2>3. Valor e pagamento</h2><p>O valor anual deste contrato é de <strong>${price}</strong>, definido conforme o documento do CONTRATANTE. A forma de pagamento cadastrada é ${safe(data.payment||"a combinar")}.</p>
+        <h2>4. Vigência</h2><p>O plano terá vigência de 12 meses, iniciando em <strong>${formatDate(data.planStart)}</strong> e encerrando em <strong>${formatDate(data.planEnd||addYear(data.planStart))}</strong>. Os benefícios não utilizados não são cumulativos para o período seguinte.</p>
+        <h2>5. Condições de atendimento</h2><p>Os atendimentos dependem de solicitação e agendamento. O CONTRATANTE deverá disponibilizar acesso ao aplicativo, faturas e demais informações necessárias. Peças, materiais, deslocamentos extraordinários, reparos corretivos e serviços não descritos na cláusula 2 não estão incluídos, podendo ser orçados separadamente.</p>
+        <h2>6. Aceite eletrônico</h2><p>O CONTRATANTE declara que teve acesso ao conteúdo integral deste instrumento e concorda que o aceite eletrônico seja utilizado como manifestação de vontade. O sistema registrará a data, a hora, a identificação informada e dados técnicos do dispositivo utilizado.</p>
+        <h2>7. Dados pessoais</h2><p>Os dados fornecidos serão utilizados para cadastro, execução do plano, comunicação, comprovação do aceite e manutenção do histórico contratual, observadas as obrigações legais aplicáveis.</p>
+        <h2>8. Disposições gerais</h2><p>As situações não previstas serão tratadas entre as partes conforme a legislação aplicável. Alterações relevantes no plano deverão ser formalizadas em novo instrumento ou renovação.</p>`;
+    }
+    async function createContractRecord(clientId,data,reason="new"){
+      const token=makeContractToken();
+      const number=`IGM-${new Date().getFullYear()}-${token.slice(0,8).toUpperCase()}`;
+      const generatedAt=new Date().toISOString();
+      return {
+        token, number, version:CONTRACT_VERSION, reason, clientId,
+        clientName:data.name, documentType:getClientType(data), documentMasked:maskDocument(data.document),
+        documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data),
+        planStart:data.planStart, planEnd:data.planEnd||addYear(data.planStart), city:data.city||"", address:data.address||"",
+        payment:data.payment||"", status:"pending", generatedAt, acceptedAt:null, acceptedBy:"",
+        acceptedDocumentMasked:"", contractHtml:buildContractHtml(data,number)
+      };
+    }
+    const addYear = (dateStr) => {
+      const d = parseDate(dateStr); d.setFullYear(d.getFullYear()+1); d.setDate(d.getDate()-1);
+      return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    };
+    const daysBetween = (from, to) => Math.ceil((parseDate(to)-parseDate(from))/(1000*60*60*24));
+    const getPlanInfo = (client) => {
+      const start = client.planStart || todayISO();
+      const end = client.planEnd || addYear(start);
+      const days = daysBetween(todayISO(), end);
+      const elapsed = Math.max(0, daysBetween(start, todayISO()));
+      const progress = Math.max(0, Math.min(100, Math.round((elapsed/PLAN_DAYS)*100)));
+      let status = "active";
+      if (days < 0) status = "expired";
+      else if (days <= 30) status = "expiring";
+      return {start,end,days,progress,status};
+    };
+    const statusBadge = (status, days) => {
+      if(status==="expired") return `<span class="badge danger"><span class="status-dot"></span>Vencido há ${Math.abs(days)} dia${Math.abs(days)===1?"":"s"}</span>`;
+      if(status==="expiring") return `<span class="badge warning"><span class="status-dot"></span>Vence em ${days} dia${days===1?"":"s"}</span>`;
+      return `<span class="badge success"><span class="status-dot"></span>Ativo</span>`;
+    };
+    const serviceUsage = (client, type) => (client.services?.[type]?.used ? 1 : 0);
+    const permissions = () => state.currentProfile?.permissions || ROLE_PERMISSIONS[state.currentProfile?.role] || [];
+    const can = (permission) => permissions().includes(permission);
+    const roleLabel = (role) => ROLE_LABELS[role] || role || "Usuário";
+
+    function showToast(message, type="success") {
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<span>${type==="error"?"⚠":"✓"}</span><div>${safe(message)}</div>`;
+      $("toastStack").appendChild(toast);
+      setTimeout(()=>toast.remove(), 3800);
+    }
+    function openModal(id){ $(id).classList.add("open"); }
+    function closeModal(id){ $(id).classList.remove("open"); }
+    function askConfirm(title,message,callback, danger=true){
+      $("confirmTitle").textContent=title; $("confirmMessage").textContent=message;
+      $("confirmActionBtn").className=`btn ${danger?"btn-danger":"btn-primary"}`;
+      state.confirmCallback=callback; openModal("confirmModalBackdrop");
+    }
+    function nowGreeting() {
+      const h=new Date().getHours(); return h<12?"Bom dia":h<18?"Boa tarde":"Boa noite";
+    }
+
+    async function initFirebase(){
+      try {
+        const appApi = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`);
+        const authApi = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-auth.js`);
+        const dbApi = await import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-firestore.js`);
+        const app = appApi.initializeApp(firebaseConfig);
+        state.auth = authApi.getAuth(app);
+        state.db = dbApi.getFirestore(app);
+        state.firebaseApi = {...authApi,...dbApi};
+        state.firebase = true;
+        $("connectionDot").classList.remove("demo");
+        $("connectionText").textContent="Firebase conectado";
+        $("firebaseStatusPanel").innerHTML="<strong>Firebase conectado.</strong><br>Projeto monitoramento-bdb36 sincronizado com o Cloud Firestore.";
+        if(ACCEPT_TOKEN) await loadPublicContract(ACCEPT_TOKEN);
+        else authApi.onAuthStateChanged(state.auth, handleAuthState);
+      } catch(err) {
+        console.error(err);
+        state.firebase = false;
+        $("connectionText").textContent="Firebase indisponível";
+        $("firebaseStatusPanel").innerHTML="<strong>Falha na conexão.</strong><br>Não foi possível acessar o projeto monitoramento-bdb36. Verifique a conexão e a configuração do Firebase.";
+        showAuth();
+        showToast("Não foi possível conectar ao Firebase. Recarregue a página e tente novamente.","error");
+      }
+    }
+
+    async function handleAuthState(user){
+      if(!user){ showAuth(); return; }
+      const {doc,getDoc,setDoc,serverTimestamp}=state.firebaseApi;
+      const ref=doc(state.db,"users",user.uid);
+      let snap=await getDoc(ref);
+      if(!snap.exists()){
+        await setDoc(ref,{name:user.displayName||user.email.split("@")[0],email:user.email,role:"viewer",active:false,permissions:ROLE_PERMISSIONS.viewer,createdAt:serverTimestamp()});
+        snap=await getDoc(ref);
+      }
+      const profile={uid:user.uid,...snap.data()};
+      if(!profile.active){
+        await state.firebaseApi.signOut(state.auth);
+        showToast("Seu acesso ainda está aguardando aprovação do administrador.","error");
+        return;
+      }
+      state.currentUser=user;state.currentProfile=profile;
+      showApp();
+      subscribeFirebaseData();
+    }
+
+    function showAuth(){
+      $("contractAcceptanceScreen").classList.add("hidden");$("authScreen").classList.remove("hidden");$("appScreen").classList.add("hidden");
+    }
+    function showPublicContract(){
+      $("authScreen").classList.add("hidden");$("appScreen").classList.add("hidden");$("contractAcceptanceScreen").classList.remove("hidden");
+    }
+    function showApp(){
+      $("contractAcceptanceScreen").classList.add("hidden");$("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");
+      updateUserUI();applyPermissionUI();renderAll();
+    }
+    function updateUserUI(){
+      const p=state.currentProfile||{};
+      $("sidebarName").textContent=p.name||p.email||"Usuário";
+      $("sidebarRole").textContent=roleLabel(p.role);
+      $("sidebarAvatar").textContent=initials(p.name||p.email);
+      $("greeting").textContent=`${nowGreeting()}, ${(p.name||"equipe").split(" ")[0]}! 👋`;
+      $("serviceOperator").value=p.name||"";
+    }
+    function applyPermissionUI(){
+      $$("[data-permission]").forEach(el=>{
+        const allowed=can(el.dataset.permission);
+        if(el.classList.contains("nav-item")) el.classList.toggle("hidden",!allowed);
+        else {el.disabled=!allowed;el.title=allowed?"":`Sem permissão: ${PERMISSION_LABELS[el.dataset.permission]}`;}
+      });
+    }
+
+    function subscribeFirebaseData(){
+      state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
+      const {collection,onSnapshot,query,orderBy}=state.firebaseApi;
+      state.unsubscribers.push(onSnapshot(query(collection(state.db,"clients"),orderBy("createdAt","desc")),snap=>{
+        state.clients=snap.docs.map(d=>({id:d.id,...d.data()}));renderAll();
+      },err=>showToast("Erro ao carregar clientes: "+err.message,"error")));
+      state.unsubscribers.push(onSnapshot(collection(state.db,"users"),snap=>{
+        state.users=snap.docs.map(d=>({uid:d.id,...d.data()}));renderUsers();
+      }));
+      state.unsubscribers.push(onSnapshot(query(collection(state.db,"activities"),orderBy("createdAt","desc")),snap=>{
+        state.activities=snap.docs.map(d=>({id:d.id,...d.data(),createdAt:d.data().createdAt?.toDate?.().toISOString?.()||d.data().createdAt}));renderDashboard();
+      }));
+      state.unsubscribers.push(onSnapshot(collection(state.db,"publicContracts"),snap=>{
+        state.contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
+        renderClients();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();
+      }));
+    }
+
+    function renderAll(){
+      renderDashboard();renderClients();renderExpirations();renderUsers();
+      if(state.selectedClientId) renderClientDetail();
+    }
+    function renderDashboard(){
+      const infos=state.clients.map(c=>({client:c,...getPlanInfo(c)}));
+      const active=infos.filter(x=>x.status!=="expired").length;
+      const expiring=infos.filter(x=>x.status==="expiring").length;
+      const expired=infos.filter(x=>x.status==="expired").length;
+      $("statActive").textContent=active;
+      $("statRevenue").textContent=money(state.clients.reduce((sum, client)=>sum+getPlanPrice(client),0));
+      $("statExpiring").textContent=expiring;
+      $("statExpired").textContent=expired;
+
+      const attention=infos.filter(x=>x.status!=="active").sort((a,b)=>a.days-b.days).slice(0,6);
+      $("attentionTable").innerHTML=attention.map(x=>`
+        <tr>
+          <td><div class="customer-cell"><div class="customer-avatar">${initials(x.client.name)}</div><div><strong>${safe(x.client.name)}</strong><span>${safe(x.client.city||"Cidade não informada")}</span></div></div></td>
+          <td>${statusBadge(x.status,x.days)}</td>
+          <td><span class="mono">${formatDate(x.start)}</span><div class="small muted" style="margin-top:3px">até ${formatDate(x.end)}</div></td>
+          <td><div class="progress-mini"><div class="progress-line"><span style="width:${x.progress}%"></span></div><div class="progress-meta"><span>${x.progress}% transcorrido</span></div></div></td>
+          <td class="text-right"><button class="btn btn-soft btn-sm" onclick="openClient('${x.client.id}')">Abrir</button></td>
+        </tr>`).join("");
+      $("attentionEmpty").classList.toggle("hidden",attention.length>0);
+
+      const total=Math.max(active,1);
+      ["appCheck","invoiceAnalysis","technicalVisit"].forEach(type=>{
+        const used=state.clients.filter(c=>getPlanInfo(c).status!=="expired"&&serviceUsage(c,type)).length;
+        const ids={appCheck:["usageAppText","usageAppBar"],invoiceAnalysis:["usageInvoiceText","usageInvoiceBar"],technicalVisit:["usageVisitText","usageVisitBar"]}[type];
+        $(ids[0]).textContent=`${used} de ${active}`;
+        $(ids[1]).style.width=`${Math.round(used/total*100)}%`;
+      });
+      const acts=[...state.activities].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,7);
+      $("recentActivity").innerHTML=acts.length?acts.map(a=>`
+        <div class="activity-item"><div class="activity-icon">${a.type==="service"?"✓":a.type==="renewal"?"↻":"＋"}</div>
+        <div class="activity-text"><strong>${safe(a.title)}</strong><span>${safe(a.description||"")}</span></div>
+        <div class="activity-time">${formatDateTime(a.createdAt)}</div></div>`).join(""):`<div class="empty"><div class="empty-icon">⌁</div><strong>Sem atividades recentes</strong></div>`;
+    }
+
+    function filteredClients(){
+      const term=$("clientSearch").value.trim().toLowerCase();
+      const filter=$("clientStatusFilter").value;
+      return state.clients.filter(c=>{
+        const hay=[c.name,c.document,c.city,c.phone,c.email].join(" ").toLowerCase();
+        const info=getPlanInfo(c);
+        return (!term||hay.includes(term))&&(!filter||info.status===filter);
+      });
+    }
+    function renderClients(){
+      const list=filteredClients();
+      $("clientsTable").innerHTML=list.map(c=>{
+        const p=getPlanInfo(c);const used=["appCheck","invoiceAnalysis","technicalVisit"].reduce((n,t)=>n+serviceUsage(c,t),0);const contract=getContractForClient(c);
+        return `<tr>
+          <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano</span></div></div></td>
+          <td><strong>${safe(c.phone||"—")}</strong><div class="small muted" style="margin-top:3px">${safe(c.city||"—")}</div></td>
+          <td class="mono">${formatDate(p.start)}</td>
+          <td class="mono">${formatDate(p.end)}</td>
+          <td>${statusBadge(p.status,p.days)}</td>
+          <td>${contractBadge(contract)}${contract?.number?`<div class="small muted" style="margin-top:5px">${safe(contract.number)}</div>`:""}</td>
+          <td><span class="badge info">${used}/3 utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}</td>
+          <td><div class="actions"><button class="btn btn-soft btn-sm" onclick="openClient('${c.id}')">Ver ficha</button>
+          <button class="btn btn-ghost btn-sm" onclick="editClient('${c.id}')" ${can("clientsEdit")?"":"disabled"}>✎</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')" ${can("clientsDelete")?"":"disabled"}>×</button></div></td>
+        </tr>`;
+      }).join("");
+      $("clientsEmpty").classList.toggle("hidden",list.length>0);
+    }
+    function renderExpirations(){
+      const info=state.clients.map(c=>({client:c,...getPlanInfo(c)}));
+      const list=info.filter(x=>x.days<=60).sort((a,b)=>a.days-b.days);
+      $("expExpiredCount").textContent=info.filter(x=>x.days<0).length;
+      $("exp7Count").textContent=info.filter(x=>x.days>=0&&x.days<=7).length;
+      $("exp30Count").textContent=info.filter(x=>x.days>=0&&x.days<=30).length;
+      $("renewalPotential").textContent=money(list.reduce((sum, item)=>sum+getPlanPrice(item.client),0));
+      $("expirationsTable").innerHTML=list.map(x=>`<tr>
+        <td><div class="customer-cell"><div class="customer-avatar">${initials(x.client.name)}</div><div><strong>${safe(x.client.name)}</strong><span>${safe(x.client.document||"")}</span></div></div></td>
+        <td class="mono">${formatDate(x.end)}</td><td>${statusBadge(x.status,x.days)}</td>
+        <td>${safe(x.client.seller||"Não informado")}</td><td>${safe(x.client.phone||"—")}</td>
+        <td class="text-right"><button class="btn btn-soft btn-sm" onclick="openClient('${x.client.id}')">Abrir ficha</button></td></tr>`).join("");
+      $("expirationsEmpty").classList.toggle("hidden",list.length>0);
+    }
+    function renderUsers(){
+      if(!can("usersManage")) return;
+      $("usersTable").innerHTML=state.users.map(u=>`<tr>
+        <td><div class="customer-cell"><div class="customer-avatar">${initials(u.name||u.email)}</div><div><strong>${safe(u.name||"Sem nome")}</strong><span>${safe(u.email||"")}</span></div></div></td>
+        <td><span class="badge info">${roleLabel(u.role)}</span></td>
+        <td>${u.active?'<span class="badge success"><span class="status-dot"></span>Ativo</span>':'<span class="badge warning"><span class="status-dot"></span>Aguardando</span>'}</td>
+        <td><span class="small muted">${(u.permissions||[]).length} de ${Object.keys(PERMISSION_LABELS).length}</span></td>
+        <td class="mono">${u.createdAt?.toDate?formatDateTime(u.createdAt.toDate().toISOString()):formatDateTime(u.createdAt)}</td>
+        <td class="text-right"><button class="btn btn-soft btn-sm" onclick="editUser('${u.uid}')">Editar acesso</button></td>
+      </tr>`).join("");
+      $("usersEmpty").classList.toggle("hidden",state.users.length>0);
+    }
+
+    function renderClientDetail(){
+      const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
+      const p=getPlanInfo(c);
+      $("detailAvatar").textContent=initials(c.name);$("detailName").textContent=c.name;
+      $("detailMeta").textContent=[c.document,c.city,c.phone].filter(Boolean).join(" · ")||"Dados cadastrais";
+      $("detailPlanLabel").textContent=getPlanLabel(c);
+      $("detailPlanPrice").textContent=`${money(getPlanPrice(c))} / ano`;
+      $("detailStart").textContent=formatDate(p.start);$("detailEnd").textContent=formatDate(p.end);
+      $("detailStatus").textContent=p.status==="expired"?"Vencido":p.status==="expiring"?"Próximo do vencimento":"Ativo";
+      $("detailSeller").textContent=c.seller||"Não informado";
+      $("detailDays").textContent=Math.max(0,p.days);$("detailDaysRing").style.setProperty("--ring",`${Math.max(0,100-p.progress)}%`);
+      $("detailDaysRing").querySelector("span").textContent=p.days<0?`vencido há ${Math.abs(p.days)} dias`:"dias restantes";
+      renderDetailContract(c);
+
+      Object.keys(SERVICES).forEach(type=>{
+        const used=!!c.services?.[type]?.used;
+        $(`serviceCard-${type}`).classList.toggle("used",used);
+        $(`serviceCount-${type}`).textContent=used?"1/1":"0/1";
+        const btn=$(`serviceCard-${type}`).querySelector(".register-service");
+        btn.disabled=used||p.status==="expired"||!can("servicesRegister");
+        btn.textContent=used?"Utilizado":p.status==="expired"?"Plano vencido":"Registrar uso";
+      });
+      const histories=[];
+      Object.entries(c.services||{}).forEach(([type,s])=>{if(s.used)histories.push({date:s.date||c.createdAt,title:SERVICES[type]?.label||type,description:`Realizado por ${s.operator||"operador"}${s.description?" · "+s.description:""}`})});
+      (c.history||[]).forEach(h=>histories.push(h));
+      const contract=getContractForClient(c);
+      if(contract){
+        histories.push({date:timestampISO(contract.generatedAt)||c.createdAt,title:"Contrato gerado",description:`${contract.number} · ${contract.status==="accepted"?"aceito digitalmente":"aguardando aceite"}.`});
+        if(contract.status==="accepted")histories.push({date:timestampISO(contract.acceptedAt),title:"Contrato aceito digitalmente",description:`Aceite registrado por ${contract.acceptedBy||"responsável"}.`});
+      }
+      histories.push({date:c.createdAt,title:"Cliente cadastrado",description:`Plano iniciado em ${formatDate(c.planStart)}.`});
+      histories.sort((a,b)=>new Date(b.date)-new Date(a.date));
+      $("clientTimeline").innerHTML=histories.map(h=>`<div class="timeline-item"><span class="timeline-dot"></span><strong>${safe(h.title)}</strong><p>${safe(h.description||"")}</p><time>${h.date?.includes?.("T")?formatDateTime(h.date):formatDate(h.date)}</time></div>`).join("");
+      $("clientInfo").innerHTML=`
+        ${infoLine("Telefone",c.phone)}${infoLine("E-mail",c.email)}${infoLine("Documento",c.document)}
+        ${infoLine("Tipo de plano",`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))} por ano`)}
+        ${infoLine("Contrato",contract?`${contract.number} · ${contract.status==="accepted"?"Aceito":"Aguardando aceite"}`:"Não gerado")}
+        ${infoLine("Cidade",c.city)}${infoLine("Endereço",c.address)}${infoLine("Pagamento",`${c.payment||"—"} · ${c.paymentStatus==="paid"?"Pago":"Pendente"}`)}
+        ${infoLine("Observações",c.notes||"Nenhuma observação")}`;
+    }
+    function infoLine(label,value){return `<div style="padding:11px 0;border-bottom:1px solid #edf2f7"><div class="small muted">${label}</div><strong style="display:block;font-size:11px;margin-top:5px;line-height:1.5">${safe(value||"—")}</strong></div>`;}
+
+
+    function renderDetailContract(client){
+      const contract=getContractForClient(client);
+      $("detailContractStatus").innerHTML=contractBadge(contract);
+      if(!contract){
+        $("detailContractMeta").textContent="Contrato ainda não gerado.";
+        $("primaryContractActionBtn").textContent="Gerar contrato";
+        $("primaryContractActionBtn").disabled=!can("clientsEdit");
+        $("copyDetailContractLink").disabled=true;
+        return;
+      }
+      const accepted=contract.status==="accepted"?` · Aceito por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}`:" · Link disponível para envio";
+      $("detailContractMeta").textContent=`${contract.number}${accepted}`;
+      $("primaryContractActionBtn").textContent="Ver contrato";
+      $("primaryContractActionBtn").disabled=false;
+      $("copyDetailContractLink").disabled=false;
+    }
+    async function generateContractForClient(client,reason="manual"){
+      const contract=await createContractRecord(client.id,client,reason);
+      const summary=contractSummary(contract);
+      if(!state.firebase) throw new Error("Firebase indisponível");
+      const batch=state.firebaseApi.writeBatch(state.db);
+      batch.set(state.firebaseApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.firebaseApi.serverTimestamp()});
+      batch.update(state.firebaseApi.doc(state.db,"clients",client.id),{contract:summary,updatedAt:state.firebaseApi.serverTimestamp()});
+      await batch.commit();
+      await logActivity("contract",client.id,"Contrato do plano gerado",`${client.name} · ${contract.number}`);
+      return contract;
+    }
+    function renderContractModal(contract){
+      state.selectedContractToken=contract.token;
+      $("contractModalNumber").textContent=contract.number||"—";
+      $("contractModalStatus").innerHTML=contractBadge(contract);
+      $("contractLinkInput").value=getContractLink(contract.token);
+      $("contractPreview").innerHTML=(contract.contractHtml||"")+contractEvidenceHtml(contract);
+      const accepted=contract.status==="accepted";
+      $("contractModalAccepted").classList.toggle("hidden",!accepted);
+      if(accepted)$("contractModalAccepted").innerHTML=`<strong>Contrato aceito.</strong><br>${safe(contract.acceptedBy||"Responsável")} confirmou o aceite em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
+      $("openAcceptanceBtn").textContent=accepted?"Abrir contrato aceito":"Abrir página de aceite";
+    }
+    async function openContractForClient(clientId){
+      const client=state.clients.find(c=>c.id===clientId);if(!client)return;
+      let contract=getContractForClient(client);
+      if(contract && !contract.contractHtml && state.firebase && contract.token){
+        const snap=await state.firebaseApi.getDoc(state.firebaseApi.doc(state.db,"publicContracts",contract.token));
+        if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
+      }
+      if(!contract){
+        if(!can("clientsEdit")){showToast("Você não possui permissão para gerar contratos.","error");return;}
+        contract=await generateContractForClient(client);
+      }
+      renderContractModal(contract);openModal("contractModalBackdrop");
+    }
+    async function copyText(value){
+      try{await navigator.clipboard.writeText(value);showToast("Link de aceite copiado.");}
+      catch(_){const input=document.createElement("textarea");input.value=value;document.body.appendChild(input);input.select();document.execCommand("copy");input.remove();showToast("Link de aceite copiado.");}
+    }
+    function printContract(contract){
+      const win=window.open("","_blank","width=900,height=800");
+      if(!win){showToast("O navegador bloqueou a janela de impressão.","error");return;}
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${contract.contractHtml||""}${contractEvidenceHtml(contract)}</body></html>`);
+      win.document.close();win.focus();setTimeout(()=>win.print(),300);
+    }
+    async function syncAcceptedContracts(){
+      if(!state.firebase||!state.currentProfile||!can("clientsEdit"))return;
+      for(const contract of state.contracts.filter(c=>c.status==="accepted")){
+        if(state.syncedContractTokens.has(contract.token))continue;
+        const client=state.clients.find(c=>c.id===contract.clientId);
+        if(!client||client.contract?.status==="accepted"){state.syncedContractTokens.add(contract.token);continue;}
+        state.syncedContractTokens.add(contract.token);
+        try{await state.firebaseApi.updateDoc(state.firebaseApi.doc(state.db,"clients",client.id),{contract:contractSummary(contract),updatedAt:state.firebaseApi.serverTimestamp()});}
+        catch(err){console.warn("Não foi possível sincronizar o aceite no cliente",err);}
+      }
+    }
+    async function loadPublicContract(token){
+      showPublicContract();
+      $("publicContractLoading").classList.remove("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.add("hidden");
+      try{
+        if(!state.firebase) throw new Error("firebase-unavailable");
+        let contract;
+        const snap=await state.firebaseApi.getDoc(state.firebaseApi.doc(state.db,"publicContracts",token));
+        if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
+        if(!contract)throw new Error("not-found");
+        state.publicContract=contract;renderPublicContract(contract);
+      }catch(err){
+        console.error(err);$("publicContractLoading").classList.add("hidden");$("publicContractError").classList.remove("hidden");
+      }
+    }
+    function renderPublicContract(contract){
+      $("publicContractLoading").classList.add("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.remove("hidden");
+      $("publicContractDocument").innerHTML=(contract.contractHtml||"")+contractEvidenceHtml(contract);
+      const accepted=contract.status==="accepted";
+      $("publicAcceptedBanner").classList.toggle("hidden",!accepted);$("publicAcceptanceForm").classList.toggle("hidden",accepted);
+      if(accepted)$("publicAcceptedText").textContent=`Aceite registrado por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
+      else{$("publicSignerName").value="";$("publicSignerDocument").value="";$("publicAcceptanceWord").value="";$("publicAcceptanceCheck").checked=false;}
+    }
+
+    window.openClient=(id)=>{
+      state.selectedClientId=id;renderClientDetail();navigate("client-detail");
+    };
+    window.editClient=(id)=>{
+      if(!can("clientsEdit"))return;
+      const c=state.clients.find(x=>x.id===id);if(!c)return;
+      $("clientModalTitle").textContent="Editar ficha do cliente";$("clientId").value=c.id;
+      $("clientName").value=c.name||"";$("clientDocument").value=c.document||"";$("clientPhone").value=c.phone||"";
+      $("clientEmail").value=c.email||"";$("clientCity").value=c.city||"";$("clientAddress").value=c.address||"";
+      $("clientPlanStart").value=c.planStart||todayISO();$("clientSeller").value=c.seller||"";
+      $("clientPayment").value=c.payment||"PIX";$("clientPaymentStatus").value=c.paymentStatus||"paid";$("clientNotes").value=c.notes||"";
+      $("clientContractNote").classList.add("hidden");updateClientPlanPreview();
+      openModal("clientModalBackdrop");
+    };
+    window.deleteClient=(id)=>{
+      if(!can("clientsDelete"))return;
+      const c=state.clients.find(x=>x.id===id);if(!c)return;
+      askConfirm("Excluir cliente",`Deseja realmente excluir ${c.name}? Esta ação remove a ficha da plataforma.`,async()=>{
+        if(!state.firebase) throw new Error("Firebase indisponível");
+        await state.firebaseApi.deleteDoc(state.firebaseApi.doc(state.db,"clients",id));
+        showToast("Cliente excluído.");
+      });
+    };
+    window.editUser=(id)=>{
+      if(!can("usersManage"))return;
+      const u=state.users.find(x=>x.uid===id);if(!u)return;
+      $("userUid").value=u.uid;$("userName").value=u.name||"";$("userEmail").value=u.email||"";
+      $("userRole").value=u.role||"viewer";$("userActive").value=String(!!u.active);
+      renderPermissionGrid(u.permissions||ROLE_PERMISSIONS[u.role]||[]);
+      openModal("userModalBackdrop");
+    };
+
+    function navigate(page){
+      $$(".page").forEach(p=>p.classList.remove("active"));
+      $(`page-${page}`).classList.add("active");
+      $$(".nav-item[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===page));
+      const titles={dashboard:"Visão geral",clients:"Clientes",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
+      $("topPageTitle").textContent=titles[page]||"CRM";
+      $("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open");
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+    function updateClientPlanPreview(){
+      const document = $("clientDocument").value.trim();
+      const digits = documentDigits(document);
+      if(!digits){
+        $("clientPlanPreview").textContent="Informe o documento para definir o plano.";
+        return;
+      }
+      const type = getClientType(document);
+      const complete = digits.length === 11 || digits.length === 14;
+      $("clientPlanPreview").innerHTML = `<strong>${type.toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano${complete?"":" · documento incompleto"}`;
+    }
+    function resetClientForm(){
+      $("clientForm").reset();$("clientId").value="";$("clientPlanStart").value=todayISO();$("clientModalTitle").textContent="Cadastrar cliente";$("clientContractNote").classList.remove("hidden");updateClientPlanPreview();
+    }
+    function openNewClient(){if(!can("clientsCreate"))return;resetClientForm();openModal("clientModalBackdrop");}
+    function renderPermissionGrid(selected=[]){
+      $("permissionGrid").innerHTML=Object.entries(PERMISSION_LABELS).map(([key,label])=>`<label class="permission-item"><input type="checkbox" name="permission" value="${key}" ${selected.includes(key)?"checked":""}><span><strong>${label}</strong></span></label>`).join("");
+    }
+
+    async function saveClient(data,id){
+      if(!state.firebase) throw new Error("Firebase indisponível");
+      let clientId=id;
+      let generatedContract=null;
+      const {doc,collection,setDoc,serverTimestamp,writeBatch}=state.firebaseApi;
+      if(id){
+        await setDoc(doc(state.db,"clients",id),{...data,updatedAt:serverTimestamp()},{merge:true});
+      }else{
+        const clientRef=doc(collection(state.db,"clients"));
+        clientId=clientRef.id;
+        generatedContract=await createContractRecord(clientId,data,"new");
+        const batch=writeBatch(state.db);
+        batch.set(clientRef,{...data,contract:contractSummary(generatedContract),createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+        batch.set(doc(state.db,"publicContracts",generatedContract.token),{...generatedContract,generatedAt:serverTimestamp()});
+        await batch.commit();
+      }
+      await logActivity(id?"client_edit":"client",clientId,id?"Ficha de cliente atualizada":"Novo cliente cadastrado",`${data.name} · por ${state.currentProfile.name}`);
+      if(generatedContract)await logActivity("contract",clientId,"Contrato do plano gerado",`${data.name} · ${generatedContract.number}`);
+      return {clientId,contract:generatedContract};
+    }
+    async function logActivity(typeClient,id,title,description){
+      if(!state.firebase) throw new Error("Firebase indisponível");
+      const type=typeClient==="client_edit"?"client":typeClient;
+      const activity={clientId:id||"",type,title,description,createdAt:new Date().toISOString()};
+      await state.firebaseApi.addDoc(state.firebaseApi.collection(state.db,"activities"),{...activity,createdAt:state.firebaseApi.serverTimestamp()});
+    }
+
+    async function registerService(event){
+      event.preventDefault();
+      const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
+      const type=$("serviceType").value;
+      if(c.services?.[type]?.used){showToast("Este benefício já foi utilizado no período.","error");return;}
+      const service={used:true,date:$("serviceDate").value,operator:$("serviceOperator").value.trim(),description:$("serviceDescription").value.trim()};
+      const services={...(c.services||{}),[type]:service};
+      if(!state.firebase) throw new Error("Firebase indisponível");
+      await state.firebaseApi.updateDoc(state.firebaseApi.doc(state.db,"clients",c.id),{services,updatedAt:state.firebaseApi.serverTimestamp()});
+      await logActivity("service",c.id,`${SERVICES[type].label} registrada`,`${c.name} · por ${service.operator}`);
+      closeModal("serviceModalBackdrop");$("serviceForm").reset();renderClientDetail();showToast("Benefício registrado no histórico do cliente.");
+    }
+
+    async function renewClient(event){
+      event.preventDefault();
+      const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
+      const newStart=$("renewStart").value;const history=[...(c.history||[])];
+      const renewedData={...c,planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:$("renewSeller").value.trim()||c.seller,payment:c.payment};
+      const contract=await createContractRecord(c.id,renewedData,"renewal");
+      history.push({date:new Date().toISOString(),title:"Plano renovado",description:`${getPlanLabel(c)} no valor de ${money(getPlanPrice(c))}. Novo contrato: ${contract.number}. Período anterior: ${formatDate(c.planStart)} a ${formatDate(c.planEnd||addYear(c.planStart))}. ${$("renewNotes").value.trim()}`});
+      const update={planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:renewedData.seller,services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},history,contract:contractSummary(contract)};
+      if(!state.firebase) throw new Error("Firebase indisponível");
+      const batch=state.firebaseApi.writeBatch(state.db);
+      batch.update(state.firebaseApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.firebaseApi.serverTimestamp()});
+      batch.set(state.firebaseApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.firebaseApi.serverTimestamp()});
+      await batch.commit();
+      await logActivity("renewal",c.id,"Plano anual renovado",`${c.name} · novo período iniciado em ${formatDate(newStart)} · ${contract.number}`);
+      closeModal("renewModalBackdrop");renderClientDetail();showToast("Plano renovado e novo contrato gerado.");
+      renderContractModal(contract);openModal("contractModalBackdrop");
+    }
+
+    async function saveUser(event){
+      event.preventDefault();
+      if(!can("usersManage"))return;
+      const id=$("userUid").value||uid();
+      const data={name:$("userName").value.trim(),email:$("userEmail").value.trim(),role:$("userRole").value,active:$("userActive").value==="true",permissions:$$('input[name="permission"]:checked').map(x=>x.value),updatedAt:new Date().toISOString()};
+      if(!state.firebase) throw new Error("Firebase indisponível");
+      await state.firebaseApi.setDoc(state.firebaseApi.doc(state.db,"users",id),{...data,updatedAt:state.firebaseApi.serverTimestamp()},{merge:true});
+      closeModal("userModalBackdrop");showToast("Permissões do operador atualizadas.");
+    }
+
+    function exportCSV(){
+      if(!can("reportsExport"))return;
+      const headers=["Cliente","CPF/CNPJ","Tipo de plano","Valor anual","Telefone","E-mail","Cidade","Início do plano","Fim do plano","Dias restantes","Status","Contrato","Número do contrato","Aceito em","Verificação app","Análise fatura","Visita técnica","Responsável","Pagamento"];
+      const rows=state.clients.map(c=>{const p=getPlanInfo(c),contract=getContractForClient(c);return [c.name,c.document,getClientType(c).toUpperCase(),getPlanPrice(c),c.phone,c.email,c.city,c.planStart,p.end,p.days,p.status,contract?.status==="accepted"?"Aceito":contract?"Aguardando aceite":"Não gerado",contract?.number||"",timestampISO(contract?.acceptedAt)||"",serviceUsage(c,"appCheck")?"Utilizado":"Disponível",serviceUsage(c,"invoiceAnalysis")?"Utilizado":"Disponível",serviceUsage(c,"technicalVisit")?"Utilizado":"Disponível",c.seller,c.paymentStatus==="paid"?"Pago":"Pendente"]});
+      const csv="\uFEFF"+[headers,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n");
+      const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);a.download=`clientes_ig_monitoramento_${todayISO()}.csv`;a.click();URL.revokeObjectURL(a.href);
+      showToast("Relatório exportado.");
+    }
+
+    /* Eventos */
+    $$(".auth-tab").forEach(btn=>btn.addEventListener("click",()=>{
+      $$(".auth-tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
+      const login=btn.dataset.authTab==="login";$("loginForm").classList.toggle("hidden",!login);$("registerForm").classList.toggle("hidden",login);
+      $("authTitle").textContent=login?"Entrar no CRM":"Solicitar acesso";
+    }));
+    $("loginForm").addEventListener("submit",async e=>{
+      e.preventDefault();const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
+      if(!state.firebase){showToast("Firebase indisponível. Recarregue a página e tente novamente.","error");return;}
+      try{
+        await state.firebaseApi.signInWithEmailAndPassword(state.auth,email,password);
+      }catch(err){showToast("Não foi possível entrar. Verifique o e-mail e a senha.","error");}
+    });
+    $("registerForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+      if(!state.firebase){showToast("Firebase indisponível. Recarregue a página e tente novamente.","error");return;}
+      try{
+        const {createUserWithEmailAndPassword,updateProfile,signOut}=state.firebaseApi;
+        const cred=await createUserWithEmailAndPassword(state.auth,$("registerEmail").value.trim(),$("registerPassword").value);
+        await updateProfile(cred.user,{displayName:$("registerName").value.trim()});
+        await state.firebaseApi.setDoc(state.firebaseApi.doc(state.db,"users",cred.user.uid),{name:$("registerName").value.trim(),email:cred.user.email,role:"viewer",active:false,permissions:ROLE_PERMISSIONS.viewer,createdAt:state.firebaseApi.serverTimestamp()});
+        await signOut(state.auth);showToast("Solicitação criada. Aguarde a aprovação do administrador.");
+        $$(".auth-tab")[0].click();
+      }catch(err){showToast("Erro ao criar solicitação: "+(err.code||err.message),"error");}
+    });
+    $("logoutBtn").addEventListener("click",async()=>{
+      state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
+      if(state.firebase) await state.firebaseApi.signOut(state.auth);
+      state.currentUser=null;state.currentProfile=null;showAuth();
+    });
+    $$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
+    $$("[data-go-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.goPage)));
+    $("menuToggle").addEventListener("click",()=>{$("sidebar").classList.add("open");$("mobileOverlay").classList.add("open")});
+    $("mobileOverlay").addEventListener("click",()=>{$("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open")});
+    $$("[data-close]").forEach(btn=>btn.addEventListener("click",()=>closeModal(btn.dataset.close)));
+    $$(".modal-backdrop").forEach(back=>back.addEventListener("click",e=>{if(e.target===back)closeModal(back.id)}));
+    $("quickAddClient").addEventListener("click",openNewClient);$("addClientBtn").addEventListener("click",openNewClient);
+    $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
+    $("clientDocument").addEventListener("input",updateClientPlanPreview);
+    $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
+    $("backClients").addEventListener("click",()=>navigate("clients"));
+    $("editDetailClient").addEventListener("click",()=>editClient(state.selectedClientId));
+    $("primaryContractActionBtn").addEventListener("click",()=>openContractForClient(state.selectedClientId));
+    $("copyDetailContractLink").addEventListener("click",()=>{const c=state.clients.find(x=>x.id===state.selectedClientId),contract=getContractForClient(c);if(contract)copyText(getContractLink(contract.token));});
+    $("copyContractLinkBtn").addEventListener("click",()=>copyText($("contractLinkInput").value));
+    $("openAcceptanceBtn").addEventListener("click",()=>{if(state.selectedContractToken)window.open(getContractLink(state.selectedContractToken),"_blank")});
+    $("printContractBtn").addEventListener("click",()=>{const contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract)printContract(contract);});
+    $("publicAcceptanceForm").addEventListener("submit",async e=>{
+      e.preventDefault();const contract=state.publicContract;if(!contract||contract.status==="accepted")return;
+      const name=$("publicSignerName").value.trim();const document=$("publicSignerDocument").value.trim();
+      if($("publicAcceptanceWord").value.trim().toUpperCase()!=="ACEITO"){showToast("Digite a palavra ACEITO para confirmar.","error");return;}
+      const hash=await hashText(documentDigits(document));
+      if(hash!==contract.documentHash){showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;}
+      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",userAgent:navigator.userAgent};
+      try{
+        if(!state.firebase) throw new Error("Firebase indisponível");
+        await state.firebaseApi.updateDoc(state.firebaseApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.firebaseApi.serverTimestamp()});
+        const snap=await state.firebaseApi.getDoc(state.firebaseApi.doc(state.db,"publicContracts",contract.token));
+        state.publicContract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
+        renderPublicContract(state.publicContract);showToast("Contrato aceito com sucesso.");
+      }catch(err){console.error(err);showToast("Não foi possível registrar o aceite. Tente novamente.","error");}
+    });
+    $("clientForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+      const id=$("clientId").value;
+      const document=$("clientDocument").value.trim();
+      const digits=documentDigits(document);
+      if(digits.length!==11 && digits.length!==14){showToast("Informe um CPF com 11 dígitos ou um CNPJ com 14 dígitos.","error");return;}
+      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
+      if(!id)data.services={appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}};
+      try{const result=await saveClient(data,id);closeModal("clientModalBackdrop");showToast(id?"Ficha atualizada.":"Cliente cadastrado e contrato gerado.");if(!id&&result.contract){renderContractModal(result.contract);openModal("contractModalBackdrop");}}catch(err){showToast("Erro ao salvar cliente: "+err.message,"error");}
+    });
+    $$(".register-service").forEach(btn=>btn.addEventListener("click",()=>{
+      const type=btn.dataset.service,c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
+      $("serviceType").value=type;$("serviceDate").value=todayISO();$("serviceOperator").value=state.currentProfile?.name||"";
+      $("serviceDescription").value="";$("serviceModalInfo").innerHTML=`<strong>${SERVICES[type].label}</strong><br>Cliente: ${safe(c.name)}. Após confirmar, o benefício ficará marcado como utilizado neste período anual.`;
+      openModal("serviceModalBackdrop");
+    }));
+    $("serviceForm").addEventListener("submit",registerService);
+    $("renewClientBtn").addEventListener("click",()=>{const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;$("renewStart").value=todayISO();$("renewSeller").value=c.seller||state.currentProfile?.name||"";$("renewNotes").value="";$("renewPlanInfo").innerHTML=`<strong>${getPlanLabel(c)} · ${money(getPlanPrice(c))} por ano</strong><br>A renovação iniciará um novo período de 12 meses, zerará os três benefícios e preservará todo o histórico anterior.`;openModal("renewModalBackdrop")});
+    $("renewForm").addEventListener("submit",renewClient);
+    $("addUserProfileBtn").addEventListener("click",()=>{$("userForm").reset();$("userUid").value="";$("userRole").value="viewer";$("userActive").value="false";renderPermissionGrid(ROLE_PERMISSIONS.viewer);openModal("userModalBackdrop")});
+    $("userRole").addEventListener("change",()=>renderPermissionGrid(ROLE_PERMISSIONS[$("userRole").value]||[]));
+    $("userForm").addEventListener("submit",saveUser);
+    $("confirmActionBtn").addEventListener("click",async()=>{closeModal("confirmModalBackdrop");if(state.confirmCallback){const cb=state.confirmCallback;state.confirmCallback=null;try{await cb()}catch(err){showToast(err.message,"error")}}});
+
+    // Fechar modal com Esc
+    document.addEventListener("keydown",e=>{if(e.key==="Escape")$$(".modal-backdrop.open").forEach(m=>m.classList.remove("open"))});
+
+    // Inicialização
+    $("clientPlanStart").value=todayISO();
+    updateClientPlanPreview();
+    $("serviceDate").value=todayISO();
+    $("renewStart").value=todayISO();
+    renderPermissionGrid([]);
+    initFirebase();
+  </script>
+</body>
+</html>
