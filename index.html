@@ -357,6 +357,22 @@
     .role-card strong { display:block;font-size:12px; }
     .role-card p { color:var(--muted);font-size:10px;line-height:1.5;margin:6px 0 0; }
 
+    /* Integrações */
+    .integration-card { margin-top:18px; }
+    .integration-head { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap; }
+    .integration-brand { display:flex;align-items:center;gap:13px; }
+    .integration-icon { width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:var(--shadow-sm); }
+    .integration-status { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
+    .integration-actions { display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:18px; }
+    .integration-summary { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px; }
+    .integration-summary-item { border:1px solid var(--line);background:#fbfdf9;border-radius:13px;padding:13px; }
+    .integration-summary-item span { display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:800; }
+    .integration-summary-item strong { display:block;margin-top:6px;font-size:11px;line-height:1.45; }
+    .switch-row { display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--line);border-radius:13px;padding:12px 13px;background:#fbfdff; }
+    .switch-row input { width:18px;height:18px;accent-color:var(--primary); }
+    .integration-note { border:1px solid #d6e2b1;background:#f6f9e8;color:#45551a;border-radius:13px;padding:13px 14px;font-size:10px;line-height:1.65;margin-top:14px; }
+    @media (max-width:650px) { .integration-summary { grid-template-columns:1fr; } .integration-actions .btn { width:100%; } }
+
     /* Modal / Toast */
     .modal-backdrop { position:fixed;inset:0;background:rgba(5,23,42,.58);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px; }
     .modal-backdrop.open { display:flex; }
@@ -999,6 +1015,7 @@
                 <option value="active">Ativos</option>
                 <option value="expiring">Próximos do vencimento</option>
                 <option value="expired">Vencidos</option>
+                <option value="no_plan">Sem plano contratado</option>
               </select>
             </div>
             <div class="toolbar-right">
@@ -1089,6 +1106,76 @@
                 <p class="muted small" style="line-height:1.7;margin:0">A plataforma está conectada ao ambiente online, com autenticação individual e sincronização segura dos dados.</p>
               </div>
             </div>
+          </div>
+
+          <div class="card integration-card" data-permission="integrationsManage">
+            <div class="card-header">
+              <div class="integration-head" style="width:100%">
+                <div class="integration-brand">
+                  <div class="integration-icon">SZ</div>
+                  <div>
+                    <div class="card-title">Integração SolarZ</div>
+                    <div class="card-subtitle">Importação direta dos clientes cadastrados no SolarZ</div>
+                  </div>
+                </div>
+                <div class="integration-status">
+                  <span id="integrationStatusBadge" class="badge gray"><span class="status-dot"></span>Não configurada</span>
+                </div>
+              </div>
+            </div>
+            <form id="integrationForm" class="card-body">
+              <div class="form-grid">
+                <div class="field">
+                  <label>Usuário da API *</label>
+                  <input id="integrationApiUsername" type="text" placeholder="Usuário gerado no SolarZ" autocomplete="username">
+                  <span class="small muted">Usuário de acesso da API do SolarZ Monitoramento.</span>
+                </div>
+                <div class="field">
+                  <label>Senha da API *</label>
+                  <input id="integrationApiPassword" type="password" placeholder="Informe a senha da API" autocomplete="current-password">
+                  <span id="integrationPasswordHint" class="small muted">A senha ficará disponível somente nesta sessão do navegador.</span>
+                </div>
+                <div class="field full">
+                  <label>URL base da API SolarZ *</label>
+                  <input id="integrationConnectorUrl" type="url" value="https://app.solarz.com.br" placeholder="https://app.solarz.com.br" autocomplete="off">
+                  <span class="small muted">Use somente o endereço base. A autenticação Basic será enviada diretamente pelo HTML.</span>
+                </div>
+                <div class="field">
+                  <label>Identificação da conta</label>
+                  <input id="integrationAccountLabel" type="text" placeholder="Ex.: IG Energia">
+                </div>
+                <div class="field">
+                  <label>Clientes a importar</label>
+                  <select id="integrationClientSource">
+                    <option value="both">Todos os clientes</option>
+                    <option value="persons">Somente documentos com até 11 dígitos</option>
+                    <option value="organizations">Somente documentos com 14 dígitos</option>
+                  </select>
+                </div>
+                <div class="field full">
+                  <label class="switch-row">
+                    <span><strong style="display:block;font-size:11px">Integração ativa</strong><span class="small muted">Permite testar a conexão e sincronizar clientes.</span></span>
+                    <input id="integrationEnabled" type="checkbox">
+                  </label>
+                </div>
+              </div>
+
+              <div class="integration-note">
+                A autenticação é feita diretamente no navegador com usuário e senha da API. Por segurança, a senha não é gravada no banco de dados: será necessário informá-la novamente ao fechar esta aba ou encerrar a sessão.
+              </div>
+
+              <div class="integration-actions">
+                <button id="saveIntegrationBtn" type="submit" class="btn btn-primary">Salvar integração</button>
+                <button id="testIntegrationBtn" type="button" class="btn btn-ghost">Testar conexão</button>
+                <button id="syncIntegrationBtn" type="button" class="btn btn-accent">Sincronizar clientes agora</button>
+              </div>
+
+              <div class="integration-summary">
+                <div class="integration-summary-item"><span>Último teste</span><strong id="integrationLastTest">Nunca realizado</strong></div>
+                <div class="integration-summary-item"><span>Última sincronização</span><strong id="integrationLastSync">Nunca realizada</strong></div>
+                <div class="integration-summary-item"><span>Resultado</span><strong id="integrationLastResult">Nenhum resultado disponível</strong></div>
+              </div>
+            </form>
           </div>
         </section>
 
@@ -1261,10 +1348,44 @@
     </div>
   </div>
 
+  <!-- MODAL ATIVAÇÃO DO PLANO -->
+  <div id="activatePlanModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3>Ativar plano de monitoramento</h3><button class="close-btn" data-close="activatePlanModalBackdrop">×</button></div>
+      <form id="activatePlanForm">
+        <div class="modal-body">
+          <input id="activateClientId" type="hidden">
+          <div class="demo-note" style="margin:0 0 18px">
+            <strong>Confira os dados antes de gerar o contrato.</strong><br>
+            Complete as informações obrigatórias. Ao confirmar, o plano será ativado e o link individual de aceite ficará pronto para copiar ou enviar pelo WhatsApp.
+          </div>
+          <div class="form-grid">
+            <div class="field full"><label>Nome completo / Razão social *</label><input id="activateName" required></div>
+            <div class="field"><label>CPF / CNPJ *</label><input id="activateDocument" placeholder="Digite o CPF ou CNPJ" required><span id="activatePlanPreview" class="small muted">Informe o documento para definir o plano.</span></div>
+            <div class="field"><label>Telefone / WhatsApp *</label><input id="activatePhone" placeholder="(47) 99999-9999" required></div>
+            <div class="field"><label>E-mail *</label><input id="activateEmail" type="email" placeholder="cliente@email.com" required></div>
+            <div class="field"><label>Cidade *</label><input id="activateCity" required></div>
+            <div class="field full"><label>Endereço completo *</label><input id="activateAddress" placeholder="Rua, número, bairro e complemento" required></div>
+            <div class="field"><label>Data de início do plano *</label><input id="activateStart" type="date" required></div>
+            <div class="field"><label>Responsável pela venda</label><input id="activateSeller" placeholder="Nome do responsável"></div>
+            <div class="field"><label>Forma de pagamento</label>
+              <select id="activatePayment"><option>PIX</option><option>Dinheiro</option><option>Cartão</option><option>Boleto</option><option>Outro</option></select>
+            </div>
+            <div class="field"><label>Situação do pagamento</label>
+              <select id="activatePaymentStatus"><option value="pending">Pendente</option><option value="paid">Pago</option></select>
+            </div>
+            <div class="field full"><label>Observações</label><textarea id="activateNotes" placeholder="Informações adicionais para o cadastro ou atendimento..."></textarea></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="activatePlanModalBackdrop">Cancelar</button><button id="activatePlanSubmitBtn" type="submit" class="btn btn-primary">Ativar plano e gerar contrato</button></div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL RENOVAÇÃO -->
   <div id="renewModalBackdrop" class="modal-backdrop">
     <div class="modal sm">
-      <div class="modal-header"><h3>Renovar plano anual</h3><button class="close-btn" data-close="renewModalBackdrop">×</button></div>
+      <div class="modal-header"><h3 id="renewModalTitle">Renovar plano anual</h3><button class="close-btn" data-close="renewModalBackdrop">×</button></div>
       <form id="renewForm">
         <div class="modal-body form-grid one">
           <div id="renewPlanInfo" class="demo-note" style="margin:0">A renovação iniciará um novo período de 12 meses, conforme o tipo de documento do cliente, e zerará a disponibilidade dos três benefícios. O histórico anterior será preservado.</div>
@@ -1296,6 +1417,7 @@
       </div>
       <div class="modal-footer" style="flex-wrap:wrap">
         <button id="printContractBtn" type="button" class="btn btn-ghost">Imprimir / salvar PDF</button>
+        <button id="sendContractWhatsAppBtn" type="button" class="btn btn-soft">Enviar pelo WhatsApp</button>
         <button id="openAcceptanceBtn" type="button" class="btn btn-primary">Abrir página de aceite</button>
       </div>
     </div>
@@ -1346,7 +1468,8 @@
       clientsDelete: "Excluir clientes",
       servicesRegister: "Registrar benefícios",
       reportsExport: "Exportar relatórios",
-      usersManage: "Gerenciar usuários"
+      usersManage: "Gerenciar usuários",
+      integrationsManage: "Gerenciar integrações"
     };
     const ROLE_LABELS = {
       master: "Master",
@@ -1377,10 +1500,25 @@
       activities: [],
       contracts: [],
       selectedClientId: null,
+      activationClientId: null,
       selectedContractToken: null,
+      selectedContractClientId: null,
       publicContract: null,
+      integration: {
+        enabled: false,
+        connectorUrl: "",
+        apiUsername: "",
+        credentialsConfigured: false,
+        accountLabel: "",
+        clientSource: "both",
+        lastTestAt: null,
+        lastTestStatus: "",
+        lastSyncAt: null,
+        lastSyncResult: ""
+      },
       confirmCallback: null,
       syncedContractTokens: new Set(),
+      importPlanCleanupRunning: false,
       unsubscribers: []
     };
 
@@ -1463,7 +1601,7 @@
         clientName:data.name, documentType:getClientType(data), documentMasked:maskDocument(data.document),
         documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data),
         planStart:data.planStart, planEnd:data.planEnd||addYear(data.planStart), city:data.city||"", address:data.address||"",
-        payment:data.payment||"", status:"pending", generatedAt, acceptedAt:null, acceptedBy:"",
+        clientPhone:data.phone||"", clientEmail:data.email||"", payment:data.payment||"", status:"pending", generatedAt, acceptedAt:null, acceptedBy:"",
         acceptedDocumentMasked:"", contractHtml:buildContractHtml(data,number)
       };
     }
@@ -1472,8 +1610,16 @@
       return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
     };
     const daysBetween = (from, to) => Math.ceil((parseDate(to)-parseDate(from))/(1000*60*60*24));
+    const hasActivePlan = (client) => client?.planActive !== false && !!client?.planStart;
+    const hasPlanContract = (client) => !!client?.contract?.token;
+    const shouldResetImportedPlan = (client) => client?.source === "SolarZ"
+      && !!client?.planStart
+      && !client?.planActivatedAt
+      && client?.planActivationSource !== "manual"
+      && !hasPlanContract(client);
     const getPlanInfo = (client) => {
-      const start = client.planStart || todayISO();
+      if(!hasActivePlan(client)) return {start:null,end:null,days:null,progress:0,status:"no_plan"};
+      const start = client.planStart;
       const end = client.planEnd || addYear(start);
       const days = daysBetween(todayISO(), end);
       const elapsed = Math.max(0, daysBetween(start, todayISO()));
@@ -1484,6 +1630,7 @@
       return {start,end,days,progress,status};
     };
     const statusBadge = (status, days) => {
+      if(status==="no_plan") return `<span class="badge gray"><span class="status-dot"></span>Sem plano</span>`;
       if(status==="expired") return `<span class="badge danger"><span class="status-dot"></span>Vencido há ${Math.abs(days)} dia${Math.abs(days)===1?"":"s"}</span>`;
       if(status==="expiring") return `<span class="badge warning"><span class="status-dot"></span>Vence em ${days} dia${days===1?"":"s"}</span>`;
       return `<span class="badge success"><span class="status-dot"></span>Ativo</span>`;
@@ -1581,6 +1728,7 @@
     }
     function showApp(){
       $("contractAcceptanceScreen").classList.add("hidden");$("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");
+      loadLocalIntegrationSettings();
       updateUserUI();applyPermissionUI();renderAll();
     }
     function updateUserUI(){
@@ -1601,11 +1749,441 @@
       if(masterOption) masterOption.disabled=!isMasterProfile(state.currentProfile);
     }
 
+    const SOLARZ_SESSION_PASSWORD_KEY = "ig_solarz_api_password";
+    const SOLARZ_LOCAL_SETTINGS_KEY = "ig_solarz_integration_settings";
+    function loadLocalIntegrationSettings(){
+      try{
+        const stored=localStorage.getItem(SOLARZ_LOCAL_SETTINGS_KEY);
+        if(stored) state.integration={...state.integration,...JSON.parse(stored)};
+      }catch(err){console.warn("Não foi possível carregar a configuração local da integração.",err);}
+    }
+    function saveLocalIntegrationSettings(){
+      const cfg={
+        enabled:!!state.integration?.enabled,
+        connectorUrl:state.integration?.connectorUrl||"",
+        apiUsername:state.integration?.apiUsername||"",
+        credentialsConfigured:!!state.integration?.credentialsConfigured,
+        accountLabel:state.integration?.accountLabel||"",
+        clientSource:state.integration?.clientSource||"both",
+        lastTestAt:timestampISO(state.integration?.lastTestAt)||state.integration?.lastTestAt||null,
+        lastTestStatus:state.integration?.lastTestStatus||"",
+        lastTestMessage:state.integration?.lastTestMessage||"",
+        lastSyncAt:timestampISO(state.integration?.lastSyncAt)||state.integration?.lastSyncAt||null,
+        lastSyncResult:state.integration?.lastSyncResult||"",
+        lastSyncStatus:state.integration?.lastSyncStatus||""
+      };
+      localStorage.setItem(SOLARZ_LOCAL_SETTINGS_KEY,JSON.stringify(cfg));
+    }
+    function getSolarZSessionPassword(){
+      return $("integrationApiPassword")?.value || sessionStorage.getItem(SOLARZ_SESSION_PASSWORD_KEY) || "";
+    }
+    function normalizeSolarZBaseUrl(value){
+      const raw=String(value||"").trim().replace(/\/$/,"");
+      if(!raw) return "";
+      try{
+        const url=new URL(raw);
+        return `${url.protocol}//${url.host}`;
+      }catch(_){return raw;}
+    }
+    function basicAuthValue(username,password){
+      const value=`${username}:${password}`;
+      return "Basic "+btoa(unescape(encodeURIComponent(value)));
+    }
+    function integrationConfigured(){
+      const enabled = $("integrationEnabled") ? $("integrationEnabled").checked : !!state.integration?.enabled;
+      const connectorUrl = normalizeSolarZBaseUrl($("integrationConnectorUrl")?.value || state.integration?.connectorUrl || "");
+      const apiUsername = $("integrationApiUsername")?.value.trim() || state.integration?.apiUsername || "";
+      return !!(enabled && connectorUrl && apiUsername && getSolarZSessionPassword());
+    }
+    function updateIntegrationActionButtons(){
+      const allowed=can("integrationsManage");
+      const connectorUrl=normalizeSolarZBaseUrl($("integrationConnectorUrl")?.value || state.integration?.connectorUrl || "");
+      const apiUsername=$("integrationApiUsername")?.value.trim() || state.integration?.apiUsername || "";
+      const password=getSolarZSessionPassword();
+      if($("testIntegrationBtn")) $("testIntegrationBtn").disabled=!allowed||!connectorUrl||!apiUsername||!password;
+      if($("syncIntegrationBtn")) $("syncIntegrationBtn").disabled=!allowed||!integrationConfigured();
+    }
+    function integrationDate(value){
+      const iso=timestampISO(value);
+      return iso ? formatDateTime(iso) : "Nunca realizado";
+    }
+    function renderIntegrationSettings(){
+      const cfg=state.integration||{};
+      if(!$("integrationConnectorUrl")) return;
+      const sessionPassword=getSolarZSessionPassword();
+      $("integrationConnectorUrl").value=cfg.connectorUrl||"https://app.solarz.com.br";
+      $("integrationApiUsername").value=cfg.apiUsername||"";
+      if(!$("integrationApiPassword").value) $("integrationApiPassword").value="";
+      $("integrationApiPassword").placeholder=sessionPassword ? "Senha carregada nesta sessão" : "Informe a senha da API";
+      $("integrationPasswordHint").textContent=sessionPassword
+        ? "A senha está carregada somente nesta aba. Digite outra senha para substituí-la."
+        : "Informe a senha para autenticar diretamente na API nesta sessão.";
+      $("integrationAccountLabel").value=cfg.accountLabel||"";
+      $("integrationClientSource").value=cfg.clientSource||"both";
+      $("integrationEnabled").checked=!!cfg.enabled;
+      $("integrationLastTest").textContent=integrationDate(cfg.lastTestAt);
+      $("integrationLastSync").textContent=integrationDate(cfg.lastSyncAt);
+      $("integrationLastResult").textContent=cfg.lastSyncResult||cfg.lastTestStatus||"Nenhum resultado disponível";
+      const badge=$("integrationStatusBadge");
+      if(!cfg.connectorUrl||!cfg.apiUsername){
+        badge.className="badge gray";badge.innerHTML='<span class="status-dot"></span>Não configurada';
+      }else if(!sessionPassword){
+        badge.className="badge warning";badge.innerHTML='<span class="status-dot"></span>Senha da sessão pendente';
+      }else if(!cfg.enabled){
+        badge.className="badge warning";badge.innerHTML='<span class="status-dot"></span>Desativada';
+      }else if(cfg.lastTestStatus==="Conexão confirmada"){
+        badge.className="badge success";badge.innerHTML='<span class="status-dot"></span>Conectada';
+      }else{
+        badge.className="badge info";badge.innerHTML='<span class="status-dot"></span>Configurada';
+      }
+      const allowed=can("integrationsManage");
+      ["integrationConnectorUrl","integrationApiUsername","integrationApiPassword","integrationAccountLabel","integrationClientSource","integrationEnabled","saveIntegrationBtn","testIntegrationBtn","syncIntegrationBtn"].forEach(id=>{
+        if($(id)) $(id).disabled=!allowed;
+      });
+      updateIntegrationActionButtons();
+    }
+    async function saveIntegrationSettings(event){
+      event.preventDefault();
+      if(!can("integrationsManage")) return;
+      const connectorUrl=normalizeSolarZBaseUrl($("integrationConnectorUrl").value);
+      const apiUsername=$("integrationApiUsername").value.trim();
+      const apiPassword=$("integrationApiPassword").value || sessionStorage.getItem(SOLARZ_SESSION_PASSWORD_KEY) || "";
+      if(!connectorUrl||!/^https:\/\//i.test(connectorUrl)){
+        showToast("Informe uma URL segura iniciada por https://.","error");return;
+      }
+      if(!apiUsername){showToast("Informe o usuário da API.","error");return;}
+      if(!apiPassword){showToast("Informe a senha da API para autenticar nesta sessão.","error");return;}
+      try{
+        sessionStorage.setItem(SOLARZ_SESSION_PASSWORD_KEY,apiPassword);
+        const data={
+          provider:"SolarZ",
+          authMethod:"basic-direct",
+          enabled:$("integrationEnabled").checked,
+          connectorUrl,
+          apiUsername,
+          credentialsConfigured:true,
+          accountLabel:$("integrationAccountLabel").value.trim(),
+          clientSource:$("integrationClientSource").value,
+          updatedBy:state.currentProfile?.name||state.currentProfile?.email||"Operador",
+          updatedAt:new Date().toISOString()
+        };
+        state.integration={...state.integration,...data};
+        saveLocalIntegrationSettings();
+        $("integrationApiPassword").value="";
+        renderIntegrationSettings();
+        showToast("Integração salva neste navegador. A senha permanece ativa somente nesta sessão.");
+      }catch(err){
+        console.error(err);showToast("Não foi possível salvar a integração neste navegador: "+err.message,"error");
+      }
+    }
+    async function solarZRequest(path,options={}){
+      const base=normalizeSolarZBaseUrl($("integrationConnectorUrl").value||state.integration?.connectorUrl||"https://app.solarz.com.br");
+      const username=$("integrationApiUsername").value.trim()||state.integration?.apiUsername||"";
+      const password=getSolarZSessionPassword();
+      if(!base) throw new Error("Informe a URL base da API SolarZ.");
+      if(!username||!password) throw new Error("Informe usuário e senha da API nesta sessão.");
+      const headers={
+        Accept:"application/json",
+        Authorization:basicAuthValue(username,password),
+        ...(options.body?{"Content-Type":"application/json"}:{}),
+        ...(options.headers||{})
+      };
+      let response;
+      try{
+        response=await fetch(`${base}${path}`,{...options,headers,mode:"cors"});
+      }catch(err){
+        throw new Error("O navegador bloqueou a chamada direta. Verifique se a API permite CORS para o domínio deste CRM.");
+      }
+      const text=await response.text();
+      let payload=text;
+      try{payload=text?JSON.parse(text):{};}catch(_){ }
+      if(response.status===401) throw new Error("Usuário ou senha da API inválidos (Unauthorized).");
+      if(response.status===403) throw new Error("A conta não possui permissão para consultar este recurso.");
+      if(!response.ok){
+        const message=typeof payload==="object"?(payload.message||payload.error):String(payload||"");
+        throw new Error(message||`Falha de comunicação (${response.status})`);
+      }
+      return payload;
+    }
+    async function testIntegration(){
+      if(!can("integrationsManage")) return;
+      const btn=$("testIntegrationBtn"),original=btn.textContent;btn.disabled=true;btn.textContent="Testando...";
+      try{
+        const result=await solarZRequest("/openApi/seller/clients",{method:"GET"});
+        const count=Array.isArray(result)?result.length:(Array.isArray(result?.content)?result.content.length:0);
+        const message=`Conexão confirmada${count?` · ${count} clientes retornados`:""}`;
+        state.integration={
+          ...state.integration,
+          lastTestAt:new Date().toISOString(),
+          lastTestStatus:"Conexão confirmada",
+          lastTestMessage:message
+        };
+        saveLocalIntegrationSettings();
+        showToast(message);
+      }catch(err){
+        state.integration={
+          ...state.integration,
+          lastTestAt:new Date().toISOString(),
+          lastTestStatus:"Falha no teste",
+          lastTestMessage:err.message
+        };
+        saveLocalIntegrationSettings();
+        showToast("Falha no teste: "+err.message,"error");
+      }finally{btn.textContent=original;renderIntegrationSettings();}
+    }
+    function extractSolarZItems(payload){
+      if(Array.isArray(payload)) return payload;
+      if(Array.isArray(payload?.content)) return payload.content;
+      if(Array.isArray(payload?.items)) return payload.items;
+      if(Array.isArray(payload?.data)) return payload.data;
+      if(Array.isArray(payload?.results)) return payload.results;
+      return [];
+    }
+    async function fetchSolarZClientDirectory(){
+      const payload=await solarZRequest("/openApi/seller/clients",{method:"GET"});
+      return extractSolarZItems(payload);
+    }
+    function solarZClientFromDirectory(item){
+      const solarzClientId=item?.id??item?.clientId??null;
+      const name=String(item?.name||item?.nome||"Cliente SolarZ").trim();
+      const email=String(item?.email||"").trim();
+      const document=String(item?.cpf||item?.cnpj||item?.document||item?.documento||"").trim();
+      const phone=String(item?.telefone||item?.phone||"").trim();
+      const key=solarzClientId!=null?`client-${solarzClientId}`:(documentDigits(document)||email.toLowerCase()||`directory-${uid()}`);
+      return {key,solarzClientId,name,document,email,phone,city:"",address:"",plantIds:[],plantNames:[]};
+    }
+    async function fetchAllSolarZPlants(onProgress){
+      const all=[];
+      const seen=new Set();
+      const pageSize=100;
+      let previousSignature="";
+      for(let page=1;page<=1000;page++){
+        const payload=await solarZRequest("/openApi/seller/plant/list",{
+          method:"POST",
+          body:JSON.stringify({page:String(page),pageSize:String(pageSize)})
+        });
+        const items=extractSolarZItems(payload);
+        if(!items.length) break;
+
+        let added=0;
+        const pageKeys=[];
+        items.forEach((item,index)=>{
+          const itemKey=String(item?.id??item?.plantId??`${page}-${index}-${item?.name||item?.denominacao||""}`);
+          pageKeys.push(itemKey);
+          if(!seen.has(itemKey)){
+            seen.add(itemKey);
+            all.push(item);
+            added++;
+          }
+        });
+        const signature=pageKeys.join("|");
+        if(typeof onProgress==="function") onProgress({page,count:all.length,total:Number(payload?.totalElements||0)});
+
+        // A documentação da API orienta continuar até receber uma página vazia.
+        // Não interromper quando a página vier com menos itens que pageSize,
+        // pois a API pode limitar internamente cada resposta.
+        if(payload?.last===true) break;
+        if(Number(payload?.totalPages)>0&&page>=Number(payload.totalPages)) break;
+        if(page>1&&added===0&&signature===previousSignature) break;
+        previousSignature=signature;
+      }
+      return all;
+    }
+    function solarZClientFromPlant(plant){
+      const customer=plant?.cliente||plant?.client||plant?.owner||{};
+      const address=plant?.endereco||plant?.address||{};
+      const solarzClientId=customer?.id??customer?.clientId??null;
+      const document=String(customer.cpf||customer.cnpj||customer.document||customer.documento||"").trim();
+      const name=String(customer.nome||customer.name||plant?.name||plant?.denominacao||"Cliente SolarZ").trim();
+      const email=String(customer.email||"").trim();
+      const phone=String(customer.telefone||customer.phone||"").trim();
+      const city=String(address.cidade||address.city||"").trim();
+      const stateCode=String(address.siglaEstado||address.state||"").trim();
+      const addressText=[address.logradouro||address.street,address.numero||address.number,address.bairro||address.district,address.cep||address.zipCode,stateCode].filter(Boolean).join(" · ");
+      const key=solarzClientId!=null?`client-${solarzClientId}`:(documentDigits(document)||email.toLowerCase()||`plant-${plant?.id||uid()}`);
+      return {key,solarzClientId,name,document,email,phone,city,address:addressText,plantId:plant?.id||null,plantName:plant?.name||plant?.denominacao||""};
+    }
+    function mergeSolarZClients(directoryItems,plants){
+      const grouped=new Map();
+      const emailIndex=new Map();
+      const documentIndex=new Map();
+
+      directoryItems.forEach(item=>{
+        const record=solarZClientFromDirectory(item);
+        grouped.set(record.key,record);
+        if(record.email&&!emailIndex.has(record.email.toLowerCase())) emailIndex.set(record.email.toLowerCase(),record.key);
+        const docKey=documentDigits(record.document);
+        if(docKey&&!documentIndex.has(docKey)) documentIndex.set(docKey,record.key);
+      });
+
+      plants.forEach(plant=>{
+        const item=solarZClientFromPlant(plant);
+        const emailKey=item.email.toLowerCase();
+        const docKey=documentDigits(item.document);
+        let targetKey=grouped.has(item.key)?item.key:null;
+        if(!targetKey&&emailKey&&emailIndex.has(emailKey)) targetKey=emailIndex.get(emailKey);
+        if(!targetKey&&docKey&&documentIndex.has(docKey)) targetKey=documentIndex.get(docKey);
+        if(!targetKey) targetKey=item.key;
+
+        const current=grouped.get(targetKey)||{
+          ...item,
+          key:targetKey,
+          plantIds:[],
+          plantNames:[]
+        };
+        if(item.solarzClientId!=null&&current.solarzClientId==null) current.solarzClientId=item.solarzClientId;
+        if(item.plantId!=null) current.plantIds.push(item.plantId);
+        if(item.plantName) current.plantNames.push(item.plantName);
+        ["name","document","email","phone","city","address"].forEach(k=>{if(!current[k]&&item[k])current[k]=item[k];});
+        current.plantIds=Array.from(new Set(current.plantIds));
+        current.plantNames=Array.from(new Set(current.plantNames));
+        grouped.set(targetKey,current);
+        if(current.email&&!emailIndex.has(current.email.toLowerCase())) emailIndex.set(current.email.toLowerCase(),targetKey);
+        const currentDoc=documentDigits(current.document);
+        if(currentDoc&&!documentIndex.has(currentDoc)) documentIndex.set(currentDoc,targetKey);
+      });
+      return [...grouped.values()];
+    }
+    async function writeSolarZClients(records,onProgress){
+      let created=0,updated=0,skipped=0;
+      const existingBySolarz=new Map();
+      const existingByDocument=new Map();
+      const existingByEmail=new Map();
+      const claimedExistingIds=new Set();
+      const addToListMap=(map,key,value)=>{
+        if(!key) return;
+        const list=map.get(key)||[];
+        list.push(value);
+        map.set(key,list);
+      };
+      state.clients.forEach(client=>{
+        if(client.solarzKey) existingBySolarz.set(String(client.solarzKey),client);
+        addToListMap(existingByDocument,documentDigits(client.document),client);
+        addToListMap(existingByEmail,String(client.email||"").toLowerCase(),client);
+      });
+      const firstAvailable=(list=[])=>list.find(item=>!claimedExistingIds.has(item.id));
+      const operations=[];
+      for(const record of records){
+        if(!record.name){skipped++;continue;}
+        const docKey=documentDigits(record.document);
+        const emailKey=String(record.email||"").toLowerCase();
+        let existing=existingBySolarz.get(String(record.key));
+        if(existing&&claimedExistingIds.has(existing.id)) existing=null;
+        if(!existing&&docKey) existing=firstAvailable(existingByDocument.get(docKey));
+        if(!existing&&emailKey) existing=firstAvailable(existingByEmail.get(emailKey));
+        if(existing) claimedExistingIds.add(existing.id);
+
+        const sourceData={
+          name:record.name,
+          document:record.document||existing?.document||"",
+          documentType:getClientType(record.document||existing?.document||""),
+          phone:record.phone||existing?.phone||"",
+          email:record.email||existing?.email||"",
+          city:record.city||existing?.city||"",
+          address:record.address||existing?.address||"",
+          solarzKey:record.key,
+          solarzClientId:record.solarzClientId??existing?.solarzClientId??null,
+          solarzPlantIds:Array.from(new Set([...(existing?.solarzPlantIds||[]),...(record.plantIds||[])])),
+          solarzPlantNames:Array.from(new Set([...(existing?.solarzPlantNames||[]),...(record.plantNames||[])])),
+          source:"SolarZ",
+          sourceUpdatedAt:new Date().toISOString()
+        };
+        if(existing && shouldResetImportedPlan(existing)){
+          Object.assign(sourceData,{
+            planActive:false,
+            planStart:null,
+            planEnd:null,
+            planPrice:null,
+            planActivationSource:null,
+            planActivatedAt:null
+          });
+        }
+        if(existing){operations.push({type:"update",id:existing.id,data:sourceData});updated++;}
+        else{
+          operations.push({type:"create",id:null,data:{...sourceData,planActive:false,services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},paymentStatus:"pending",notes:"Importado da SolarZ. Plano de monitoramento ainda não contratado."}});created++;
+        }
+      }
+      const {doc,collection,writeBatch,serverTimestamp}=state.serviceApi;
+      const totalBatches=Math.ceil(operations.length/400)||1;
+      for(let i=0,batchNumber=1;i<operations.length;i+=400,batchNumber++){
+        const batch=writeBatch(state.db);
+        operations.slice(i,i+400).forEach(op=>{
+          if(op.type==="update") batch.set(doc(state.db,"clients",op.id),{...op.data,updatedAt:serverTimestamp()},{merge:true});
+          else batch.set(doc(collection(state.db,"clients")),{...op.data,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
+        });
+        if(typeof onProgress==="function") onProgress({processed:Math.min(i+400,operations.length),total:operations.length,batch:batchNumber,totalBatches});
+        await batch.commit();
+      }
+      return {created,updated,skipped,total:records.length};
+    }
+    async function syncIntegrationClients(){
+      if(!can("integrationsManage")) return;
+      if(!$("integrationEnabled").checked){showToast("Ative e salve a integração antes de sincronizar.","error");return;}
+      const btn=$("syncIntegrationBtn"),original=btn.textContent;btn.disabled=true;btn.textContent="Carregando clientes...";
+      try{
+        const directory=await fetchSolarZClientDirectory();
+        btn.textContent=`${directory.length} clientes encontrados · buscando dados...`;
+        const plants=await fetchAllSolarZPlants(({page,count,total})=>{
+          btn.textContent=`Buscando usinas · página ${page} · ${count}${total?`/${total}`:""}`;
+        });
+        let records=mergeSolarZClients(directory,plants);
+        const source=$("integrationClientSource").value||state.integration?.clientSource||"both";
+        if(source==="persons") records=records.filter(r=>documentDigits(r.document).length!==14);
+        if(source==="organizations") records=records.filter(r=>documentDigits(r.document).length===14);
+        const result=await writeSolarZClients(records,({processed,total})=>{
+          btn.textContent=`Salvando clientes · ${processed}/${total}`;
+        });
+        const summary=`${result.total} clientes processados · ${result.created} novos · ${result.updated} atualizados · ${result.skipped} ignorados`;
+        state.integration={...state.integration,lastSyncAt:new Date().toISOString(),lastSyncResult:summary,lastSyncStatus:"success"};
+        saveLocalIntegrationSettings();
+        await logActivity("integration","", "Clientes sincronizados com a SolarZ", summary);
+        showToast(summary);
+      }catch(err){
+        state.integration={...state.integration,lastSyncAt:new Date().toISOString(),lastSyncResult:err.message,lastSyncStatus:"error"};
+        saveLocalIntegrationSettings();
+        showToast("Não foi possível sincronizar: "+err.message,"error");
+      }finally{btn.textContent=original;renderIntegrationSettings();}
+    }
+
+    async function cleanupImportedPlanDates(){
+      if(state.importPlanCleanupRunning || !state.connected || !can("clientsEdit")) return;
+      const targets=state.clients.filter(shouldResetImportedPlan);
+      if(!targets.length) return;
+      state.importPlanCleanupRunning=true;
+      try{
+        const {doc,writeBatch,serverTimestamp}=state.serviceApi;
+        for(let i=0;i<targets.length;i+=400){
+          const batch=writeBatch(state.db);
+          targets.slice(i,i+400).forEach(client=>{
+            batch.update(doc(state.db,"clients",client.id),{
+              planActive:false,
+              planStart:null,
+              planEnd:null,
+              planPrice:null,
+              planActivationSource:null,
+              planActivatedAt:null,
+              importedPlanResetAt:serverTimestamp(),
+              updatedAt:serverTimestamp()
+            });
+          });
+          await batch.commit();
+        }
+        showToast(`${targets.length} clientes importados foram mantidos somente como cadastro, sem data de plano.`);
+      }catch(err){
+        console.error(err);
+        showToast("Não foi possível limpar as datas dos clientes importados: "+err.message,"error");
+      }finally{
+        state.importPlanCleanupRunning=false;
+      }
+    }
+
     function subscribeData(){
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
       const {collection,onSnapshot,query,orderBy}=state.serviceApi;
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"clients"),orderBy("createdAt","desc")),snap=>{
-        state.clients=snap.docs.map(d=>({id:d.id,...d.data()}));renderAll();
+        state.clients=snap.docs.map(d=>({id:d.id,...d.data()}));
+        renderAll();
+        queueMicrotask(cleanupImportedPlanDates);
       },err=>showToast("Erro ao carregar clientes: "+err.message,"error")));
       state.unsubscribers.push(onSnapshot(collection(state.db,"users"),snap=>{
         state.users=snap.docs.map(d=>({uid:d.id,...d.data()}));
@@ -1631,20 +2209,20 @@
     }
 
     function renderAll(){
-      renderDashboard();renderClients();renderExpirations();renderUsers();
+      renderDashboard();renderClients();renderExpirations();renderUsers();renderIntegrationSettings();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
       const infos=state.clients.map(c=>({client:c,...getPlanInfo(c)}));
-      const active=infos.filter(x=>x.status!=="expired").length;
+      const active=infos.filter(x=>x.status==="active"||x.status==="expiring").length;
       const expiring=infos.filter(x=>x.status==="expiring").length;
       const expired=infos.filter(x=>x.status==="expired").length;
       $("statActive").textContent=active;
-      $("statRevenue").textContent=money(state.clients.reduce((sum, client)=>sum+getPlanPrice(client),0));
+      $("statRevenue").textContent=money(state.clients.filter(hasActivePlan).reduce((sum, client)=>sum+getPlanPrice(client),0));
       $("statExpiring").textContent=expiring;
       $("statExpired").textContent=expired;
 
-      const attention=infos.filter(x=>x.status!=="active").sort((a,b)=>a.days-b.days).slice(0,6);
+      const attention=infos.filter(x=>x.status==="expired"||x.status==="expiring").sort((a,b)=>a.days-b.days).slice(0,6);
       $("attentionTable").innerHTML=attention.map(x=>`
         <tr>
           <td><div class="customer-cell"><div class="customer-avatar">${initials(x.client.name)}</div><div><strong>${safe(x.client.name)}</strong><span>${safe(x.client.city||"Cidade não informada")}</span></div></div></td>
@@ -1657,7 +2235,7 @@
 
       const total=Math.max(active,1);
       ["appCheck","invoiceAnalysis","technicalVisit"].forEach(type=>{
-        const used=state.clients.filter(c=>getPlanInfo(c).status!=="expired"&&serviceUsage(c,type)).length;
+        const used=state.clients.filter(c=>["active","expiring"].includes(getPlanInfo(c).status)&&serviceUsage(c,type)).length;
         const ids={appCheck:["usageAppText","usageAppBar"],invoiceAnalysis:["usageInvoiceText","usageInvoiceBar"],technicalVisit:["usageVisitText","usageVisitBar"]}[type];
         $(ids[0]).textContent=`${used} de ${active}`;
         $(ids[1]).style.width=`${Math.round(used/total*100)}%`;
@@ -1682,15 +2260,17 @@
       const list=filteredClients();
       $("clientsTable").innerHTML=list.map(c=>{
         const p=getPlanInfo(c);const used=["appCheck","invoiceAnalysis","technicalVisit"].reduce((n,t)=>n+serviceUsage(c,t),0);const contract=getContractForClient(c);
+        const planText=hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano`:`Importado da SolarZ · sem plano`;
+        const benefitHtml=hasActivePlan(c)?`<span class="badge info">${used}/3 utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}`:`<span class="badge gray">Plano não ativado</span>`;
         return `<tr>
-          <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano</span></div></div></td>
+          <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${planText}</span></div></div></td>
           <td><strong>${safe(c.phone||"—")}</strong><div class="small muted" style="margin-top:3px">${safe(c.city||"—")}</div></td>
           <td class="mono">${formatDate(p.start)}</td>
           <td class="mono">${formatDate(p.end)}</td>
           <td>${statusBadge(p.status,p.days)}</td>
-          <td>${contractBadge(contract)}${contract?.number?`<div class="small muted" style="margin-top:5px">${safe(contract.number)}</div>`:""}</td>
-          <td><span class="badge info">${used}/3 utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}</td>
-          <td><div class="actions"><button class="btn btn-soft btn-sm" onclick="openClient('${c.id}')">Ver ficha</button>
+          <td>${hasActivePlan(c)?contractBadge(contract):'<span class="badge gray">Aguardando ativação</span>'}${contract?.number?`<div class="small muted" style="margin-top:5px">${safe(contract.number)}</div>`:""}</td>
+          <td>${benefitHtml}</td>
+          <td><div class="actions"><button class="btn btn-soft btn-sm" onclick="${hasActivePlan(c)?`openClient('${c.id}')`:`startPlanActivation('${c.id}')`}">${hasActivePlan(c)?"Ver ficha":"Ativar plano"}</button>
           <button class="btn btn-ghost btn-sm" onclick="editClient('${c.id}')" ${can("clientsEdit")?"":"disabled"}>✎</button>
           <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')" ${can("clientsDelete")?"":"disabled"}>×</button></div></td>
         </tr>`;
@@ -1699,10 +2279,10 @@
     }
     function renderExpirations(){
       const info=state.clients.map(c=>({client:c,...getPlanInfo(c)}));
-      const list=info.filter(x=>x.days<=60).sort((a,b)=>a.days-b.days);
-      $("expExpiredCount").textContent=info.filter(x=>x.days<0).length;
-      $("exp7Count").textContent=info.filter(x=>x.days>=0&&x.days<=7).length;
-      $("exp30Count").textContent=info.filter(x=>x.days>=0&&x.days<=30).length;
+      const list=info.filter(x=>x.status!=="no_plan"&&x.days<=60).sort((a,b)=>a.days-b.days);
+      $("expExpiredCount").textContent=info.filter(x=>x.status!=="no_plan"&&x.days<0).length;
+      $("exp7Count").textContent=info.filter(x=>x.status!=="no_plan"&&x.days>=0&&x.days<=7).length;
+      $("exp30Count").textContent=info.filter(x=>x.status!=="no_plan"&&x.days>=0&&x.days<=30).length;
       $("renewalPotential").textContent=money(list.reduce((sum, item)=>sum+getPlanPrice(item.client),0));
       $("expirationsTable").innerHTML=list.map(x=>`<tr>
         <td><div class="customer-cell"><div class="customer-avatar">${initials(x.client.name)}</div><div><strong>${safe(x.client.name)}</strong><span>${safe(x.client.document||"")}</span></div></div></td>
@@ -1734,13 +2314,14 @@
       const p=getPlanInfo(c);
       $("detailAvatar").textContent=initials(c.name);$("detailName").textContent=c.name;
       $("detailMeta").textContent=[c.document,c.city,c.phone].filter(Boolean).join(" · ")||"Dados cadastrais";
-      $("detailPlanLabel").textContent=getPlanLabel(c);
-      $("detailPlanPrice").textContent=`${money(getPlanPrice(c))} / ano`;
+      $("detailPlanLabel").textContent=hasActivePlan(c)?getPlanLabel(c):"Cliente importado · plano ainda não contratado";
+      $("detailPlanPrice").textContent=hasActivePlan(c)?`${money(getPlanPrice(c))} / ano`:"Aguardando ativação";
       $("detailStart").textContent=formatDate(p.start);$("detailEnd").textContent=formatDate(p.end);
-      $("detailStatus").textContent=p.status==="expired"?"Vencido":p.status==="expiring"?"Próximo do vencimento":"Ativo";
+      $("detailStatus").textContent=p.status==="no_plan"?"Sem plano":p.status==="expired"?"Vencido":p.status==="expiring"?"Próximo do vencimento":"Ativo";
       $("detailSeller").textContent=c.seller||"Não informado";
-      $("detailDays").textContent=Math.max(0,p.days);$("detailDaysRing").style.setProperty("--ring",`${Math.max(0,100-p.progress)}%`);
-      $("detailDaysRing").querySelector("span").textContent=p.days<0?`vencido há ${Math.abs(p.days)} dias`:"dias restantes";
+      $("detailDays").textContent=p.status==="no_plan"?"—":Math.max(0,p.days);$("detailDaysRing").style.setProperty("--ring",p.status==="no_plan"?"0%":`${Math.max(0,100-p.progress)}%`);
+      $("detailDaysRing").querySelector("span").textContent=p.status==="no_plan"?"plano não ativado":p.days<0?`vencido há ${Math.abs(p.days)} dias`:"dias restantes";
+      $("renewClientBtn").textContent=hasActivePlan(c)?"↻ Renovar plano":"＋ Ativar plano";
       renderDetailContract(c);
 
       Object.keys(SERVICES).forEach(type=>{
@@ -1748,8 +2329,8 @@
         $(`serviceCard-${type}`).classList.toggle("used",used);
         $(`serviceCount-${type}`).textContent=used?"1/1":"0/1";
         const btn=$(`serviceCard-${type}`).querySelector(".register-service");
-        btn.disabled=used||p.status==="expired"||!can("servicesRegister");
-        btn.textContent=used?"Utilizado":p.status==="expired"?"Plano vencido":"Registrar uso";
+        btn.disabled=used||p.status==="expired"||p.status==="no_plan"||!can("servicesRegister");
+        btn.textContent=used?"Utilizado":p.status==="no_plan"?"Ative o plano":p.status==="expired"?"Plano vencido":"Registrar uso";
       });
       const histories=[];
       Object.entries(c.services||{}).forEach(([type,s])=>{if(s.used)histories.push({date:s.date||c.createdAt,title:SERVICES[type]?.label||type,description:`Realizado por ${s.operator||"operador"}${s.description?" · "+s.description:""}`})});
@@ -1759,12 +2340,12 @@
         histories.push({date:timestampISO(contract.generatedAt)||c.createdAt,title:"Contrato gerado",description:`${contract.number} · ${contract.status==="accepted"?"aceito digitalmente":"aguardando aceite"}.`});
         if(contract.status==="accepted")histories.push({date:timestampISO(contract.acceptedAt),title:"Contrato aceito digitalmente",description:`Aceite registrado por ${contract.acceptedBy||"responsável"}.`});
       }
-      histories.push({date:c.createdAt,title:"Cliente cadastrado",description:`Plano iniciado em ${formatDate(c.planStart)}.`});
+      histories.push({date:c.createdAt,title:c.source==="SolarZ"?"Cliente importado da SolarZ":"Cliente cadastrado",description:hasActivePlan(c)?`Plano iniciado em ${formatDate(c.planStart)}.`:"Plano de monitoramento ainda não ativado."});
       histories.sort((a,b)=>new Date(b.date)-new Date(a.date));
       $("clientTimeline").innerHTML=histories.map(h=>`<div class="timeline-item"><span class="timeline-dot"></span><strong>${safe(h.title)}</strong><p>${safe(h.description||"")}</p><time>${h.date?.includes?.("T")?formatDateTime(h.date):formatDate(h.date)}</time></div>`).join("");
       $("clientInfo").innerHTML=`
         ${infoLine("Telefone",c.phone)}${infoLine("E-mail",c.email)}${infoLine("Documento",c.document)}
-        ${infoLine("Tipo de plano",`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))} por ano`)}
+        ${infoLine("Tipo de plano",hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))} por ano`:"Sem plano contratado")}
         ${infoLine("Contrato",contract?`${contract.number} · ${contract.status==="accepted"?"Aceito":"Aguardando aceite"}`:"Não gerado")}
         ${infoLine("Cidade",c.city)}${infoLine("Endereço",c.address)}${infoLine("Pagamento",`${c.payment||"—"} · ${c.paymentStatus==="paid"?"Pago":"Pendente"}`)}
         ${infoLine("Observações",c.notes||"Nenhuma observação")}`;
@@ -1774,6 +2355,14 @@
 
     function renderDetailContract(client){
       const contract=getContractForClient(client);
+      if(!hasActivePlan(client)){
+        $("detailContractStatus").innerHTML='<span class="badge gray">Aguardando ativação</span>';
+        $("detailContractMeta").textContent="Ative o plano para gerar o contrato de adesão.";
+        $("primaryContractActionBtn").textContent="Ativar plano";
+        $("primaryContractActionBtn").disabled=!can("clientsEdit");
+        $("copyDetailContractLink").disabled=true;
+        return;
+      }
       $("detailContractStatus").innerHTML=contractBadge(contract);
       if(!contract){
         $("detailContractMeta").textContent="Contrato ainda não gerado.";
@@ -1801,6 +2390,7 @@
     }
     function renderContractModal(contract){
       state.selectedContractToken=contract.token;
+      state.selectedContractClientId=contract.clientId||null;
       $("contractModalNumber").textContent=contract.number||"—";
       $("contractModalStatus").innerHTML=contractBadge(contract);
       $("contractLinkInput").value=getContractLink(contract.token);
@@ -1809,9 +2399,17 @@
       $("contractModalAccepted").classList.toggle("hidden",!accepted);
       if(accepted)$("contractModalAccepted").innerHTML=`<strong>Contrato aceito.</strong><br>${safe(contract.acceptedBy||"Responsável")} confirmou o aceite em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
       $("openAcceptanceBtn").textContent=accepted?"Abrir contrato aceito":"Abrir página de aceite";
+      const client=state.clients.find(c=>c.id===contract.clientId);
+      const phone=documentDigits(contract.clientPhone||client?.phone||"");
+      $("sendContractWhatsAppBtn").disabled=!phone;
+      $("sendContractWhatsAppBtn").title=phone?"Enviar o link de aceite pelo WhatsApp":"Cadastre um telefone para enviar pelo WhatsApp";
     }
     async function openContractForClient(clientId){
       const client=state.clients.find(c=>c.id===clientId);if(!client)return;
+      if(!hasActivePlan(client)){
+        startPlanActivation(client.id);
+        return;
+      }
       let contract=getContractForClient(client);
       if(contract && !contract.contractHtml && state.connected && contract.token){
         const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
@@ -1876,7 +2474,7 @@
       $("clientModalTitle").textContent="Editar ficha do cliente";$("clientId").value=c.id;
       $("clientName").value=c.name||"";$("clientDocument").value=c.document||"";$("clientPhone").value=c.phone||"";
       $("clientEmail").value=c.email||"";$("clientCity").value=c.city||"";$("clientAddress").value=c.address||"";
-      $("clientPlanStart").value=c.planStart||todayISO();$("clientSeller").value=c.seller||"";
+      $("clientPlanStart").value=c.planStart||"";$("clientSeller").value=c.seller||"";
       $("clientPayment").value=c.payment||"PIX";$("clientPaymentStatus").value=c.paymentStatus||"paid";$("clientNotes").value=c.notes||"";
       $("clientContractNote").classList.add("hidden");updateClientPlanPreview();
       openModal("clientModalBackdrop");
@@ -1928,6 +2526,37 @@
       const complete = digits.length === 11 || digits.length === 14;
       $("clientPlanPreview").innerHTML = `<strong>${type.toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano${complete?"":" · documento incompleto"}`;
     }
+    function updateActivationPlanPreview(){
+      const document=$("activateDocument").value.trim();
+      const digits=documentDigits(document);
+      if(!digits){
+        $("activatePlanPreview").textContent="Informe o documento para definir o plano.";
+        return;
+      }
+      const complete=digits.length===11||digits.length===14;
+      $("activatePlanPreview").innerHTML=`<strong>${getClientType(document).toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano${complete?"":" · documento incompleto"}`;
+    }
+    window.startPlanActivation=(id)=>{
+      if(!can("clientsEdit")){showToast("Você não possui permissão para ativar planos.","error");return;}
+      const c=state.clients.find(x=>x.id===id);if(!c)return;
+      if(hasActivePlan(c)){openClient(id);return;}
+      state.activationClientId=id;
+      state.selectedClientId=id;
+      $("activateClientId").value=id;
+      $("activateName").value=c.name||"";
+      $("activateDocument").value=c.document||"";
+      $("activatePhone").value=c.phone||"";
+      $("activateEmail").value=c.email||"";
+      $("activateCity").value=c.city||"";
+      $("activateAddress").value=c.address||"";
+      $("activateStart").value=todayISO();
+      $("activateSeller").value=c.seller||state.currentProfile?.name||"";
+      $("activatePayment").value=c.payment||"PIX";
+      $("activatePaymentStatus").value=c.paymentStatus||"pending";
+      $("activateNotes").value=c.notes||"";
+      updateActivationPlanPreview();
+      openModal("activatePlanModalBackdrop");
+    };
     function resetClientForm(){
       $("clientForm").reset();$("clientId").value="";$("clientPlanStart").value=todayISO();$("clientModalTitle").textContent="Cadastrar cliente";$("clientContractNote").classList.remove("hidden");updateClientPlanPreview();
     }
@@ -1958,6 +2587,9 @@
       if(id){
         await setDoc(doc(state.db,"clients",id),{...data,updatedAt:serverTimestamp()},{merge:true});
       }else{
+        data.planActive=true;
+        data.planActivationSource="manual";
+        data.planActivatedAt=new Date().toISOString();
         const clientRef=doc(collection(state.db,"clients"));
         clientId=clientRef.id;
         generatedContract=await createContractRecord(clientId,data,"new");
@@ -1990,20 +2622,64 @@
       closeModal("serviceModalBackdrop");$("serviceForm").reset();renderClientDetail();showToast("Benefício registrado no histórico do cliente.");
     }
 
+    async function activatePlan(event){
+      event.preventDefault();
+      const clientId=$("activateClientId").value||state.activationClientId;
+      const c=state.clients.find(x=>x.id===clientId);if(!c)return;
+      if(hasActivePlan(c)){closeModal("activatePlanModalBackdrop");openClient(c.id);return;}
+      const document=$("activateDocument").value.trim();
+      const digits=documentDigits(document);
+      if(digits.length!==11&&digits.length!==14){showToast("Informe um CPF com 11 dígitos ou um CNPJ com 14 dígitos.","error");return;}
+      const phone=$("activatePhone").value.trim();
+      if(documentDigits(phone).length<10){showToast("Informe um telefone ou WhatsApp válido para o envio do contrato.","error");return;}
+      const start=$("activateStart").value;
+      const completeData={
+        ...c,
+        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(document),
+        phone,email:$("activateEmail").value.trim(),city:$("activateCity").value.trim(),address:$("activateAddress").value.trim(),
+        planActive:true,planStart:start,planEnd:addYear(start),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),seller:$("activateSeller").value.trim()||state.currentProfile?.name||c.seller||"",
+        payment:$("activatePayment").value,paymentStatus:$("activatePaymentStatus").value,notes:$("activateNotes").value.trim()
+      };
+      const history=[...(c.history||[])];
+      const contract=await createContractRecord(c.id,completeData,"activation");
+      history.push({date:new Date().toISOString(),title:"Plano ativado",description:`${getPlanLabel(completeData)} no valor de ${money(getPlanPrice(completeData))}. Contrato: ${contract.number}.`});
+      const update={
+        name:completeData.name,document:completeData.document,documentType:completeData.documentType,planPrice:completeData.planPrice,
+        phone:completeData.phone,email:completeData.email,city:completeData.city,address:completeData.address,
+        planActive:true,planStart:completeData.planStart,planEnd:completeData.planEnd,
+        planActivationSource:"manual",planActivatedAt:completeData.planActivatedAt,seller:completeData.seller,
+        payment:completeData.payment,paymentStatus:completeData.paymentStatus,notes:completeData.notes,
+        services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},history,contract:contractSummary(contract)
+      };
+      if(!state.connected)throw new Error("Serviço indisponível");
+      const batch=state.serviceApi.writeBatch(state.db);
+      batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
+      batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
+      await batch.commit();
+      await logActivity("activation",c.id,"Plano anual ativado",`${completeData.name} · período iniciado em ${formatDate(start)} · ${contract.number}`);
+      await logActivity("contract",c.id,"Contrato do plano gerado",`${completeData.name} · ${contract.number}`);
+      closeModal("activatePlanModalBackdrop");
+      state.activationClientId=null;
+      showToast("Plano ativado. O link de aceite está pronto para envio.");
+      renderContractModal(contract);
+      openModal("contractModalBackdrop");
+    }
+
     async function renewClient(event){
       event.preventDefault();
       const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
+      if(!hasActivePlan(c)){closeModal("renewModalBackdrop");startPlanActivation(c.id);return;}
       const newStart=$("renewStart").value;const history=[...(c.history||[])];
-      const renewedData={...c,planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:$("renewSeller").value.trim()||c.seller,payment:c.payment};
+      const renewedData={...c,planActive:true,planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:$("renewSeller").value.trim()||c.seller,payment:c.payment};
       const contract=await createContractRecord(c.id,renewedData,"renewal");
       history.push({date:new Date().toISOString(),title:"Plano renovado",description:`${getPlanLabel(c)} no valor de ${money(getPlanPrice(c))}. Novo contrato: ${contract.number}. Período anterior: ${formatDate(c.planStart)} a ${formatDate(c.planEnd||addYear(c.planStart))}. ${$("renewNotes").value.trim()}`});
-      const update={planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:renewedData.seller,services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},history,contract:contractSummary(contract)};
+      const update={planActive:true,planStart:newStart,planEnd:addYear(newStart),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:renewedData.seller,services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},history,contract:contractSummary(contract)};
       if(!state.connected) throw new Error("Serviço indisponível");
       const batch=state.serviceApi.writeBatch(state.db);
       batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
       batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
       await batch.commit();
-      await logActivity("renewal",c.id,"Plano anual renovado",`${c.name} · novo período iniciado em ${formatDate(newStart)} · ${contract.number}`);
+      await logActivity("renewal",c.id,"Plano anual renovado",`${c.name} · período iniciado em ${formatDate(newStart)} · ${contract.number}`);
       closeModal("renewModalBackdrop");renderClientDetail();showToast("Plano renovado e novo contrato gerado.");
       renderContractModal(contract);openModal("contractModalBackdrop");
     }
@@ -2073,6 +2749,7 @@
     $("logoutBtn").addEventListener("click",async()=>{
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
       if(state.connected) await state.serviceApi.signOut(state.auth);
+      sessionStorage.removeItem(SOLARZ_SESSION_PASSWORD_KEY);
       state.currentUser=null;state.currentProfile=null;showAuth();
     });
     $$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
@@ -2084,12 +2761,23 @@
     $("quickAddClient").addEventListener("click",openNewClient);$("addClientBtn").addEventListener("click",openNewClient);
     $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
     $("clientDocument").addEventListener("input",updateClientPlanPreview);
+    $("activateDocument").addEventListener("input",updateActivationPlanPreview);
     $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
     $("backClients").addEventListener("click",()=>navigate("clients"));
     $("editDetailClient").addEventListener("click",()=>editClient(state.selectedClientId));
     $("primaryContractActionBtn").addEventListener("click",()=>openContractForClient(state.selectedClientId));
     $("copyDetailContractLink").addEventListener("click",()=>{const c=state.clients.find(x=>x.id===state.selectedClientId),contract=getContractForClient(c);if(contract)copyText(getContractLink(contract.token));});
     $("copyContractLinkBtn").addEventListener("click",()=>copyText($("contractLinkInput").value));
+    $("sendContractWhatsAppBtn").addEventListener("click",()=>{
+      const contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);
+      if(!contract)return;
+      const client=state.clients.find(c=>c.id===(contract.clientId||state.selectedContractClientId));
+      const phone=documentDigits(contract.clientPhone||client?.phone||"");
+      if(!phone){showToast("Cadastre o telefone do cliente para enviar pelo WhatsApp.","error");return;}
+      const countryPhone=phone.startsWith("55")?phone:`55${phone}`;
+      const message=`Olá, ${contract.clientName||client?.name||"cliente"}! Segue o contrato do plano de monitoramento da IG Energia para leitura e aceite digital: ${getContractLink(contract.token)}`;
+      window.open(`https://wa.me/${countryPhone}?text=${encodeURIComponent(message)}`,"_blank");
+    });
     $("openAcceptanceBtn").addEventListener("click",()=>{if(state.selectedContractToken)window.open(getContractLink(state.selectedContractToken),"_blank")});
     $("printContractBtn").addEventListener("click",()=>{const contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract)printContract(contract);});
     $("publicAcceptanceForm").addEventListener("submit",async e=>{
@@ -2124,7 +2812,15 @@
       openModal("serviceModalBackdrop");
     }));
     $("serviceForm").addEventListener("submit",registerService);
-    $("renewClientBtn").addEventListener("click",()=>{const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;$("renewStart").value=todayISO();$("renewSeller").value=c.seller||state.currentProfile?.name||"";$("renewNotes").value="";$("renewPlanInfo").innerHTML=`<strong>${getPlanLabel(c)} · ${money(getPlanPrice(c))} por ano</strong><br>A renovação iniciará um novo período de 12 meses, zerará os três benefícios e preservará todo o histórico anterior.`;openModal("renewModalBackdrop")});
+    $("activatePlanForm").addEventListener("submit",activatePlan);
+    $("renewClientBtn").addEventListener("click",()=>{
+      const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
+      if(!hasActivePlan(c)){startPlanActivation(c.id);return;}
+      $("renewModalTitle").textContent="Renovar plano anual";
+      $("renewStart").value=todayISO();$("renewSeller").value=c.seller||state.currentProfile?.name||"";$("renewNotes").value="";
+      $("renewPlanInfo").innerHTML=`<strong>${getPlanLabel(c)} · ${money(getPlanPrice(c))} por ano</strong><br>A renovação iniciará um novo período de 12 meses, zerará os três benefícios e preservará todo o histórico anterior.`;
+      openModal("renewModalBackdrop");
+    });
     $("renewForm").addEventListener("submit",renewClient);
     $("addUserProfileBtn").addEventListener("click",()=>{
       $("userForm").reset();resetUserModalControls();$("userUid").value="";$("userRole").value="viewer";$("userActive").value="false";
@@ -2138,6 +2834,16 @@
     $("clearPermissionsBtn").addEventListener("click",()=>{$$('input[name="permission"]:not(:disabled)').forEach(x=>x.checked=false);updatePermissionCount();});
     $("restoreRolePermissionsBtn").addEventListener("click",()=>{const role=$("userRole").value;renderPermissionGrid(ROLE_PERMISSIONS[role]||[],role==="master");});
     $("userForm").addEventListener("submit",saveUser);
+    $("integrationForm").addEventListener("submit",saveIntegrationSettings);
+    ["integrationConnectorUrl","integrationApiUsername","integrationApiPassword","integrationEnabled"].forEach(id=>{
+      const field=$(id);
+      if(field){
+        field.addEventListener("input",updateIntegrationActionButtons);
+        field.addEventListener("change",updateIntegrationActionButtons);
+      }
+    });
+    $("testIntegrationBtn").addEventListener("click",testIntegration);
+    $("syncIntegrationBtn").addEventListener("click",syncIntegrationClients);
     $("confirmActionBtn").addEventListener("click",async()=>{closeModal("confirmModalBackdrop");if(state.confirmCallback){const cb=state.confirmCallback;state.confirmCallback=null;try{await cb()}catch(err){showToast(err.message,"error")}}});
 
     // Fechar modal com Esc
@@ -2145,7 +2851,9 @@
 
     // Inicialização
     $("clientPlanStart").value=todayISO();
+    $("activateStart").value=todayISO();
     updateClientPlanPreview();
+    updateActivationPlanPreview();
     $("serviceDate").value=todayISO();
     $("renewStart").value=todayISO();
     renderPermissionGrid([]);
