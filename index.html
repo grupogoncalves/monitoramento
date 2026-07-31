@@ -1431,7 +1431,7 @@
   <!-- MODAL USUÁRIO -->
   <div id="userModalBackdrop" class="modal-backdrop">
     <div class="modal">
-      <div class="modal-header"><h3>Usuário e permissões</h3><button class="close-btn" data-close="userModalBackdrop">×</button></div>
+      <div class="modal-header"><h3 id="userModalTitle">Usuário e permissões</h3><button class="close-btn" data-close="userModalBackdrop">×</button></div>
       <form id="userForm">
         <div class="modal-body">
           <input id="userUid" type="hidden">
@@ -1451,6 +1451,14 @@
             <div class="field"><label>Status</label>
               <select id="userActive"><option value="true">Ativo</option><option value="false">Aguardando / Bloqueado</option></select>
             </div>
+            <div id="userPasswordFields" class="field full">
+              <label>Senha inicial de acesso *</label>
+              <div class="form-grid">
+                <div class="field"><input id="userPassword" type="password" minlength="6" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></div>
+                <div class="field"><input id="userPasswordConfirm" type="password" minlength="6" autocomplete="new-password" placeholder="Confirme a senha"></div>
+              </div>
+              <span class="small muted">A conta será criada diretamente no Firebase Authentication sem desconectar o administrador atual.</span>
+            </div>
             <div class="field full">
               <label>Permissões individuais</label>
               <div class="permission-toolbar">
@@ -1464,10 +1472,10 @@
               <div id="masterPermissionNotice" class="master-notice hidden">O perfil Master possui acesso integral e suas permissões não podem ser removidas.</div>
               <div id="permissionGrid" class="permission-grid"></div>
             </div>
-            <div class="field full"><div class="demo-note" style="margin:0">O operador deve primeiro criar a conta em “Solicitar acesso”. Depois, um Master ou administrador aprova e define as permissões nesta tela.</div></div>
+            <div class="field full"><div id="userModalNote" class="demo-note" style="margin:0"><strong>Novo operador.</strong><br>Informe uma senha inicial. O sistema criará a conta de login e o perfil de permissões no mesmo processo.</div></div>
           </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="userModalBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Salvar permissões</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="userModalBackdrop">Cancelar</button><button id="userSubmitBtn" type="submit" class="btn btn-primary">Criar usuário</button></div>
       </form>
     </div>
   </div>
@@ -1648,6 +1656,8 @@
       serviceApi: null,
       db: null,
       auth: null,
+      userCreationAuth: null,
+      userCreationDb: null,
       currentUser: null,
       currentProfile: null,
       clients: [],
@@ -1908,8 +1918,11 @@
         const authApi = await import(`${sdkRoot}/${provider}-auth.js`);
         const dbApi = await import(`${sdkRoot}/${provider}-${dataModule}.js`);
         const app = appApi.initializeApp(serviceConfig);
+        const userCreationApp = appApi.initializeApp(serviceConfig,"ig-user-creation");
         state.auth = authApi.getAuth(app);
         state.db = dbApi[`get${["Fire","store"].join("")}`](app);
+        state.userCreationAuth = authApi.getAuth(userCreationApp);
+        state.userCreationDb = dbApi[`get${["Fire","store"].join("")}`](userCreationApp);
         state.serviceApi = {...authApi,...dbApi};
         state.connected = true;
         $("connectionDot").classList.remove("demo");
@@ -2938,13 +2951,19 @@
         showToast("Somente um usuário Master pode alterar outro perfil Master.","error");return;
       }
       const protectedLucas=isLucasProfile(u);
+      $("userModalTitle").textContent="Editar usuário e permissões";
+      $("userSubmitBtn").textContent="Salvar permissões";
+      $("userPasswordFields").classList.add("hidden");
+      $("userPassword").required=false;$("userPasswordConfirm").required=false;
+      $("userModalNote").innerHTML="<strong>Conta já criada.</strong><br>Nesta tela você altera função, status e permissões. A senha do operador deve ser redefinida pelo fluxo do Firebase Authentication.";
       $("userUid").value=u.uid;$("userName").value=u.name||"";$("userEmail").value=u.email||"";
       $("userRole").value=protectedLucas?"master":(u.role||"viewer");
       $("userActive").value=String(protectedLucas?true:!!u.active);
       $("userRole").disabled=protectedLucas;
       $("userActive").disabled=protectedLucas;
       $("userName").readOnly=protectedLucas;
-      $("userEmail").readOnly=protectedLucas;
+      // O e-mail identifica a conta no Firebase Authentication e não deve ser alterado apenas no Firestore.
+      $("userEmail").readOnly=true;
       renderPermissionGrid(protectedLucas?ROLE_PERMISSIONS.master:(u.permissions||ROLE_PERMISSIONS[u.role]||[]),protectedLucas);
       openModal("userModalBackdrop");
     };
@@ -3009,6 +3028,11 @@
     function openNewClient(){if(!can("clientsCreate"))return;resetClientForm();openModal("clientModalBackdrop");}
     function resetUserModalControls(){
       $("userRole").disabled=false;$("userActive").disabled=false;$("userName").readOnly=false;$("userEmail").readOnly=false;
+      $("userModalTitle").textContent="Cadastrar novo usuário";
+      $("userSubmitBtn").textContent="Criar usuário";
+      $("userPasswordFields").classList.remove("hidden");
+      $("userPassword").required=true;$("userPasswordConfirm").required=true;
+      $("userModalNote").innerHTML="<strong>Novo operador.</strong><br>Informe uma senha inicial. O sistema criará a conta de login e o perfil de permissões no mesmo processo.";
     }
     function updatePermissionCount(){
       const count=$$('input[name="permission"]:checked').length;
@@ -3137,12 +3161,28 @@
       renderContractModal(contract);openModal("contractModalBackdrop");
     }
 
+    function userCreationErrorMessage(error){
+      const messages={
+        "auth/email-already-in-use":"Este e-mail já possui uma conta no Firebase Authentication.",
+        "auth/invalid-email":"Informe um e-mail válido.",
+        "auth/weak-password":"A senha precisa ter pelo menos 6 caracteres.",
+        "auth/operation-not-allowed":"Ative o provedor E-mail/senha no Firebase Authentication.",
+        "auth/network-request-failed":"Falha de conexão ao criar a conta. Tente novamente.",
+        "permission-denied":"O Firebase bloqueou a gravação do perfil. Revise as regras da coleção users."
+      };
+      return messages[error?.code]||messages[String(error?.code||"").replace("firestore/","")]||error?.message||"Não foi possível criar o usuário.";
+    }
+
     async function saveUser(event){
       event.preventDefault();
-      if(!can("usersManage"))return;
-      const id=$("userUid").value||uid();
-      const existing=state.users.find(x=>x.uid===id)||{};
-      const protectedLucas=isLucasProfile(existing)||isLucasProfile({name:$("userName").value,email:$("userEmail").value});
+      if(!can("usersManage")){showToast("Você não possui permissão para gerenciar usuários.","error");return;}
+      const existingId=$("userUid").value.trim();
+      const isEditing=!!existingId;
+      const existing=state.users.find(x=>x.uid===existingId)||{};
+      const name=$("userName").value.trim();
+      const email=$("userEmail").value.trim().toLowerCase();
+      const protectedLucas=isLucasProfile(existing)||isLucasProfile({name,email});
+      if(!name||!email){showToast("Preencha o nome e o e-mail do operador.","error");return;}
       if(isMasterProfile(existing) && !isMasterProfile(state.currentProfile)){
         showToast("Somente um usuário Master pode alterar esse perfil.","error");return;
       }
@@ -3154,14 +3194,82 @@
         ? ROLE_PERMISSIONS.master
         : $$('input[name="permission"]:checked').map(x=>x.value);
       const data={
-        name:$("userName").value.trim(),email:$("userEmail").value.trim(),role,
+        name,email,role,
         active:protectedLucas?true:$("userActive").value==="true",
-        permissions:selectedPermissions,updatedAt:new Date().toISOString()
+        permissions:selectedPermissions,
+        updatedBy:state.currentProfile?.email||state.currentProfile?.name||"Administrador"
       };
-      if(!state.connected) throw new Error("Serviço indisponível");
-      await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"users",id),{...data,updatedAt:state.serviceApi.serverTimestamp()},{merge:true});
-      if(id===state.currentProfile?.uid) Object.assign(state.currentProfile,data);
-      closeModal("userModalBackdrop");applyPermissionUI();updateUserUI();showToast("Permissões do operador atualizadas.");
+      if(!state.connected){showToast("Serviço indisponível.","error");return;}
+
+      const submitBtn=$("userSubmitBtn");
+      submitBtn.disabled=true;
+      const originalText=submitBtn.textContent;
+      submitBtn.textContent=isEditing?"Salvando...":"Criando conta...";
+      let createdUser=null;
+      let secondaryProfileCreated=false;
+      try{
+        if(isEditing){
+          await state.serviceApi.setDoc(
+            state.serviceApi.doc(state.db,"users",existingId),
+            {...data,updatedAt:state.serviceApi.serverTimestamp()},
+            {merge:true}
+          );
+          if(existingId===state.currentProfile?.uid) Object.assign(state.currentProfile,data);
+          closeModal("userModalBackdrop");applyPermissionUI();updateUserUI();
+          showToast("Permissões do operador atualizadas.");
+          return;
+        }
+
+        const password=$("userPassword").value;
+        const passwordConfirm=$("userPasswordConfirm").value;
+        if(password.length<6){showToast("A senha precisa ter pelo menos 6 caracteres.","error");return;}
+        if(password!==passwordConfirm){showToast("A confirmação da senha não confere.","error");return;}
+        if(state.users.some(user=>(user.email||"").toLowerCase()===email)){
+          showToast("Já existe um perfil cadastrado com este e-mail.","error");return;
+        }
+        if(!state.userCreationAuth)throw new Error("Serviço de criação de usuários não inicializado.");
+
+        if(state.userCreationAuth.currentUser)await state.serviceApi.signOut(state.userCreationAuth);
+        const credential=await state.serviceApi.createUserWithEmailAndPassword(state.userCreationAuth,email,password);
+        createdUser=credential.user;
+        await state.serviceApi.updateProfile(createdUser,{displayName:name});
+
+        const profilePayload={
+          ...data,
+          createdAt:state.serviceApi.serverTimestamp(),
+          updatedAt:state.serviceApi.serverTimestamp(),
+          createdBy:state.currentProfile?.email||state.currentProfile?.name||"Administrador"
+        };
+        try{
+          await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"users",createdUser.uid),profilePayload);
+        }catch(mainWriteError){
+          // Algumas regras permitem que o próprio usuário crie o perfil básico.
+          const baseline={name,email,role:"viewer",active:false,permissions:ROLE_PERMISSIONS.viewer,createdAt:state.serviceApi.serverTimestamp()};
+          await state.serviceApi.setDoc(state.serviceApi.doc(state.userCreationDb,"users",createdUser.uid),baseline,{merge:true});
+          secondaryProfileCreated=true;
+          await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"users",createdUser.uid),profilePayload,{merge:true});
+        }
+
+        await state.serviceApi.signOut(state.userCreationAuth);
+        $("userForm").reset();
+        closeModal("userModalBackdrop");
+        showToast(`Usuário ${name} criado com sucesso e pronto para entrar.`);
+      }catch(error){
+        console.error("Erro ao criar/atualizar usuário",error);
+        if(createdUser){
+          if(secondaryProfileCreated){
+            try{await state.serviceApi.deleteDoc(state.serviceApi.doc(state.userCreationDb,"users",createdUser.uid));}catch(profileRollbackError){console.warn("Não foi possível remover o perfil incompleto.",profileRollbackError);}
+          }
+          try{await state.serviceApi.deleteUser(createdUser);}catch(rollbackError){console.warn("Não foi possível desfazer a conta criada após a falha do perfil.",rollbackError);}
+        }
+        if(state.userCreationAuth?.currentUser){
+          try{await state.serviceApi.signOut(state.userCreationAuth);}catch(_){ }
+        }
+        showToast(userCreationErrorMessage(error),"error");
+      }finally{
+        submitBtn.disabled=false;
+        submitBtn.textContent=originalText;
+      }
     }
 
     function exportCSV(){
@@ -3282,7 +3390,7 @@
     });
     $("renewForm").addEventListener("submit",renewClient);
     $("addUserProfileBtn").addEventListener("click",()=>{
-      $("userForm").reset();resetUserModalControls();$("userUid").value="";$("userRole").value="viewer";$("userActive").value="false";
+      $("userForm").reset();resetUserModalControls();$("userUid").value="";$("userRole").value="viewer";$("userActive").value="true";
       renderPermissionGrid(ROLE_PERMISSIONS.viewer,false);openModal("userModalBackdrop");
     });
     $("userRole").addEventListener("change",()=>{
