@@ -762,6 +762,41 @@
       .contract-summary-actions .btn { flex:1; }
     }
 
+
+    /* Editor de planos */
+    .plan-settings-card { overflow:hidden; }
+    .plan-settings-intro { display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px; }
+    .plan-settings-intro p { margin:5px 0 0;max-width:720px;line-height:1.6; }
+    .plan-editors-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start; }
+    .plan-editor { border:1px solid var(--line);border-radius:14px;background:#fbfdf9;overflow:hidden; }
+    .plan-editor-head { padding:17px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,#f7faef,#eef5e8); }
+    .plan-editor-head strong { display:block;font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;font-size:20px;color:var(--primary); }
+    .plan-editor-head span { display:block;margin-top:4px;font-size:10px;color:var(--muted); }
+    .plan-editor-body { padding:16px; }
+    .plan-price-row { display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:12px;margin-bottom:16px; }
+    .benefit-editor-list { display:flex;flex-direction:column;gap:10px; }
+    .benefit-editor { border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;transition:.18s; }
+    .benefit-editor.inactive { opacity:.68;background:#f5f7f3; }
+    .benefit-editor-summary { display:grid;grid-template-columns:auto minmax(0,1fr) 105px;gap:11px;align-items:center;padding:12px 13px; }
+    .benefit-toggle { width:18px;height:18px;accent-color:var(--primary); }
+    .benefit-editor-summary strong { font-size:11px;line-height:1.35; }
+    .benefit-editor-summary span { display:block;font-size:9px;color:var(--muted);margin-top:3px; }
+    .benefit-editor-summary input[type="number"] { width:100%;border:1px solid var(--line);border-radius:9px;padding:9px;background:#fff; }
+    .benefit-editor-fields { border-top:1px solid #edf2e9;padding:12px 13px;display:grid;grid-template-columns:1fr;gap:10px; }
+    .benefit-editor.inactive .benefit-editor-fields { display:none; }
+    .plan-settings-footer { display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:18px;padding-top:17px;border-top:1px solid var(--line); }
+    .plan-settings-actions { display:flex;gap:9px;flex-wrap:wrap; }
+    .plan-save-status { font-size:10px;color:var(--muted);line-height:1.55;max-width:620px; }
+    .plan-save-status strong { color:var(--primary); }
+    fieldset.plan-fieldset { border:0;padding:0;margin:0;min-width:0; }
+    fieldset.plan-fieldset:disabled { opacity:.72; }
+    @media (max-width:1100px) { .plan-editors-grid { grid-template-columns:1fr; } }
+    @media (max-width:650px) {
+      .plan-price-row { grid-template-columns:1fr; }
+      .benefit-editor-summary { grid-template-columns:auto minmax(0,1fr) 82px; }
+      .plan-settings-actions,.plan-settings-actions .btn { width:100%; }
+    }
+
   </style>
 </head>
 <body>
@@ -804,6 +839,10 @@
                 <input id="publicAcceptanceCheck" type="checkbox" required>
                 <span>Declaro que li o contrato, compreendi as condições do plano e concordo com o registro eletrônico deste aceite, incluindo data, hora e identificação do dispositivo.</span>
               </label>
+              <label id="publicRenewalAcceptanceRow" class="acceptance-check field full hidden">
+                <input id="publicRenewalAcceptanceCheck" type="checkbox">
+                <span>Autorizo expressamente a renovação automática do plano por novos períodos anuais e estou ciente de que, para impedir a próxima renovação, devo solicitar a não renovação ou o encerramento com antecedência mínima de 30 dias.</span>
+              </label>
             </div>
             <button id="publicAcceptBtn" class="btn btn-primary w-full" type="submit" style="margin-top:16px;padding:14px">Aceitar e assinar eletronicamente</button>
           </form>
@@ -827,9 +866,9 @@
         <h1>Mais que energia,<br><span>uma solução.</span></h1>
         <p>Gestão completa do plano de monitoramento, com clientes, benefícios, histórico de atendimento, equipe e renovações em um só lugar.</p>
         <div class="plan-showcase">
-          <div class="plan-pill">✓ Verificação remota do aplicativo</div>
-          <div class="plan-pill">✓ Análise remota de fatura</div>
-          <div class="plan-pill">✓ Visita técnica anual</div>
+          <div class="plan-pill">✓ Planos anuais para CPF e CNPJ</div>
+          <div class="plan-pill">✓ Atendimento remoto e análise de fatura</div>
+          <div class="plan-pill">✓ Visita técnica e relatórios para empresas</div>
         </div>
       </div>
       <div class="auth-footer">© 2026 IG Energia Renovável · Plataforma interna de gestão</div>
@@ -935,8 +974,8 @@
               <p>Acompanhe os clientes do plano anual, serviços utilizados e renovações que precisam da atenção da equipe.</p>
             </div>
             <div class="hero-price">
-              <strong>CPF R$ 60</strong>
-              <span>CNPJ R$ 300 · valores anuais</span>
+              <strong id="heroCpfPrice">CPF R$ 120</strong>
+              <span id="heroCnpjPrice">CNPJ R$ 350 · valores anuais</span>
             </div>
           </div>
 
@@ -981,7 +1020,7 @@
               <div class="card-body">
                 <div class="usage-bars">
                   <div>
-                    <div class="usage-row-head"><strong>Verificação do aplicativo</strong><span id="usageAppText">0 de 0</span></div>
+                    <div class="usage-row-head"><strong>Atendimento remoto do aplicativo</strong><span id="usageAppText">0 de 0</span></div>
                     <div class="progress-line"><span id="usageAppBar" style="width:0%"></span></div>
                   </div>
                   <div>
@@ -991,6 +1030,14 @@
                   <div>
                     <div class="usage-row-head"><strong>Visita técnica</strong><span id="usageVisitText">0 de 0</span></div>
                     <div class="progress-line"><span id="usageVisitBar" style="width:0%"></span></div>
+                  </div>
+                  <div>
+                    <div class="usage-row-head"><strong>Chamado técnico (PJ)</strong><span id="usageCallText">0 de 0</span></div>
+                    <div class="progress-line"><span id="usageCallBar" style="width:0%"></span></div>
+                  </div>
+                  <div>
+                    <div class="usage-row-head"><strong>Relatório trimestral via WhatsApp (PJ)</strong><span id="usageReportText">0 de 0</span></div>
+                    <div class="progress-line"><span id="usageReportBar" style="width:0%"></span></div>
                   </div>
                 </div>
               </div>
@@ -1085,25 +1132,92 @@
 
         <!-- Configurações -->
         <section id="page-settings" class="page">
-          <div class="grid-equal">
-            <div class="card">
-              <div class="card-header"><div><div class="card-title">Plano de monitoramento</div><div class="card-subtitle">Condições padrão utilizadas no cadastro</div></div></div>
-              <div class="card-body form-grid one">
-                <div class="field"><label>Nome do plano</label><input value="Plano Anual de Monitoramento" disabled></div>
-                <div class="field"><label>Pessoa física — CPF</label><input value="R$ 60,00 por ano" disabled></div>
-                <div class="field"><label>Pessoa jurídica — CNPJ</label><input value="R$ 300,00 por ano" disabled></div>
-                <div class="field"><label>Validade</label><input value="12 meses a partir da contratação" disabled></div>
-                <div class="field"><label>Benefícios</label><textarea disabled>1 verificação remota do aplicativo
-1 análise remota de fatura
-1 visita técnica por ano</textarea></div>
+          <div class="card plan-settings-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Planos e benefícios</div>
+                <div class="card-subtitle">Edite preços, nomes, limites anuais e textos apresentados ao cliente</div>
               </div>
+              <span id="planSettingsBadge" class="badge gray"><span class="status-dot"></span>Configuração padrão</span>
             </div>
+            <form id="planSettingsForm" class="card-body">
+              <fieldset id="planSettingsFieldset" class="plan-fieldset">
+                <div class="plan-settings-intro">
+                  <div>
+                    <strong style="font-size:13px">Configuração comercial dos planos</strong>
+                    <p class="muted small">As alterações serão usadas em novos cadastros, ativações e renovações. Clientes já contratados mantêm o preço e os benefícios registrados no momento da contratação.</p>
+                  </div>
+                  <div class="field" style="min-width:min(360px,100%)">
+                    <label>Nome geral do produto</label>
+                    <input id="planGeneralName" required placeholder="Plano Anual de Monitoramento">
+                  </div>
+                </div>
+
+                <div class="plan-editors-grid">
+                  <article class="plan-editor">
+                    <div class="plan-editor-head"><strong>Pessoa física</strong><span>Plano identificado por CPF</span></div>
+                    <div class="plan-editor-body">
+                      <div class="plan-price-row">
+                        <div class="field"><label>Nome exibido do plano</label><input id="planCpfLabel" required></div>
+                        <div class="field"><label>Valor anual (R$)</label><input id="planCpfPrice" type="number" min="0" step="0.01" required></div>
+                      </div>
+                      <div class="card-subtitle" style="margin-bottom:10px">Benefícios disponíveis no plano CPF</div>
+                      <div id="planBenefitsCpf" class="benefit-editor-list"></div>
+                    </div>
+                  </article>
+
+                  <article class="plan-editor">
+                    <div class="plan-editor-head"><strong>Pessoa jurídica</strong><span>Plano identificado por CNPJ</span></div>
+                    <div class="plan-editor-body">
+                      <div class="plan-price-row">
+                        <div class="field"><label>Nome exibido do plano</label><input id="planCnpjLabel" required></div>
+                        <div class="field"><label>Valor anual (R$)</label><input id="planCnpjPrice" type="number" min="0" step="0.01" required></div>
+                      </div>
+                      <div class="card-subtitle" style="margin-bottom:10px">Benefícios disponíveis no plano CNPJ</div>
+                      <div id="planBenefitsCnpj" class="benefit-editor-list"></div>
+                    </div>
+                  </article>
+                </div>
+
+                <article class="plan-editor" style="margin-top:16px">
+                  <div class="plan-editor-head"><strong>Renovação automática do contrato</strong><span>Regra geral aplicada aos novos contratos e renovações</span></div>
+                  <div class="plan-editor-body">
+                    <label class="switch-row" style="margin-bottom:14px">
+                      <span><strong style="display:block;font-size:12px">Ativar renovação automática</strong><span class="muted small" style="display:block;margin-top:4px">Quando ativada, a cláusula abaixo será incluída no contrato digital.</span></span>
+                      <input id="planAutomaticRenewalEnabled" type="checkbox">
+                    </label>
+                    <div class="field">
+                      <label>Cláusula de renovação automática e encerramento</label>
+                      <textarea id="planRenewalClause" rows="7" required></textarea>
+                      <span class="small muted">O texto pode ser alterado pelo administrador e será aplicado somente aos contratos gerados depois do salvamento.</span>
+                    </div>
+                  </div>
+                </article>
+
+                <div class="plan-settings-footer">
+                  <div id="planSettingsStatus" class="plan-save-status">Carregando configuração...</div>
+                  <div class="plan-settings-actions">
+                    <button id="restoreDefaultPlansBtn" type="button" class="btn btn-ghost" data-permission="plansManage">Restaurar valores padrão</button>
+                    <button id="savePlanSettingsBtn" type="submit" class="btn btn-primary" data-permission="plansManage">Salvar planos e benefícios</button>
+                  </div>
+                </div>
+              </fieldset>
+            </form>
+          </div>
+
+          <div class="grid-equal" style="margin-top:18px">
             <div class="card">
               <div class="card-header"><div><div class="card-title">Status do sistema</div><div class="card-subtitle">Situação atual do armazenamento</div></div></div>
               <div class="card-body">
                 <div id="systemStatusPanel" class="demo-note" style="margin:0"></div>
                 <div style="height:16px"></div>
                 <p class="muted small" style="line-height:1.7;margin:0">A plataforma está conectada ao ambiente online, com autenticação individual e sincronização segura dos dados.</p>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div><div class="card-title">Como as mudanças funcionam</div><div class="card-subtitle">Proteção das condições já contratadas</div></div></div>
+              <div class="card-body">
+                <div class="demo-note" style="margin:0"><strong>Novos valores não alteram contratos antigos.</strong><br>O sistema salva uma cópia do preço e dos benefícios dentro da ficha do cliente quando o plano é ativado ou renovado. Contratos digitais já gerados continuam com o conteúdo original.</div>
               </div>
             </div>
           </div>
@@ -1196,7 +1310,7 @@
           <div class="plan-card">
             <div>
               <div id="detailPlanLabel" class="plan-name">Plano anual de monitoramento</div>
-              <h3 id="detailPlanPrice">R$ 60,00 / ano</h3>
+              <h3 id="detailPlanPrice">R$ 120,00 / ano</h3>
               <div class="plan-dates">
                 <div>Início do plano<strong id="detailStart">—</strong></div>
                 <div>Fim do período<strong id="detailEnd">—</strong></div>
@@ -1224,20 +1338,30 @@
           </div>
 
           <div class="service-grid">
+            <div id="serviceCard-technicalCall" class="service-card hidden">
+              <div class="service-icon">☎</div><h4 id="serviceTitle-technicalCall">Chamado técnico</h4>
+              <p id="serviceDescription-technicalCall">Atendimento técnico incluído no plano empresarial.</p>
+              <div class="service-footer"><span id="serviceCount-technicalCall" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="technicalCall" data-permission="servicesRegister">Registrar uso</button></div>
+            </div>
             <div id="serviceCard-appCheck" class="service-card">
-              <div class="service-icon">▣</div><h4>Verificação do aplicativo</h4>
-              <p>Conferência remota do aplicativo e da geração do sistema.</p>
+              <div class="service-icon">▣</div><h4 id="serviceTitle-appCheck">Verificação do aplicativo</h4>
+              <p id="serviceDescription-appCheck">Conferência remota do aplicativo e da geração do sistema.</p>
               <div class="service-footer"><span id="serviceCount-appCheck" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="appCheck" data-permission="servicesRegister">Registrar uso</button></div>
             </div>
             <div id="serviceCard-invoiceAnalysis" class="service-card">
-              <div class="service-icon">▤</div><h4>Análise remota de fatura</h4>
-              <p>Análise da fatura para validar créditos, consumo e compensação.</p>
+              <div class="service-icon">▤</div><h4 id="serviceTitle-invoiceAnalysis">Análise remota de fatura</h4>
+              <p id="serviceDescription-invoiceAnalysis">Análise da fatura para validar créditos, consumo e compensação.</p>
               <div class="service-footer"><span id="serviceCount-invoiceAnalysis" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="invoiceAnalysis" data-permission="servicesRegister">Registrar uso</button></div>
             </div>
             <div id="serviceCard-technicalVisit" class="service-card">
-              <div class="service-icon">⌂</div><h4>Visita técnica anual</h4>
-              <p>Uma visita presencial incluída durante a vigência do plano.</p>
+              <div class="service-icon">⌂</div><h4 id="serviceTitle-technicalVisit">Visita técnica anual</h4>
+              <p id="serviceDescription-technicalVisit">Uma visita presencial incluída durante a vigência do plano.</p>
               <div class="service-footer"><span id="serviceCount-technicalVisit" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="technicalVisit" data-permission="servicesRegister">Registrar uso</button></div>
+            </div>
+            <div id="serviceCard-quarterlyReport" class="service-card hidden">
+              <div class="service-icon">▥</div><h4 id="serviceTitle-quarterlyReport">Relatório trimestral de geração</h4>
+              <p id="serviceDescription-quarterlyReport">Relatório de desempenho enviado ao cliente pelo WhatsApp.</p>
+              <div class="service-footer"><span id="serviceCount-quarterlyReport" class="service-count">0/4</span><button class="btn btn-soft btn-sm register-service" data-service="quarterlyReport" data-permission="servicesRegister">Registrar envio</button></div>
             </div>
           </div>
 
@@ -1388,7 +1512,7 @@
       <div class="modal-header"><h3 id="renewModalTitle">Renovar plano anual</h3><button class="close-btn" data-close="renewModalBackdrop">×</button></div>
       <form id="renewForm">
         <div class="modal-body form-grid one">
-          <div id="renewPlanInfo" class="demo-note" style="margin:0">A renovação iniciará um novo período de 12 meses, conforme o tipo de documento do cliente, e zerará a disponibilidade dos três benefícios. O histórico anterior será preservado.</div>
+          <div id="renewPlanInfo" class="demo-note" style="margin:0">A renovação iniciará um novo período de 12 meses, conforme o tipo de documento do cliente, e zerará a disponibilidade dos benefícios do plano. O histórico anterior será preservado.</div>
           <div class="field"><label>Nova data de início *</label><input id="renewStart" type="date" required></div>
           <div class="field"><label>Responsável pela renovação</label><input id="renewSeller"></div>
           <div class="field"><label>Observação</label><textarea id="renewNotes"></textarea></div>
@@ -1451,15 +1575,45 @@
     };
 
     const SDK_VERSION = "12.16.0";
-    const CPF_PLAN_PRICE = 60;
-    const CNPJ_PLAN_PRICE = 300;
     const PLAN_DAYS = 365;
-    const CONTRACT_VERSION = "1.0";
+    const CONTRACT_VERSION = "2.3";
     const ACCEPT_TOKEN = new URLSearchParams(window.location.search).get("accept");
     const SERVICES = {
-      appCheck: { label: "Verificação remota do aplicativo", icon: "▣" },
-      invoiceAnalysis: { label: "Análise remota de fatura", icon: "▤" },
-      technicalVisit: { label: "Visita técnica anual", icon: "⌂" }
+      technicalCall: { label: "Chamado técnico", icon: "☎" },
+      appCheck: { label: "Atendimento remoto do aplicativo", icon: "▣" },
+      invoiceAnalysis: { label: "Análise de fatura", icon: "▤" },
+      technicalVisit: { label: "Visita técnica", icon: "⌂" },
+      quarterlyReport: { label: "Relatório trimestral de geração via WhatsApp", icon: "▥" }
+    };
+    const DEFAULT_PLAN_SETTINGS = {
+      version: 2,
+      name: "Plano Anual de Monitoramento",
+      contract: {
+        automaticRenewalEnabled: true,
+        renewalClause: "Este plano será renovado automaticamente por períodos sucessivos de 12 (doze) meses, mediante autorização expressa do CONTRATANTE neste instrumento. A CONTRATADA enviará aviso pelos contatos cadastrados antes do término da vigência, informando a data e o valor do novo período. Caso não deseje renovar, o CONTRATANTE deverá solicitar o encerramento ou a não renovação pelos canais oficiais da CONTRATADA com antecedência mínima de 30 (trinta) dias do término da vigência. O pedido não afasta valores e obrigações já vencidos. Eventual alteração de preço será informada previamente, facultando ao CONTRATANTE recusar a renovação. O cancelamento durante a vigência poderá ser solicitado a qualquer tempo, observadas as obrigações já constituídas e a legislação aplicável."
+      },
+      cpf: {
+        label: "Plano CPF · Pessoa Física",
+        price: 120,
+        benefits: {
+          technicalCall: { enabled:false, label:"Chamado técnico", description:"Atendimento técnico incluído durante a vigência do plano.", limit:0, contractText:"1 chamado técnico" },
+          appCheck: { enabled:true, label:"Verificação remota do aplicativo", description:"Conferência remota do aplicativo e da geração do sistema.", limit:1, contractText:"1 verificação remota do aplicativo de monitoramento" },
+          invoiceAnalysis: { enabled:true, label:"Análise remota de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:1, contractText:"1 análise remota de fatura de energia" },
+          technicalVisit: { enabled:true, label:"Visita técnica anual", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial durante a vigência anual" },
+          quarterlyReport: { enabled:false, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório de desempenho e geração enviado pelo WhatsApp.", limit:0, contractText:"relatório trimestral de geração enviado via WhatsApp" }
+        }
+      },
+      cnpj: {
+        label: "Plano CNPJ · Pessoa Jurídica",
+        price: 350,
+        benefits: {
+          technicalCall: { enabled:true, label:"Chamado técnico", description:"Um chamado técnico incluído durante a vigência do plano empresarial.", limit:1, contractText:"1 chamado técnico" },
+          appCheck: { enabled:true, label:"Configuração remota do aplicativo", description:"Configuração ou ajuste remoto do aplicativo de monitoramento.", limit:3, contractText:"3 configurações remotas do aplicativo de monitoramento" },
+          invoiceAnalysis: { enabled:true, label:"Análise de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:3, contractText:"3 análises de fatura de energia" },
+          technicalVisit: { enabled:true, label:"Visita técnica", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial" },
+          quarterlyReport: { enabled:true, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório trimestral de desempenho e geração enviado pelo WhatsApp.", limit:4, contractText:"relatório trimestral de geração enviado via WhatsApp, totalizando 4 envios durante a vigência anual" }
+        }
+      }
     };
     const PERMISSION_LABELS = {
       clientsView: "Visualizar clientes",
@@ -1469,7 +1623,8 @@
       servicesRegister: "Registrar benefícios",
       reportsExport: "Exportar relatórios",
       usersManage: "Gerenciar usuários",
-      integrationsManage: "Gerenciar integrações"
+      integrationsManage: "Gerenciar integrações",
+      plansManage: "Gerenciar planos e benefícios"
     };
     const ROLE_LABELS = {
       master: "Master",
@@ -1499,6 +1654,10 @@
       users: [],
       activities: [],
       contracts: [],
+      planSettings: JSON.parse(JSON.stringify(DEFAULT_PLAN_SETTINGS)),
+      planSettingsSource: "default",
+      planSettingsUpdatedAt: null,
+      planSettingsDirty: false,
       selectedClientId: null,
       activationClientId: null,
       selectedContractToken: null,
@@ -1540,8 +1699,73 @@
       const document = typeof clientOrDocument === "object" ? clientOrDocument?.document : clientOrDocument;
       return documentDigits(document).length > 11 ? "cnpj" : "cpf";
     };
-    const getPlanPrice = (clientOrDocument) => getClientType(clientOrDocument) === "cnpj" ? CNPJ_PLAN_PRICE : CPF_PLAN_PRICE;
-    const getPlanLabel = (clientOrDocument) => getClientType(clientOrDocument) === "cnpj" ? "Plano CNPJ · Pessoa Jurídica" : "Plano CPF · Pessoa Física";
+    const cloneData = value => JSON.parse(JSON.stringify(value));
+    const normalizePlanSettings = (raw={}) => {
+      const normalized=cloneData(DEFAULT_PLAN_SETTINGS);
+      normalized.name=String(raw.name||normalized.name).trim()||DEFAULT_PLAN_SETTINGS.name;
+      normalized.version=2;
+      normalized.contract={
+        automaticRenewalEnabled:raw?.contract?.automaticRenewalEnabled===undefined
+          ? DEFAULT_PLAN_SETTINGS.contract.automaticRenewalEnabled
+          : !!raw.contract.automaticRenewalEnabled,
+        renewalClause:String(raw?.contract?.renewalClause||DEFAULT_PLAN_SETTINGS.contract.renewalClause).trim()||DEFAULT_PLAN_SETTINGS.contract.renewalClause
+      };
+      ["cpf","cnpj"].forEach(planType=>{
+        const source=raw?.[planType]||{};
+        normalized[planType].label=String(source.label||normalized[planType].label).trim()||DEFAULT_PLAN_SETTINGS[planType].label;
+        const price=Number(source.price);
+        normalized[planType].price=Number.isFinite(price)&&price>=0?price:DEFAULT_PLAN_SETTINGS[planType].price;
+        Object.keys(SERVICES).forEach(type=>{
+          const defaults=DEFAULT_PLAN_SETTINGS[planType].benefits[type];
+          const benefit=source?.benefits?.[type]||{};
+          const limit=Math.max(0,Math.floor(Number(benefit.limit ?? defaults.limit)||0));
+          normalized[planType].benefits[type]={
+            enabled:benefit.enabled===undefined?defaults.enabled:!!benefit.enabled,
+            label:String(benefit.label||defaults.label||SERVICES[type].label).trim(),
+            description:String(benefit.description||defaults.description||"").trim(),
+            limit,
+            contractText:String(benefit.contractText||defaults.contractText||"").trim()
+          };
+          if(!normalized[planType].benefits[type].enabled) normalized[planType].benefits[type].limit=0;
+        });
+      });
+      return normalized;
+    };
+    const getConfiguredPlan = (clientOrDocument) => state.planSettings[getClientType(clientOrDocument)] || DEFAULT_PLAN_SETTINGS.cpf;
+    const getConfiguredPlanBenefits = (clientOrDocument) => Object.fromEntries(
+      Object.entries(getConfiguredPlan(clientOrDocument).benefits||{}).filter(([,item])=>item.enabled!==false && Number(item.limit)>0)
+    );
+    const normalizeBenefitSnapshot = (benefits={}) => Object.fromEntries(Object.entries(benefits).filter(([,item])=>Number(item?.limit)>0).map(([type,item])=>[type,{
+      label:String(item.label||SERVICES[type]?.label||type),description:String(item.description||""),limit:Math.max(0,Math.floor(Number(item.limit)||0)),contractText:String(item.contractText||item.label||SERVICES[type]?.label||type)
+    }]));
+    const snapshotPlanBenefits = (clientOrDocument) => cloneData(getConfiguredPlanBenefits(clientOrDocument));
+    const getPlanPrice = (clientOrDocument) => {
+      const raw=typeof clientOrDocument==="object"?clientOrDocument?.planPrice:undefined;
+      const stored=raw===null||raw===""||raw===undefined?NaN:Number(raw);
+      return Number.isFinite(stored)&&stored>=0?stored:Number(getConfiguredPlan(clientOrDocument).price||0);
+    };
+    const getPlanLabel = (clientOrDocument) => typeof clientOrDocument==="object" && clientOrDocument?.planLabel
+      ? clientOrDocument.planLabel
+      : getConfiguredPlan(clientOrDocument).label;
+    const getPlanBenefits = (clientOrDocument) => {
+      if(typeof clientOrDocument==="object" && clientOrDocument?.planBenefits && Object.keys(clientOrDocument.planBenefits).length){
+        return normalizeBenefitSnapshot(clientOrDocument.planBenefits);
+      }
+      return getConfiguredPlanBenefits(clientOrDocument);
+    };
+    const getBenefit = (clientOrDocument, type) => getPlanBenefits(clientOrDocument)[type] || null;
+    const serviceEntries = (client, type) => {
+      const service=client?.services?.[type];
+      if(!service) return [];
+      if(Array.isArray(service.entries)) return service.entries;
+      if(Array.isArray(service.records)) return service.records;
+      return service.used ? [{date:service.date||client?.createdAt,operator:service.operator||"",description:service.description||""}] : [];
+    };
+    const serviceUsage = (client, type) => serviceEntries(client,type).length;
+    const serviceLimit = (client, type) => getBenefit(client,type)?.limit || 0;
+    const totalPlanBenefits = (client) => Object.values(getPlanBenefits(client)).reduce((sum,item)=>sum+(item.limit||0),0);
+    const usedPlanBenefits = (client) => Object.keys(getPlanBenefits(client)).reduce((sum,type)=>sum+Math.min(serviceUsage(client,type),serviceLimit(client,type)),0);
+    const emptyServices = () => Object.keys(SERVICES).reduce((acc,type)=>({...acc,[type]:{used:false,count:0,entries:[]}}),{});
     const timestampISO = (value) => value?.toDate ? value.toDate().toISOString() : (value || null);
     const makeContractToken = () => `${uid().replace(/-/g,"")}${Math.random().toString(36).slice(2,12)}`;
     const maskDocument = (document) => {
@@ -1580,17 +1804,25 @@
     function buildContractHtml(data, number){
       const planLabel=getPlanLabel(data);
       const price=money(getPlanPrice(data));
+      const benefits=Object.values(getPlanBenefits(data)).map(item=>`<li>${safe(item.contractText)};</li>`).join("");
+      const contractConfig=state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract;
+      const renewalText=safe(contractConfig.renewalClause||DEFAULT_PLAN_SETTINGS.contract.renewalClause).replace(/\n/g,"<br>");
+      const renewalClause=contractConfig.automaticRenewalEnabled
+        ? `<h2>5. Renovação automática e encerramento</h2><p>${renewalText}</p>`
+        : "";
+      const nextSection=contractConfig.automaticRenewalEnabled?6:5;
       return `<h1>Contrato de adesão ao plano de monitoramento</h1>
         <div class="contract-number">Contrato nº ${safe(number)} · Versão ${CONTRACT_VERSION}</div>
         <div class="contract-parties"><strong>CONTRATADA:</strong> IG Energia Renovável.<br><strong>CONTRATANTE:</strong> ${safe(data.name)} — ${getClientType(data).toUpperCase()} ${safe(maskDocument(data.document))}${data.address?` — ${safe(data.address)}`:""}${data.city?` — ${safe(data.city)}`:""}.</div>
-        <h2>1. Objeto</h2><p>Este contrato formaliza a adesão do CONTRATANTE ao ${safe(planLabel)}, destinado ao acompanhamento básico do sistema de energia solar durante o período anual contratado.</p>
-        <h2>2. Serviços incluídos</h2><p>Durante a vigência, o plano concede direito a uma utilização de cada serviço abaixo:</p><ul><li>1 verificação remota do aplicativo de monitoramento;</li><li>1 análise remota de fatura de energia;</li><li>1 visita técnica presencial por ano.</li></ul>
+        <h2>1. Objeto</h2><p>Este contrato formaliza a adesão do CONTRATANTE ao ${safe(planLabel)}, destinado ao acompanhamento do sistema de energia solar durante o período anual contratado.</p>
+        <h2>2. Serviços incluídos</h2><p>Durante a vigência, o plano concede os benefícios abaixo, respeitando os limites anuais indicados:</p><ul>${benefits}</ul>
         <h2>3. Valor e pagamento</h2><p>O valor anual deste contrato é de <strong>${price}</strong>, definido conforme o documento do CONTRATANTE. A forma de pagamento cadastrada é ${safe(data.payment||"a combinar")}.</p>
         <h2>4. Vigência</h2><p>O plano terá vigência de 12 meses, iniciando em <strong>${formatDate(data.planStart)}</strong> e encerrando em <strong>${formatDate(data.planEnd||addYear(data.planStart))}</strong>. Os benefícios não utilizados não são cumulativos para o período seguinte.</p>
-        <h2>5. Condições de atendimento</h2><p>Os atendimentos dependem de solicitação e agendamento. O CONTRATANTE deverá disponibilizar acesso ao aplicativo, faturas e demais informações necessárias. Peças, materiais, deslocamentos extraordinários, reparos corretivos e serviços não descritos na cláusula 2 não estão incluídos, podendo ser orçados separadamente.</p>
-        <h2>6. Aceite eletrônico</h2><p>O CONTRATANTE declara que teve acesso ao conteúdo integral deste instrumento e concorda que o aceite eletrônico seja utilizado como manifestação de vontade. O sistema registrará a data, a hora, a identificação informada e dados técnicos do dispositivo utilizado.</p>
-        <h2>7. Dados pessoais</h2><p>Os dados fornecidos serão utilizados para cadastro, execução do plano, comunicação, comprovação do aceite e manutenção do histórico contratual, observadas as obrigações legais aplicáveis.</p>
-        <h2>8. Disposições gerais</h2><p>As situações não previstas serão tratadas entre as partes conforme a legislação aplicável. Alterações relevantes no plano deverão ser formalizadas em novo instrumento ou renovação.</p>`;
+        ${renewalClause}
+        <h2>${nextSection}. Condições de atendimento</h2><p>Os atendimentos dependem de solicitação e agendamento. O CONTRATANTE deverá disponibilizar acesso ao aplicativo, faturas e demais informações necessárias. Peças, materiais, deslocamentos extraordinários, reparos corretivos e serviços não descritos na cláusula 2 não estão incluídos, podendo ser orçados separadamente.</p>
+        <h2>${nextSection+1}. Aceite eletrônico</h2><p>O CONTRATANTE declara que teve acesso ao conteúdo integral deste instrumento e concorda que o aceite eletrônico seja utilizado como manifestação de vontade. O sistema registrará a data, a hora, a identificação informada e dados técnicos do dispositivo utilizado.</p>
+        <h2>${nextSection+2}. Dados pessoais</h2><p>Os dados fornecidos serão utilizados para cadastro, execução do plano, comunicação, comprovação do aceite e manutenção do histórico contratual, observadas as obrigações legais aplicáveis.</p>
+        <h2>${nextSection+3}. Disposições gerais</h2><p>As situações não previstas serão tratadas entre as partes conforme a legislação aplicável. Alterações relevantes no plano deverão ser formalizadas em novo instrumento ou renovação.</p>`;
     }
     async function createContractRecord(clientId,data,reason="new"){
       const token=makeContractToken();
@@ -1602,6 +1834,8 @@
         documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data),
         planStart:data.planStart, planEnd:data.planEnd||addYear(data.planStart), city:data.city||"", address:data.address||"",
         clientPhone:data.phone||"", clientEmail:data.email||"", payment:data.payment||"", status:"pending", generatedAt, acceptedAt:null, acceptedBy:"",
+        automaticRenewalEnabled:!!(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).automaticRenewalEnabled,
+        renewalClause:(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).renewalClause||"",
         acceptedDocumentMasked:"", contractHtml:buildContractHtml(data,number)
       };
     }
@@ -1635,13 +1869,15 @@
       if(status==="expiring") return `<span class="badge warning"><span class="status-dot"></span>Vence em ${days} dia${days===1?"":"s"}</span>`;
       return `<span class="badge success"><span class="status-dot"></span>Ativo</span>`;
     };
-    const serviceUsage = (client, type) => (client.services?.[type]?.used ? 1 : 0);
-    const normalizedIdentity = (profile={}) => `${profile.name||""} ${profile.email||""}`.trim();
-    const isLucasProfile = (profile={}) => /(^|\s)lucas(?:\s|$|[._-])/i.test(normalizedIdentity(profile)) || /^lucas[^@]*@/i.test(profile.email||"");
-    const isMasterProfile = (profile={}) => profile.role === "master" || isLucasProfile(profile);
-    const permissions = () => isMasterProfile(state.currentProfile)
-      ? ROLE_PERMISSIONS.master
-      : (state.currentProfile?.permissions || ROLE_PERMISSIONS[state.currentProfile?.role] || []);
+    const normalizedIdentity = (profile={}) => { profile=profile||{}; return `${profile.name||""} ${profile.email||""}`.trim(); };
+    const isLucasProfile = (profile={}) => { profile=profile||{}; return /(^|\s)lucas(?:\s|$|[._-])/i.test(normalizedIdentity(profile)) || /^lucas[^@]*@/i.test(profile.email||""); };
+    const isMasterProfile = (profile={}) => { profile=profile||{}; return profile.role === "master" || isLucasProfile(profile); };
+    const permissions = () => {
+      if(isMasterProfile(state.currentProfile))return ROLE_PERMISSIONS.master;
+      const role=state.currentProfile?.role;
+      const saved=state.currentProfile?.permissions||[];
+      return role==="admin"?Array.from(new Set([...(ROLE_PERMISSIONS.admin||[]),...saved])):(saved.length?saved:(ROLE_PERMISSIONS[role]||[]));
+    };
     const can = (permission) => isMasterProfile(state.currentProfile) || permissions().includes(permission);
     const roleLabel = (role, profile=null) => isMasterProfile(profile||{role}) ? "Master" : (ROLE_LABELS[role] || role || "Usuário");
 
@@ -1701,6 +1937,12 @@
         snap=await getDoc(ref);
       }
       const profile={uid:user.uid,...snap.data()};
+      if(profile.planSettings){
+        state.planSettings=normalizePlanSettings(profile.planSettings);
+        state.planSettingsSource="online";
+        state.planSettingsUpdatedAt=timestampISO(profile.planSettingsUpdatedAt||profile.updatedAt)||null;
+        saveLocalPlanSettings(state.planSettings);
+      }
       if(profile.active && isLucasProfile(profile)){
         const masterData={role:"master",active:true,permissions:ROLE_PERMISSIONS.master};
         Object.assign(profile,masterData);
@@ -1728,6 +1970,7 @@
     }
     function showApp(){
       $("contractAcceptanceScreen").classList.add("hidden");$("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");
+      loadLocalPlanSettings();
       loadLocalIntegrationSettings();
       updateUserUI();applyPermissionUI();renderAll();
     }
@@ -1747,6 +1990,166 @@
       });
       const masterOption=$("userRole")?.querySelector('option[value="master"]');
       if(masterOption) masterOption.disabled=!isMasterProfile(state.currentProfile);
+    }
+
+    const PLAN_SETTINGS_LOCAL_KEY = "ig_monitoring_plan_settings";
+    function loadLocalPlanSettings(){
+      try{
+        const stored=localStorage.getItem(PLAN_SETTINGS_LOCAL_KEY);
+        if(!stored)return false;
+        state.planSettings=normalizePlanSettings(JSON.parse(stored));
+        state.planSettingsSource="local";
+        return true;
+      }catch(err){console.warn("Não foi possível carregar os planos salvos localmente.",err);return false;}
+    }
+    function saveLocalPlanSettings(settings=state.planSettings){
+      try{localStorage.setItem(PLAN_SETTINGS_LOCAL_KEY,JSON.stringify(settings));return true;}
+      catch(err){console.warn("Não foi possível salvar os planos localmente.",err);return false;}
+    }
+    function getPlanSettingsOwnerProfile(requireSavedSettings=false){
+      const candidates=[
+        ...state.users.filter(user=>isLucasProfile(user)),
+        ...(isLucasProfile(state.currentProfile)?[state.currentProfile]:[]),
+        ...state.users.filter(user=>isMasterProfile(user)),
+        ...(state.currentProfile?[state.currentProfile]:[])
+      ].filter(Boolean);
+      const unique=[];
+      candidates.forEach(profile=>{if(profile.uid&&!unique.some(item=>item.uid===profile.uid))unique.push(profile);});
+      return requireSavedSettings
+        ? (unique.find(profile=>profile.planSettings)||null)
+        : (unique[0]||null);
+    }
+    function applyProfilePlanSettings(profile){
+      if(!profile?.planSettings||state.planSettingsDirty)return false;
+      const updatedAt=timestampISO(profile.planSettingsUpdatedAt||profile.updatedAt)||null;
+      const currentTime=state.planSettingsUpdatedAt?Date.parse(state.planSettingsUpdatedAt):0;
+      const incomingTime=updatedAt?Date.parse(updatedAt):0;
+      if(state.planSettingsSource==="online"&&currentTime&&incomingTime&&incomingTime<currentTime)return false;
+      state.planSettings=normalizePlanSettings(profile.planSettings);
+      state.planSettingsSource="online";
+      state.planSettingsUpdatedAt=updatedAt;
+      saveLocalPlanSettings(state.planSettings);
+      renderPlanSettings(true);
+      renderPlanSummary();
+      return true;
+    }
+    async function savePlanSettingsInAuthorizedProfile(settings){
+      const owner=getPlanSettingsOwnerProfile(false);
+      if(!owner?.uid)throw new Error("Não foi possível localizar o perfil responsável pelas configurações.");
+      const {doc,setDoc,serverTimestamp}=state.serviceApi;
+      const payload={
+        planSettings:settings,
+        planSettingsUpdatedAt:serverTimestamp(),
+        planSettingsUpdatedBy:state.currentProfile?.name||state.currentProfile?.email||"Usuário"
+      };
+      await setDoc(doc(state.db,"users",owner.uid),payload,{merge:true});
+      if(state.currentProfile?.uid===owner.uid)state.currentProfile={...state.currentProfile,...payload,planSettingsUpdatedAt:new Date().toISOString()};
+      const listIndex=state.users.findIndex(user=>user.uid===owner.uid);
+      if(listIndex>=0)state.users[listIndex]={...state.users[listIndex],...payload,planSettingsUpdatedAt:new Date().toISOString()};
+      return owner;
+    }
+    function benefitEditorHtml(planType,type,benefit){
+      const active=benefit.enabled!==false&&Number(benefit.limit)>0;
+      return `<div class="benefit-editor ${active?"":"inactive"}" data-benefit-row="${planType}-${type}">
+        <div class="benefit-editor-summary">
+          <input class="benefit-toggle" type="checkbox" data-benefit-enabled="${planType}-${type}" ${active?"checked":""} aria-label="Ativar benefício">
+          <div><strong data-benefit-summary="${planType}-${type}">${safe(benefit.label||SERVICES[type].label)}</strong><span>${active?"Benefício ativo no plano":"Benefício desativado"}</span></div>
+          <input type="number" min="1" step="1" value="${active?Math.max(1,Number(benefit.limit)||1):Math.max(1,Number(DEFAULT_PLAN_SETTINGS[planType].benefits[type].limit)||1)}" data-benefit-limit="${planType}-${type}" aria-label="Quantidade anual" ${active?"":"disabled"}>
+        </div>
+        <div class="benefit-editor-fields">
+          <div class="field"><label>Nome do benefício</label><input value="${safe(benefit.label||SERVICES[type].label)}" data-benefit-label="${planType}-${type}"></div>
+          <div class="field"><label>Descrição apresentada na ficha do cliente</label><textarea data-benefit-description="${planType}-${type}">${safe(benefit.description||"")}</textarea></div>
+          <div class="field"><label>Texto apresentado no contrato</label><input value="${safe(benefit.contractText||"")}" data-benefit-contract="${planType}-${type}"></div>
+        </div>
+      </div>`;
+    }
+    function populatePlanSettingsForm(settings){
+      const config=normalizePlanSettings(settings);
+      $("planGeneralName").value=config.name;
+      $("planCpfLabel").value=config.cpf.label;
+      $("planCpfPrice").value=config.cpf.price;
+      $("planCnpjLabel").value=config.cnpj.label;
+      $("planCnpjPrice").value=config.cnpj.price;
+      $("planAutomaticRenewalEnabled").checked=config.contract.automaticRenewalEnabled;
+      $("planRenewalClause").value=config.contract.renewalClause;
+      $("planRenewalClause").disabled=!config.contract.automaticRenewalEnabled;
+      $("planBenefitsCpf").innerHTML=Object.keys(SERVICES).map(type=>benefitEditorHtml("cpf",type,config.cpf.benefits[type])).join("");
+      $("planBenefitsCnpj").innerHTML=Object.keys(SERVICES).map(type=>benefitEditorHtml("cnpj",type,config.cnpj.benefits[type])).join("");
+    }
+    function renderPlanSettings(force=false){
+      if(!$("planSettingsForm"))return;
+      if(!state.planSettingsDirty||force)populatePlanSettingsForm(state.planSettings);
+      const online=state.planSettingsSource==="online";
+      const local=state.planSettingsSource==="local";
+      $("planSettingsBadge").className=`badge ${online?"success":local?"warning":"gray"}`;
+      $("planSettingsBadge").innerHTML=`<span class="status-dot"></span>${online?"Sincronizado":local?"Salvo localmente":"Configuração padrão"}`;
+      const updated=state.planSettingsUpdatedAt?` Última atualização: ${formatDateTime(state.planSettingsUpdatedAt)}.`:"";
+      $("planSettingsStatus").innerHTML=state.planSettingsDirty
+        ? `<strong>Existem alterações ainda não salvas.</strong> Clique em “Salvar planos e benefícios”.`
+        : online
+          ? `<strong>Configuração sincronizada online.</strong>${updated} Todos os usuários recebem os mesmos valores.`
+          : local
+            ? `<strong>Configuração salva neste navegador.</strong> A sincronização online será tentada ao salvar novamente.`
+            : `<strong>Valores padrão em uso.</strong> Salve para registrar a configuração.`;
+      $("planSettingsFieldset").disabled=!can("plansManage");
+    }
+    function renderPlanSummary(){
+      if($("heroCpfPrice"))$("heroCpfPrice").textContent=`CPF ${money(state.planSettings.cpf.price)}`;
+      if($("heroCnpjPrice"))$("heroCnpjPrice").textContent=`CNPJ ${money(state.planSettings.cnpj.price)} · valores anuais`;
+      updateClientPlanPreview();
+      updateActivationPlanPreview();
+    }
+    function readBenefitConfig(planType,type){
+      const key=`${planType}-${type}`;
+      const enabled=document.querySelector(`[data-benefit-enabled="${key}"]`)?.checked||false;
+      const limit=enabled?Math.max(1,Math.floor(Number(document.querySelector(`[data-benefit-limit="${key}"]`)?.value)||1)):0;
+      const label=document.querySelector(`[data-benefit-label="${key}"]`)?.value.trim()||SERVICES[type].label;
+      const description=document.querySelector(`[data-benefit-description="${key}"]`)?.value.trim()||"";
+      const contractText=document.querySelector(`[data-benefit-contract="${key}"]`)?.value.trim()||`${limit} ${label}`;
+      return {enabled,label,description,limit,contractText};
+    }
+    function readPlanSettingsForm(){
+      const automaticRenewalEnabled=$("planAutomaticRenewalEnabled").checked;
+      const renewalClause=$("planRenewalClause").value.trim();
+      const settings={version:2,name:$("planGeneralName").value.trim(),contract:{automaticRenewalEnabled,renewalClause},cpf:{label:$("planCpfLabel").value.trim(),price:Number($("planCpfPrice").value),benefits:{}},cnpj:{label:$("planCnpjLabel").value.trim(),price:Number($("planCnpjPrice").value),benefits:{}}};
+      if(!settings.name||!settings.cpf.label||!settings.cnpj.label)throw new Error("Preencha os nomes dos planos.");
+      if(automaticRenewalEnabled&&!renewalClause)throw new Error("Informe o texto da cláusula de renovação automática.");
+      if(!Number.isFinite(settings.cpf.price)||settings.cpf.price<0||!Number.isFinite(settings.cnpj.price)||settings.cnpj.price<0)throw new Error("Informe valores anuais válidos.");
+      ["cpf","cnpj"].forEach(planType=>Object.keys(SERVICES).forEach(type=>{settings[planType].benefits[type]=readBenefitConfig(planType,type);}));
+      if(!Object.values(settings.cpf.benefits).some(item=>item.enabled))throw new Error("Ative pelo menos um benefício para pessoa física.");
+      if(!Object.values(settings.cnpj.benefits).some(item=>item.enabled))throw new Error("Ative pelo menos um benefício para pessoa jurídica.");
+      return normalizePlanSettings(settings);
+    }
+    async function savePlanSettings(event){
+      event.preventDefault();
+      if(!can("plansManage")){showToast("Você não possui permissão para alterar os planos.","error");return;}
+      let settings;
+      try{settings=readPlanSettingsForm();}catch(err){showToast(err.message,"error");return;}
+      state.planSettings=settings;
+      state.planSettingsDirty=false;
+      state.planSettingsUpdatedAt=new Date().toISOString();
+      saveLocalPlanSettings(settings);
+      state.planSettingsSource="local";
+      renderAll();
+      if(!state.connected){renderPlanSettings(true);showToast("Planos salvos neste navegador. O sistema está sem conexão online.","error");return;}
+      try{
+        await savePlanSettingsInAuthorizedProfile(settings);
+        state.planSettingsSource="online";
+        renderPlanSettings(true);
+        showToast("Valores, benefícios e cláusulas foram salvos e sincronizados.");
+      }catch(profileError){
+        console.warn("Não foi possível sincronizar as configurações no perfil autorizado.",profileError);
+        state.planSettingsSource="local";
+        renderPlanSettings(true);
+        showToast("A configuração ficou salva somente neste navegador. Verifique as permissões de atualização dos usuários no Firebase.","error");
+      }
+    }
+    function restoreDefaultPlanSettings(){
+      if(!can("plansManage"))return;
+      populatePlanSettingsForm(DEFAULT_PLAN_SETTINGS);
+      state.planSettingsDirty=true;
+      renderPlanSettings(false);
+      showToast("Valores padrão carregados. Clique em salvar para confirmar.");
     }
 
     const SOLARZ_SESSION_PASSWORD_KEY = "ig_solarz_api_password";
@@ -2100,7 +2503,7 @@
         }
         if(existing){operations.push({type:"update",id:existing.id,data:sourceData});updated++;}
         else{
-          operations.push({type:"create",id:null,data:{...sourceData,planActive:false,services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},paymentStatus:"pending",notes:"Importado da SolarZ. Plano de monitoramento ainda não contratado."}});created++;
+          operations.push({type:"create",id:null,data:{...sourceData,planActive:false,services:emptyServices(),paymentStatus:"pending",notes:"Importado da SolarZ. Plano de monitoramento ainda não contratado."}});created++;
         }
       }
       const {doc,collection,writeBatch,serverTimestamp}=state.serviceApi;
@@ -2179,7 +2582,24 @@
 
     function subscribeData(){
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
-      const {collection,onSnapshot,query,orderBy}=state.serviceApi;
+      const {collection,doc,onSnapshot,query,orderBy}=state.serviceApi;
+      state.unsubscribers.push(onSnapshot(doc(state.db,"settings","plans"),snap=>{
+        if(snap.exists()){
+          state.planSettings=normalizePlanSettings(snap.data());
+          state.planSettingsSource="online";
+          state.planSettingsUpdatedAt=timestampISO(snap.data().updatedAt);
+          saveLocalPlanSettings(state.planSettings);
+          if(!state.planSettingsDirty)renderPlanSettings(true);
+          renderPlanSummary();renderDashboard();renderClients();renderExpirations();
+          if(state.selectedClientId)renderClientDetail();
+        }else{
+          renderPlanSettings(true);renderPlanSummary();
+        }
+      },err=>{
+        console.warn("Não foi possível sincronizar as configurações dos planos.",err);
+        if(state.planSettingsSource!=="online")state.planSettingsSource=localStorage.getItem(PLAN_SETTINGS_LOCAL_KEY)?"local":"default";
+        renderPlanSettings(true);renderPlanSummary();
+      }));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"clients"),orderBy("createdAt","desc")),snap=>{
         state.clients=snap.docs.map(d=>({id:d.id,...d.data()}));
         renderAll();
@@ -2197,6 +2617,8 @@
           }
           updateUserUI();applyPermissionUI();
         }
+        const settingsOwner=getPlanSettingsOwnerProfile(true);
+        if(settingsOwner)applyProfilePlanSettings(settingsOwner);
         renderUsers();
       }));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"activities"),orderBy("createdAt","desc")),snap=>{
@@ -2209,7 +2631,7 @@
     }
 
     function renderAll(){
-      renderDashboard();renderClients();renderExpirations();renderUsers();renderIntegrationSettings();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderExpirations();renderUsers();renderIntegrationSettings();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -2233,12 +2655,19 @@
         </tr>`).join("");
       $("attentionEmpty").classList.toggle("hidden",attention.length>0);
 
-      const total=Math.max(active,1);
-      ["appCheck","invoiceAnalysis","technicalVisit"].forEach(type=>{
-        const used=state.clients.filter(c=>["active","expiring"].includes(getPlanInfo(c).status)&&serviceUsage(c,type)).length;
-        const ids={appCheck:["usageAppText","usageAppBar"],invoiceAnalysis:["usageInvoiceText","usageInvoiceBar"],technicalVisit:["usageVisitText","usageVisitBar"]}[type];
-        $(ids[0]).textContent=`${used} de ${active}`;
-        $(ids[1]).style.width=`${Math.round(used/total*100)}%`;
+      const activeClients=state.clients.filter(c=>["active","expiring"].includes(getPlanInfo(c).status));
+      Object.keys(SERVICES).forEach(type=>{
+        const used=activeClients.reduce((sum,c)=>sum+Math.min(serviceUsage(c,type),serviceLimit(c,type)),0);
+        const total=activeClients.reduce((sum,c)=>sum+serviceLimit(c,type),0);
+        const ids={
+          technicalCall:["usageCallText","usageCallBar"],
+          appCheck:["usageAppText","usageAppBar"],
+          invoiceAnalysis:["usageInvoiceText","usageInvoiceBar"],
+          technicalVisit:["usageVisitText","usageVisitBar"],
+          quarterlyReport:["usageReportText","usageReportBar"]
+        }[type];
+        $(ids[0]).textContent=`${used} de ${total}`;
+        $(ids[1]).style.width=`${total?Math.round(used/total*100):0}%`;
       });
       const acts=[...state.activities].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,7);
       $("recentActivity").innerHTML=acts.length?acts.map(a=>`
@@ -2259,9 +2688,9 @@
     function renderClients(){
       const list=filteredClients();
       $("clientsTable").innerHTML=list.map(c=>{
-        const p=getPlanInfo(c);const used=["appCheck","invoiceAnalysis","technicalVisit"].reduce((n,t)=>n+serviceUsage(c,t),0);const contract=getContractForClient(c);
+        const p=getPlanInfo(c);const used=usedPlanBenefits(c);const total=totalPlanBenefits(c);const contract=getContractForClient(c);
         const planText=hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano`:`Importado da SolarZ · sem plano`;
-        const benefitHtml=hasActivePlan(c)?`<span class="badge info">${used}/3 utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}`:`<span class="badge gray">Plano não ativado</span>`;
+        const benefitHtml=hasActivePlan(c)?`<span class="badge info">${used}/${total} utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}`:`<span class="badge gray">Plano não ativado</span>`;
         return `<tr>
           <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${planText}</span></div></div></td>
           <td><strong>${safe(c.phone||"—")}</strong><div class="small muted" style="margin-top:3px">${safe(c.city||"—")}</div></td>
@@ -2325,15 +2754,26 @@
       renderDetailContract(c);
 
       Object.keys(SERVICES).forEach(type=>{
-        const used=!!c.services?.[type]?.used;
-        $(`serviceCard-${type}`).classList.toggle("used",used);
-        $(`serviceCount-${type}`).textContent=used?"1/1":"0/1";
-        const btn=$(`serviceCard-${type}`).querySelector(".register-service");
-        btn.disabled=used||p.status==="expired"||p.status==="no_plan"||!can("servicesRegister");
-        btn.textContent=used?"Utilizado":p.status==="no_plan"?"Ative o plano":p.status==="expired"?"Plano vencido":"Registrar uso";
+        const card=$(`serviceCard-${type}`);
+        const benefit=getBenefit(c,type);
+        const limit=benefit?.limit||0;
+        const used=serviceUsage(c,type);
+        const complete=limit>0&&used>=limit;
+        card.classList.toggle("hidden",limit===0);
+        if(limit===0)return;
+        card.classList.toggle("used",complete);
+        $(`serviceTitle-${type}`).textContent=benefit.label;
+        $(`serviceDescription-${type}`).textContent=benefit.description;
+        $(`serviceCount-${type}`).textContent=`${Math.min(used,limit)}/${limit}`;
+        const btn=card.querySelector(".register-service");
+        btn.disabled=complete||p.status==="expired"||p.status==="no_plan"||!can("servicesRegister");
+        btn.textContent=complete?"Limite atingido":p.status==="no_plan"?"Ative o plano":p.status==="expired"?"Plano vencido":type==="quarterlyReport"?"Registrar envio":used>0?"Registrar novo uso":"Registrar uso";
       });
       const histories=[];
-      Object.entries(c.services||{}).forEach(([type,s])=>{if(s.used)histories.push({date:s.date||c.createdAt,title:SERVICES[type]?.label||type,description:`Realizado por ${s.operator||"operador"}${s.description?" · "+s.description:""}`})});
+      Object.keys(SERVICES).forEach(type=>{
+        const benefit=getBenefit(c,type);
+        serviceEntries(c,type).forEach(entry=>histories.push({date:entry.date||c.createdAt,title:benefit?.label||SERVICES[type]?.label||type,description:`Realizado por ${entry.operator||"operador"}${entry.description?" · "+entry.description:""}`}));
+      });
       (c.history||[]).forEach(h=>histories.push(h));
       const contract=getContractForClient(c);
       if(contract){
@@ -2460,9 +2900,12 @@
       $("publicContractLoading").classList.add("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.remove("hidden");
       $("publicContractDocument").innerHTML=(contract.contractHtml||"")+contractEvidenceHtml(contract);
       const accepted=contract.status==="accepted";
+      const renewalEnabled=!!contract.automaticRenewalEnabled || /Renovação automática e encerramento/i.test(contract.contractHtml||"");
+      $("publicRenewalAcceptanceRow").classList.toggle("hidden",!renewalEnabled);
+      $("publicRenewalAcceptanceCheck").required=renewalEnabled;
       $("publicAcceptedBanner").classList.toggle("hidden",!accepted);$("publicAcceptanceForm").classList.toggle("hidden",accepted);
       if(accepted)$("publicAcceptedText").textContent=`Aceite registrado por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
-      else{$("publicSignerName").value="";$("publicSignerDocument").value="";$("publicAcceptanceWord").value="";$("publicAcceptanceCheck").checked=false;}
+      else{$("publicSignerName").value="";$("publicSignerDocument").value="";$("publicAcceptanceWord").value="";$("publicAcceptanceCheck").checked=false;$("publicRenewalAcceptanceCheck").checked=false;}
     }
 
     window.openClient=(id)=>{
@@ -2524,7 +2967,9 @@
       }
       const type = getClientType(document);
       const complete = digits.length === 11 || digits.length === 14;
-      $("clientPlanPreview").innerHTML = `<strong>${type.toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano${complete?"":" · documento incompleto"}`;
+      const benefitCount=totalPlanBenefits(document);
+      const renewalInfo=state.planSettings.contract?.automaticRenewalEnabled?" · renovação automática":"";
+      $("clientPlanPreview").innerHTML = `<strong>${type.toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano · ${benefitCount} utilizações/entregas previstas${renewalInfo}${complete?"":" · documento incompleto"}`;
     }
     function updateActivationPlanPreview(){
       const document=$("activateDocument").value.trim();
@@ -2534,7 +2979,8 @@
         return;
       }
       const complete=digits.length===11||digits.length===14;
-      $("activatePlanPreview").innerHTML=`<strong>${getClientType(document).toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano${complete?"":" · documento incompleto"}`;
+      const renewalInfo=state.planSettings.contract?.automaticRenewalEnabled?" · renovação automática":"";
+      $("activatePlanPreview").innerHTML=`<strong>${getClientType(document).toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano · ${totalPlanBenefits(document)} utilizações/entregas previstas${renewalInfo}${complete?"":" · documento incompleto"}`;
     }
     window.startPlanActivation=(id)=>{
       if(!can("clientsEdit")){showToast("Você não possui permissão para ativar planos.","error");return;}
@@ -2613,12 +3059,18 @@
       event.preventDefault();
       const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
       const type=$("serviceType").value;
-      if(c.services?.[type]?.used){showToast("Este benefício já foi utilizado no período.","error");return;}
-      const service={used:true,date:$("serviceDate").value,operator:$("serviceOperator").value.trim(),description:$("serviceDescription").value.trim()};
-      const services={...(c.services||{}),[type]:service};
+      const benefit=getBenefit(c,type);
+      const limit=benefit?.limit||0;
+      const currentEntries=serviceEntries(c,type);
+      if(!limit){showToast("Este benefício não faz parte do plano do cliente.","error");return;}
+      if(currentEntries.length>=limit){showToast("O limite deste benefício já foi atingido no período.","error");return;}
+      const entry={date:$("serviceDate").value,operator:$("serviceOperator").value.trim(),description:$("serviceDescription").value.trim()};
+      const entries=[...currentEntries,entry];
+      const service={used:entries.length>0,count:entries.length,entries,date:entry.date,operator:entry.operator,description:entry.description};
+      const services={...emptyServices(),...(c.services||{}),[type]:service};
       if(!state.connected) throw new Error("Serviço indisponível");
       await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",c.id),{services,updatedAt:state.serviceApi.serverTimestamp()});
-      await logActivity("service",c.id,`${SERVICES[type].label} registrada`,`${c.name} · por ${service.operator}`);
+      await logActivity("service",c.id,`${benefit.label} registrado`,`${c.name} · ${entries.length}/${limit} · por ${entry.operator}`);
       closeModal("serviceModalBackdrop");$("serviceForm").reset();renderClientDetail();showToast("Benefício registrado no histórico do cliente.");
     }
 
@@ -2635,7 +3087,7 @@
       const start=$("activateStart").value;
       const completeData={
         ...c,
-        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(document),
+        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(document),planLabel:getPlanLabel(document),planBenefits:snapshotPlanBenefits(document),
         phone,email:$("activateEmail").value.trim(),city:$("activateCity").value.trim(),address:$("activateAddress").value.trim(),
         planActive:true,planStart:start,planEnd:addYear(start),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),seller:$("activateSeller").value.trim()||state.currentProfile?.name||c.seller||"",
         payment:$("activatePayment").value,paymentStatus:$("activatePaymentStatus").value,notes:$("activateNotes").value.trim()
@@ -2644,12 +3096,12 @@
       const contract=await createContractRecord(c.id,completeData,"activation");
       history.push({date:new Date().toISOString(),title:"Plano ativado",description:`${getPlanLabel(completeData)} no valor de ${money(getPlanPrice(completeData))}. Contrato: ${contract.number}.`});
       const update={
-        name:completeData.name,document:completeData.document,documentType:completeData.documentType,planPrice:completeData.planPrice,
+        name:completeData.name,document:completeData.document,documentType:completeData.documentType,planPrice:completeData.planPrice,planLabel:completeData.planLabel,planBenefits:completeData.planBenefits,
         phone:completeData.phone,email:completeData.email,city:completeData.city,address:completeData.address,
         planActive:true,planStart:completeData.planStart,planEnd:completeData.planEnd,
         planActivationSource:"manual",planActivatedAt:completeData.planActivatedAt,seller:completeData.seller,
         payment:completeData.payment,paymentStatus:completeData.paymentStatus,notes:completeData.notes,
-        services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},history,contract:contractSummary(contract)
+        services:emptyServices(),history,contract:contractSummary(contract)
       };
       if(!state.connected)throw new Error("Serviço indisponível");
       const batch=state.serviceApi.writeBatch(state.db);
@@ -2670,10 +3122,11 @@
       const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
       if(!hasActivePlan(c)){closeModal("renewModalBackdrop");startPlanActivation(c.id);return;}
       const newStart=$("renewStart").value;const history=[...(c.history||[])];
-      const renewedData={...c,planActive:true,planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:$("renewSeller").value.trim()||c.seller,payment:c.payment};
+      const renewalReference=c.document;
+      const renewedData={...c,planActive:true,planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(renewalReference),planLabel:getPlanLabel(renewalReference),planBenefits:snapshotPlanBenefits(renewalReference),seller:$("renewSeller").value.trim()||c.seller,payment:c.payment};
       const contract=await createContractRecord(c.id,renewedData,"renewal");
       history.push({date:new Date().toISOString(),title:"Plano renovado",description:`${getPlanLabel(c)} no valor de ${money(getPlanPrice(c))}. Novo contrato: ${contract.number}. Período anterior: ${formatDate(c.planStart)} a ${formatDate(c.planEnd||addYear(c.planStart))}. ${$("renewNotes").value.trim()}`});
-      const update={planActive:true,planStart:newStart,planEnd:addYear(newStart),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),documentType:getClientType(c),planPrice:getPlanPrice(c),seller:renewedData.seller,services:{appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}},history,contract:contractSummary(contract)};
+      const update={planActive:true,planStart:newStart,planEnd:addYear(newStart),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),documentType:getClientType(c),planPrice:renewedData.planPrice,planLabel:renewedData.planLabel,planBenefits:renewedData.planBenefits,seller:renewedData.seller,services:emptyServices(),history,contract:contractSummary(contract)};
       if(!state.connected) throw new Error("Serviço indisponível");
       const batch=state.serviceApi.writeBatch(state.db);
       batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
@@ -2713,8 +3166,8 @@
 
     function exportCSV(){
       if(!can("reportsExport"))return;
-      const headers=["Cliente","CPF/CNPJ","Tipo de plano","Valor anual","Telefone","E-mail","Cidade","Início do plano","Fim do plano","Dias restantes","Status","Contrato","Número do contrato","Aceito em","Verificação app","Análise fatura","Visita técnica","Responsável","Pagamento"];
-      const rows=state.clients.map(c=>{const p=getPlanInfo(c),contract=getContractForClient(c);return [c.name,c.document,getClientType(c).toUpperCase(),getPlanPrice(c),c.phone,c.email,c.city,c.planStart,p.end,p.days,p.status,contract?.status==="accepted"?"Aceito":contract?"Aguardando aceite":"Não gerado",contract?.number||"",timestampISO(contract?.acceptedAt)||"",serviceUsage(c,"appCheck")?"Utilizado":"Disponível",serviceUsage(c,"invoiceAnalysis")?"Utilizado":"Disponível",serviceUsage(c,"technicalVisit")?"Utilizado":"Disponível",c.seller,c.paymentStatus==="paid"?"Pago":"Pendente"]});
+      const headers=["Cliente","CPF/CNPJ","Tipo de plano","Valor anual","Telefone","E-mail","Cidade","Início do plano","Fim do plano","Dias restantes","Status","Contrato","Número do contrato","Aceito em","Chamado técnico","Atendimento aplicativo","Análise fatura","Visita técnica","Relatório trimestral WhatsApp","Responsável","Pagamento"];
+      const rows=state.clients.map(c=>{const p=getPlanInfo(c),contract=getContractForClient(c),usage=type=>`${serviceUsage(c,type)}/${serviceLimit(c,type)}`;return [c.name,c.document,getClientType(c).toUpperCase(),getPlanPrice(c),c.phone,c.email,c.city,c.planStart,p.end,p.days,p.status,contract?.status==="accepted"?"Aceito":contract?"Aguardando aceite":"Não gerado",contract?.number||"",timestampISO(contract?.acceptedAt)||"",usage("technicalCall"),usage("appCheck"),usage("invoiceAnalysis"),usage("technicalVisit"),usage("quarterlyReport"),c.seller,c.paymentStatus==="paid"?"Pago":"Pendente"]});
       const csv="\uFEFF"+[headers,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n");
       const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");
       a.href=URL.createObjectURL(blob);a.download=`clientes_ig_monitoramento_${todayISO()}.csv`;a.click();URL.revokeObjectURL(a.href);
@@ -2784,9 +3237,11 @@
       e.preventDefault();const contract=state.publicContract;if(!contract||contract.status==="accepted")return;
       const name=$("publicSignerName").value.trim();const document=$("publicSignerDocument").value.trim();
       if($("publicAcceptanceWord").value.trim().toUpperCase()!=="ACEITO"){showToast("Digite a palavra ACEITO para confirmar.","error");return;}
+      const renewalEnabled=!!contract.automaticRenewalEnabled || /Renovação automática e encerramento/i.test(contract.contractHtml||"");
+      if(renewalEnabled&&!$("publicRenewalAcceptanceCheck").checked){showToast("Confirme a autorização expressa da renovação automática.","error");return;}
       const hash=await hashText(documentDigits(document));
       if(hash!==contract.documentHash){showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;}
-      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",userAgent:navigator.userAgent};
+      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent};
       try{
         if(!state.connected) throw new Error("Serviço indisponível");
         await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.serviceApi.serverTimestamp()});
@@ -2801,14 +3256,18 @@
       const document=$("clientDocument").value.trim();
       const digits=documentDigits(document);
       if(digits.length!==11 && digits.length!==14){showToast("Informe um CPF com 11 dígitos ou um CNPJ com 14 dígitos.","error");return;}
-      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
-      if(!id)data.services={appCheck:{used:false},invoiceAnalysis:{used:false},technicalVisit:{used:false}};
+      const existingClient=id?state.clients.find(client=>client.id===id):null;
+      const preserveExistingPlan=existingClient&&getClientType(existingClient)===getClientType(document);
+      const planReference=preserveExistingPlan?existingClient:document;
+      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(planReference),planLabel:getPlanLabel(planReference),planBenefits:preserveExistingPlan&&existingClient?.planBenefits?existingClient.planBenefits:snapshotPlanBenefits(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
+      if(!id)data.services=emptyServices();
       try{const result=await saveClient(data,id);closeModal("clientModalBackdrop");showToast(id?"Ficha atualizada.":"Cliente cadastrado e contrato gerado.");if(!id&&result.contract){renderContractModal(result.contract);openModal("contractModalBackdrop");}}catch(err){showToast("Erro ao salvar cliente: "+err.message,"error");}
     });
     $$(".register-service").forEach(btn=>btn.addEventListener("click",()=>{
       const type=btn.dataset.service,c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
       $("serviceType").value=type;$("serviceDate").value=todayISO();$("serviceOperator").value=state.currentProfile?.name||"";
-      $("serviceDescription").value="";$("serviceModalInfo").innerHTML=`<strong>${SERVICES[type].label}</strong><br>Cliente: ${safe(c.name)}. Após confirmar, o benefício ficará marcado como utilizado neste período anual.`;
+      const benefit=getBenefit(c,type),used=serviceUsage(c,type),limit=serviceLimit(c,type);
+      $("serviceDescription").value="";$("serviceModalInfo").innerHTML=`<strong>${safe(benefit?.label||SERVICES[type].label)}</strong><br>Cliente: ${safe(c.name)} · utilização ${used+1} de ${limit}. Após confirmar, o registro será incluído no histórico deste período anual.`;
       openModal("serviceModalBackdrop");
     }));
     $("serviceForm").addEventListener("submit",registerService);
@@ -2818,7 +3277,7 @@
       if(!hasActivePlan(c)){startPlanActivation(c.id);return;}
       $("renewModalTitle").textContent="Renovar plano anual";
       $("renewStart").value=todayISO();$("renewSeller").value=c.seller||state.currentProfile?.name||"";$("renewNotes").value="";
-      $("renewPlanInfo").innerHTML=`<strong>${getPlanLabel(c)} · ${money(getPlanPrice(c))} por ano</strong><br>A renovação iniciará um novo período de 12 meses, zerará os três benefícios e preservará todo o histórico anterior.`;
+      $("renewPlanInfo").innerHTML=`<strong>${getPlanLabel(c)} · ${money(getPlanPrice(c))} por ano</strong><br>A renovação iniciará um novo período de 12 meses, zerará os benefícios do plano e preservará todo o histórico anterior.`;
       openModal("renewModalBackdrop");
     });
     $("renewForm").addEventListener("submit",renewClient);
@@ -2834,6 +3293,30 @@
     $("clearPermissionsBtn").addEventListener("click",()=>{$$('input[name="permission"]:not(:disabled)').forEach(x=>x.checked=false);updatePermissionCount();});
     $("restoreRolePermissionsBtn").addEventListener("click",()=>{const role=$("userRole").value;renderPermissionGrid(ROLE_PERMISSIONS[role]||[],role==="master");});
     $("userForm").addEventListener("submit",saveUser);
+    $("planSettingsForm").addEventListener("submit",savePlanSettings);
+    $("planSettingsForm").addEventListener("input",event=>{
+      state.planSettingsDirty=true;
+      if(event.target.matches("[data-benefit-label]")){
+        const key=event.target.dataset.benefitLabel;
+        const summary=document.querySelector(`[data-benefit-summary="${key}"]`);
+        if(summary)summary.textContent=event.target.value||"Benefício sem nome";
+      }
+      renderPlanSettings(false);
+    });
+    $("planSettingsForm").addEventListener("change",event=>{
+      if(event.target.matches("[data-benefit-enabled]")){
+        const key=event.target.dataset.benefitEnabled;
+        const row=document.querySelector(`[data-benefit-row="${key}"]`);
+        const limit=document.querySelector(`[data-benefit-limit="${key}"]`);
+        row?.classList.toggle("inactive",!event.target.checked);
+        if(limit)limit.disabled=!event.target.checked;
+      }
+      if(event.target.id==="planAutomaticRenewalEnabled"){
+        $("planRenewalClause").disabled=!event.target.checked;
+      }
+      state.planSettingsDirty=true;renderPlanSettings(false);
+    });
+    $("restoreDefaultPlansBtn").addEventListener("click",restoreDefaultPlanSettings);
     $("integrationForm").addEventListener("submit",saveIntegrationSettings);
     ["integrationConnectorUrl","integrationApiUsername","integrationApiPassword","integrationEnabled"].forEach(id=>{
       const field=$(id);
@@ -2857,6 +3340,9 @@
     $("serviceDate").value=todayISO();
     $("renewStart").value=todayISO();
     renderPermissionGrid([]);
+    loadLocalPlanSettings();
+    renderPlanSettings(true);
+    renderPlanSummary();
     initService();
   </script>
 </body>
