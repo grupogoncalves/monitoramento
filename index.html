@@ -1706,8 +1706,12 @@
       return `fnv1a-${(h1>>>0).toString(16).padStart(8,"0")}`;
     }
     const getClientType = (clientOrDocument) => {
-      const document = typeof clientOrDocument === "object" ? clientOrDocument?.document : clientOrDocument;
-      return documentDigits(document).length > 11 ? "cnpj" : "cpf";
+      if(typeof clientOrDocument === "object" && clientOrDocument){
+        if(clientOrDocument.documentType==="cnpj"||clientOrDocument.documentType==="cpf")return clientOrDocument.documentType;
+        const document=clientOrDocument.document||clientOrDocument.clientDocument||clientOrDocument.clientSnapshot?.document||"";
+        return documentDigits(document).length > 11 ? "cnpj" : "cpf";
+      }
+      return documentDigits(clientOrDocument).length > 11 ? "cnpj" : "cpf";
     };
     const cloneData = value => JSON.parse(JSON.stringify(value));
     const normalizePlanSettings = (raw={}) => {
@@ -2293,25 +2297,28 @@
       if(!owner?.uid)throw new Error("Não foi possível localizar o perfil responsável pelas configurações.");
       const {doc,setDoc,serverTimestamp}=state.serviceApi;
       const updatedBy=state.currentProfile?.name||state.currentProfile?.email||"Usuário";
-      const payload={
+      const profilePayload={
         planSettings:settings,
         planSettingsUpdatedAt:serverTimestamp(),
         planSettingsUpdatedBy:updatedBy
       };
-      await setDoc(doc(state.db,"users",owner.uid),payload,{merge:true});
-      // Mantém uma configuração central para que CRM, contratos e aceite público usem o mesmo preço vigente.
-      try{
-        await setDoc(doc(state.db,"settings","plans"),{
-          ...settings,
-          updatedAt:serverTimestamp(),
-          updatedBy
-        },{merge:true});
-      }catch(settingsErr){
-        console.warn("Não foi possível atualizar settings/plans; os contratos pendentes ainda serão sincronizados diretamente.",settingsErr);
-      }
-      if(state.currentProfile?.uid===owner.uid)state.currentProfile={...state.currentProfile,...payload,planSettingsUpdatedAt:new Date().toISOString()};
+      const sharedPayload={
+        ...settings,
+        updatedAt:serverTimestamp(),
+        updatedBy
+      };
+
+      // 1. Perfil administrativo.
+      await setDoc(doc(state.db,"users",owner.uid),profilePayload,{merge:true});
+      // 2. Configuração interna central do CRM.
+      await setDoc(doc(state.db,"settings","plans"),sharedPayload,{merge:true});
+      // 3. Configuração pública somente de leitura para o link de aceite.
+      //    Esta é a fonte usada por celulares/computadores sem login.
+      await setDoc(doc(state.db,"publicPlanSettings","current"),sharedPayload,{merge:true});
+
+      if(state.currentProfile?.uid===owner.uid)state.currentProfile={...state.currentProfile,...profilePayload,planSettingsUpdatedAt:new Date().toISOString()};
       const listIndex=state.users.findIndex(user=>user.uid===owner.uid);
-      if(listIndex>=0)state.users[listIndex]={...state.users[listIndex],...payload,planSettingsUpdatedAt:new Date().toISOString()};
+      if(listIndex>=0)state.users[listIndex]={...state.users[listIndex],...profilePayload,planSettingsUpdatedAt:new Date().toISOString()};
       return owner;
     }
     function benefitEditorHtml(planType,type,benefit){
@@ -2422,12 +2429,12 @@
         state.planSettingsUpdatedAt=new Date().toISOString();
         const propagation=await propagateLivePriceToPendingContracts(planType);
         renderPlanSettings(false);
-        showToast(`Preço de ${label} salvo: ${money(value)} por ano. ${propagation.updated} contrato(s) pendente(s) atualizado(s).`);
+        showToast(`Preço de ${label} sincronizado na nuvem: ${money(value)} por ano. ${propagation.updated} contrato(s) pendente(s) atualizado(s).`);
       }catch(profileError){
         console.warn("Não foi possível sincronizar o preço no perfil autorizado.",profileError);
         state.planSettingsSource="local";
         renderPlanSettings(false);
-        showToast(`Preço de ${label} ficou salvo somente neste navegador. Verifique as permissões no Firebase.`,"error");
+        showToast(`O preço NÃO foi sincronizado na nuvem. Ele ficou apenas neste computador. Publique as regras atualizadas do Realtime Database e salve novamente.`,"error");
       }
     }
     async function savePlanSettings(event){
@@ -2453,7 +2460,7 @@
         console.warn("Não foi possível sincronizar as configurações no perfil autorizado.",profileError);
         state.planSettingsSource="local";
         renderPlanSettings(true);
-        showToast("A configuração ficou salva somente neste navegador. Verifique as permissões de atualização dos usuários no Firebase.","error");
+        showToast("A configuração NÃO foi sincronizada na nuvem. Publique as regras atualizadas do Realtime Database e salve novamente.","error");
       }
     }
     function restoreDefaultPlanSettings(){
@@ -3095,20 +3102,29 @@
     }
     async function refreshPublicPlanSettings(){
       if(!state.connected)return false;
-      try{
-        const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"settings","plans"));
-        if(!snap.exists())return false;
-        const incoming=normalizePlanSettings(snap.data());
+      const applySettings=(raw)=>{
+        const incoming=normalizePlanSettings(raw||{});
         state.planSettings=incoming;
         state.planSettingsSource="online";
-        state.planSettingsUpdatedAt=timestampISO(snap.data().updatedAt)||new Date().toISOString();
+        state.planSettingsUpdatedAt=timestampISO(raw?.updatedAt)||new Date().toISOString();
         saveLocalPlanSettings(incoming);
         return true;
-      }catch(err){
-        // Em instalações onde a configuração não é pública, o aceite usa o preço já sincronizado no próprio contrato.
-        console.warn("Configuração central não disponível na página pública; usando o valor sincronizado no contrato.",err);
-        return false;
+      };
+      try{
+        // Fonte pública/autoritativa para links de aceite abertos sem login.
+        const publicSnap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicPlanSettings","current"));
+        if(publicSnap.exists())return applySettings(publicSnap.data());
+      }catch(publicErr){
+        console.warn("Não foi possível ler publicPlanSettings/current.",publicErr);
       }
+      try{
+        // Compatibilidade para instalações anteriores quando o usuário estiver autenticado.
+        const privateSnap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"settings","plans"));
+        if(privateSnap.exists())return applySettings(privateSnap.data());
+      }catch(privateErr){
+        console.warn("Configuração central não disponível; usando o preço persistido no contrato.",privateErr);
+      }
+      return false;
     }
     async function loadPublicContract(token){
       showPublicContract();
@@ -3121,8 +3137,9 @@
         if(!contract)throw new Error("not-found");
         const linkedClient=state.clients.find(c=>c.id===contract.clientId)||null;
         if(contract.status!=="accepted"){
-          // O aceite pendente sempre confere o preço vigente antes de ser exibido.
-          await refreshPublicPlanSettings();
+          // O aceite pendente sempre confere a configuração pública vigente antes de ser exibido.
+          const cloudPriceLoaded=await refreshPublicPlanSettings();
+          if(!cloudPriceLoaded)console.warn("Aceite aberto sem configuração pública; exibindo o último valor persistido no contrato.");
           contract=hydrateContractClientData(contract,linkedClient);
           try{
             await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"publicContracts",token),{
