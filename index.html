@@ -1686,6 +1686,25 @@
     const formatTimelineDate = (value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim()) ? formatDate(value) : formatDateTime(value);
     const money = (v) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:2}).format(v||0);
     const documentDigits = (value="") => String(value).replace(/\D/g, "");
+    async function hashText(value="") {
+      const input=String(value??"");
+      try{
+        if(globalThis.crypto?.subtle && globalThis.TextEncoder){
+          const bytes=new TextEncoder().encode(input);
+          const digest=await globalThis.crypto.subtle.digest("SHA-256",bytes);
+          return Array.from(new Uint8Array(digest)).map(byte=>byte.toString(16).padStart(2,"0")).join("");
+        }
+      }catch(err){
+        console.warn("SHA-256 indisponível; usando hash compatível local.",err);
+      }
+      // Fallback determinístico para ambientes sem Web Crypto (ex.: arquivo local).
+      let h1=0x811c9dc5;
+      for(let i=0;i<input.length;i++){
+        h1^=input.charCodeAt(i);
+        h1=Math.imul(h1,0x01000193);
+      }
+      return `fnv1a-${(h1>>>0).toString(16).padStart(8,"0")}`;
+    }
     const getClientType = (clientOrDocument) => {
       const document = typeof clientOrDocument === "object" ? clientOrDocument?.document : clientOrDocument;
       return documentDigits(document).length > 11 ? "cnpj" : "cpf";
@@ -3825,8 +3844,14 @@
       if($("publicAcceptanceWord").value.trim().toUpperCase()!=="ACEITO"){showToast("Digite a palavra ACEITO para confirmar.","error");return;}
       const renewalEnabled=!!contract.automaticRenewalEnabled || /Renovação automática e encerramento/i.test(contract.contractHtml||"");
       if(renewalEnabled&&!$("publicRenewalAcceptanceCheck").checked){showToast("Confirme a autorização expressa da renovação automática.","error");return;}
-      const hash=await hashText(documentDigits(document));
-      if(hash!==contract.documentHash){showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;}
+      const enteredDocument=documentDigits(document);
+      const hash=await hashText(enteredDocument);
+      const storedDocument=documentDigits(contract.clientDocument||contract.clientSnapshot?.document||"");
+      if(contract.documentHash){
+        if(hash!==contract.documentHash){showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;}
+      }else if(storedDocument && enteredDocument!==storedDocument){
+        showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;
+      }
       const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent};
       try{
         if(!state.connected) throw new Error("Realtime Database indisponível");
