@@ -357,22 +357,6 @@
     .role-card strong { display:block;font-size:12px; }
     .role-card p { color:var(--muted);font-size:10px;line-height:1.5;margin:6px 0 0; }
 
-    /* Integrações */
-    .integration-card { margin-top:18px; }
-    .integration-head { display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap; }
-    .integration-brand { display:flex;align-items:center;gap:13px; }
-    .integration-icon { width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;box-shadow:var(--shadow-sm); }
-    .integration-status { display:flex;align-items:center;gap:8px;flex-wrap:wrap; }
-    .integration-actions { display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:18px; }
-    .integration-summary { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px; }
-    .integration-summary-item { border:1px solid var(--line);background:#fbfdf9;border-radius:13px;padding:13px; }
-    .integration-summary-item span { display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.8px;font-weight:800; }
-    .integration-summary-item strong { display:block;margin-top:6px;font-size:11px;line-height:1.45; }
-    .switch-row { display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--line);border-radius:13px;padding:12px 13px;background:#fbfdff; }
-    .switch-row input { width:18px;height:18px;accent-color:var(--primary); }
-    .integration-note { border:1px solid #d6e2b1;background:#f6f9e8;color:#45551a;border-radius:13px;padding:13px 14px;font-size:10px;line-height:1.65;margin-top:14px; }
-    @media (max-width:650px) { .integration-summary { grid-template-columns:1fr; } .integration-actions .btn { width:100%; } }
-
     /* Modal / Toast */
     .modal-backdrop { position:fixed;inset:0;background:rgba(5,23,42,.58);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px; }
     .modal-backdrop.open { display:flex; }
@@ -1079,6 +1063,8 @@
               </select>
             </div>
             <div class="toolbar-right">
+              <button id="importClientsCsvBtn" class="btn btn-ghost btn-sm" data-permission="clientsCreate">↑ Importar CSV</button>
+              <input id="clientsCsvInput" class="hidden" type="file" accept=".csv,text/csv">
               <button id="exportClients" class="btn btn-ghost btn-sm" data-permission="reportsExport">⇩ Exportar CSV</button>
               <button id="addClientBtn" class="btn btn-primary btn-sm" data-permission="clientsCreate">＋ Cadastrar cliente</button>
             </div>
@@ -1264,75 +1250,6 @@
             </div>
           </div>
 
-          <div class="card integration-card" data-permission="integrationsManage">
-            <div class="card-header">
-              <div class="integration-head" style="width:100%">
-                <div class="integration-brand">
-                  <div class="integration-icon">SZ</div>
-                  <div>
-                    <div class="card-title">Integração SolarZ</div>
-                    <div class="card-subtitle">Importação direta dos clientes cadastrados no SolarZ</div>
-                  </div>
-                </div>
-                <div class="integration-status">
-                  <span id="integrationStatusBadge" class="badge gray"><span class="status-dot"></span>Não configurada</span>
-                </div>
-              </div>
-            </div>
-            <form id="integrationForm" class="card-body">
-              <div class="form-grid">
-                <div class="field">
-                  <label>Usuário da API *</label>
-                  <input id="integrationApiUsername" type="text" placeholder="Usuário gerado no SolarZ" autocomplete="username">
-                  <span class="small muted">Usuário de acesso da API do SolarZ Monitoramento.</span>
-                </div>
-                <div class="field">
-                  <label>Senha da API *</label>
-                  <input id="integrationApiPassword" type="password" placeholder="Informe a senha da API" autocomplete="current-password">
-                  <span id="integrationPasswordHint" class="small muted">A senha ficará disponível somente nesta sessão do navegador.</span>
-                </div>
-                <div class="field full">
-                  <label>URL base da API SolarZ *</label>
-                  <input id="integrationConnectorUrl" type="url" value="https://app.solarz.com.br" placeholder="https://app.solarz.com.br" autocomplete="off">
-                  <span class="small muted">Use somente o endereço base. A autenticação Basic será enviada diretamente pelo HTML.</span>
-                </div>
-                <div class="field">
-                  <label>Identificação da conta</label>
-                  <input id="integrationAccountLabel" type="text" placeholder="Ex.: IG Energia">
-                </div>
-                <div class="field">
-                  <label>Clientes a importar</label>
-                  <select id="integrationClientSource">
-                    <option value="both">Todos os clientes</option>
-                    <option value="persons">Somente documentos com até 11 dígitos</option>
-                    <option value="organizations">Somente documentos com 14 dígitos</option>
-                  </select>
-                </div>
-                <div class="field full">
-                  <label class="switch-row">
-                    <span><strong style="display:block;font-size:11px">Integração ativa</strong><span class="small muted">Permite testar a conexão e sincronizar clientes.</span></span>
-                    <input id="integrationEnabled" type="checkbox">
-                  </label>
-                </div>
-              </div>
-
-              <div class="integration-note">
-                A autenticação é feita diretamente no navegador com usuário e senha da API. Por segurança, a senha não é gravada no banco de dados: será necessário informá-la novamente ao fechar esta aba ou encerrar a sessão.
-              </div>
-
-              <div class="integration-actions">
-                <button id="saveIntegrationBtn" type="submit" class="btn btn-primary">Salvar integração</button>
-                <button id="testIntegrationBtn" type="button" class="btn btn-ghost">Testar conexão</button>
-                <button id="syncIntegrationBtn" type="button" class="btn btn-accent">Sincronizar clientes agora</button>
-              </div>
-
-              <div class="integration-summary">
-                <div class="integration-summary-item"><span>Último teste</span><strong id="integrationLastTest">Nunca realizado</strong></div>
-                <div class="integration-summary-item"><span>Última sincronização</span><strong id="integrationLastSync">Nunca realizada</strong></div>
-                <div class="integration-summary-item"><span>Resultado</span><strong id="integrationLastResult">Nenhum resultado disponível</strong></div>
-              </div>
-            </form>
-          </div>
         </section>
 
         <!-- Detalhe do cliente -->
@@ -1619,6 +1536,8 @@
       apiKey: decodeValue("QUl6YVN5QzREWThTT0tLU0NpcmNibzJrU3EwZW4ydmQxbkxMWHZj"),
       authDomain: decodeValue("bW9uaXRvcmFtZW50by1iZGIzNi5maXJlYmFzZWFwcC5jb20="),
       projectId: decodeValue("bW9uaXRvcmFtZW50by1iZGIzNg=="),
+      // Realtime Database. Se o banco foi criado em outra região, substitua pela URL exibida no Console Firebase.
+      databaseURL: "https://monitoramento-bdb36-default-rtdb.firebaseio.com",
       storageBucket: decodeValue("bW9uaXRvcmFtZW50by1iZGIzNi5maXJlYmFzZXN0b3JhZ2UuYXBw"),
       messagingSenderId: decodeValue("NzExMjkxODczMTQ="),
       appId: decodeValue("MTo3MTEyOTE4NzMxNDp3ZWI6MmQzNjRjYTA2ZmI2YjI0YzcwNjE2Yg==")
@@ -1673,7 +1592,6 @@
       servicesRegister: "Registrar benefícios",
       reportsExport: "Exportar relatórios",
       usersManage: "Gerenciar usuários",
-      integrationsManage: "Gerenciar integrações",
       plansManage: "Gerenciar planos e benefícios"
     };
     const ROLE_LABELS = {
@@ -1715,23 +1633,11 @@
       selectedContractToken: null,
       selectedContractClientId: null,
       publicContract: null,
-      integration: {
-        enabled: false,
-        connectorUrl: "",
-        apiUsername: "",
-        credentialsConfigured: false,
-        accountLabel: "",
-        clientSource: "both",
-        lastTestAt: null,
-        lastTestStatus: "",
-        lastSyncAt: null,
-        lastSyncResult: ""
-      },
       confirmCallback: null,
       syncedContractTokens: new Set(),
       syncedContractClientDataTokens: new Set(),
       contractClientDataSyncRunning: false,
-      importPlanCleanupRunning: false,
+      clientBaseCleanupRunning: false,
       unsubscribers: []
     };
 
@@ -1985,8 +1891,11 @@
       return hydrated;
     }
     const getContractForClient = (client) => {
-      const token=client?.contract?.token;
-      const contract=(token && state.contracts.find(c=>c.token===token)) || client?.contract || null;
+      const token=String(client?.contract?.token||"").trim();
+      // Resumos antigos/importados sem token não representam um contrato público válido.
+      // Nesses casos o cliente deve permanecer como "Não gerado" até criar o contrato no Realtime Database.
+      if(!token) return null;
+      const contract=state.contracts.find(c=>c.token===token) || client.contract || null;
       return contract?hydrateContractClientData(contract,client):null;
     };
     const contractBadge = (contract) => {
@@ -2050,12 +1959,6 @@
     };
     const daysBetween = (from, to) => Math.ceil((parseDate(to)-parseDate(from))/(1000*60*60*24));
     const hasActivePlan = (client) => client?.planActive !== false && !!client?.planStart;
-    const hasPlanContract = (client) => !!client?.contract?.token;
-    const shouldResetImportedPlan = (client) => client?.source === "SolarZ"
-      && !!client?.planStart
-      && !client?.planActivatedAt
-      && client?.planActivationSource !== "manual"
-      && !hasPlanContract(client);
     const getPlanInfo = (client) => {
       if(!hasActivePlan(client)) return {start:null,end:null,days:null,progress:0,status:"no_plan"};
       const start = client.planStart;
@@ -2104,31 +2007,147 @@
       const h=new Date().getHours(); return h<12?"Bom dia":h<18?"Boa tarde":"Boa noite";
     }
 
+    function createRealtimeCompat(dbApi){
+      const cleanForRtdb = value => {
+        if(value === undefined) return undefined;
+        if(value === null || typeof value !== "object") return value;
+        if(value instanceof Date) return value.toISOString();
+        if(Array.isArray(value)) return value.map(item=>cleanForRtdb(item)).filter(item=>item!==undefined);
+        const result={};
+        Object.entries(value).forEach(([key,item])=>{
+          const cleaned=cleanForRtdb(item);
+          if(cleaned!==undefined)result[key]=cleaned;
+        });
+        return result;
+      };
+      const pathOf = target => String(target?.path||"").replace(/^\/+|\/+$/g,"");
+      const makeRef = (db,path,kind="doc") => ({__rtdbCompat:true,db,path:String(path||"").replace(/^\/+|\/+$/g,""),kind,id:String(path||"").split("/").filter(Boolean).pop()||""});
+      const nativeRef = target => dbApi.ref(target.db,pathOf(target));
+      const doc = (base,...segments) => {
+        if(base?.__rtdbCompat){
+          if(base.kind==="collection" && !segments.length){
+            const generated=dbApi.push(nativeRef(base));
+            return makeRef(base.db,[pathOf(base),generated.key].filter(Boolean).join("/"),"doc");
+          }
+          return makeRef(base.db,[pathOf(base),...segments].filter(Boolean).join("/"),"doc");
+        }
+        return makeRef(base,segments.join("/"),"doc");
+      };
+      const collection = (base,...segments) => {
+        if(base?.__rtdbCompat)return makeRef(base.db,[pathOf(base),...segments].filter(Boolean).join("/"),"collection");
+        return makeRef(base,segments.join("/"),"collection");
+      };
+      const orderBy = (field,direction="asc") => ({__orderBy:true,field,direction});
+      const query = (base,...constraints) => ({__rtdbQuery:true,base,order:constraints.find(item=>item?.__orderBy)||null});
+      const rawValueSort = value => {
+        if(value===null||value===undefined)return -Infinity;
+        if(typeof value==="number")return value;
+        const date=toDateObject(value);
+        if(date)return date.getTime();
+        return String(value).toLocaleLowerCase("pt-BR");
+      };
+      const makeDocSnapshot = (id,value) => ({
+        id,
+        exists:()=>value!==null && value!==undefined,
+        data:()=>value
+      });
+      const docsFromValue = (value,order=null) => {
+        let docs=Object.entries(value||{}).map(([id,data])=>makeDocSnapshot(id,data));
+        if(order?.field){
+          docs.sort((a,b)=>{
+            const av=rawValueSort(a.data()?.[order.field]);
+            const bv=rawValueSort(b.data()?.[order.field]);
+            if(typeof av==="number" && typeof bv==="number")return av-bv;
+            return String(av).localeCompare(String(bv),"pt-BR",{numeric:true,sensitivity:"base"});
+          });
+          if(order.direction==="desc")docs.reverse();
+        }
+        return docs;
+      };
+      const getDoc = async target => {
+        const snap=await dbApi.get(nativeRef(target));
+        return makeDocSnapshot(target.id,snap.exists()?snap.val():null);
+      };
+      const getDocs = async target => {
+        const descriptor=target?.__rtdbQuery?target:{base:target,order:null};
+        const snap=await dbApi.get(nativeRef(descriptor.base));
+        return {docs:docsFromValue(snap.exists()?snap.val():{},descriptor.order)};
+      };
+      const setDoc = async (target,data,options={}) => {
+        const cleaned=cleanForRtdb(data);
+        if(options?.merge)return dbApi.update(nativeRef(target),cleaned||{});
+        return dbApi.set(nativeRef(target),cleaned??null);
+      };
+      const updateDoc = async (target,data) => dbApi.update(nativeRef(target),cleanForRtdb(data)||{});
+      const deleteDoc = async target => dbApi.remove(nativeRef(target));
+      const addDoc = async (collectionRef,data) => {
+        const generated=dbApi.push(nativeRef(collectionRef));
+        await dbApi.set(generated,cleanForRtdb(data)||{});
+        return makeRef(collectionRef.db,[pathOf(collectionRef),generated.key].filter(Boolean).join("/"),"doc");
+      };
+      const onSnapshot = (target,onNext,onError) => {
+        const descriptor=target?.__rtdbQuery?target:{base:target,order:null};
+        const source=descriptor.base;
+        return dbApi.onValue(nativeRef(source),snap=>{
+          if(source.kind==="doc")onNext(makeDocSnapshot(source.id,snap.exists()?snap.val():null));
+          else onNext({docs:docsFromValue(snap.exists()?snap.val():{},descriptor.order)});
+        },onError);
+      };
+      const writeBatch = db => {
+        const operations=[];
+        return {
+          set(target,data,options={}){operations.push({type:options?.merge?"merge":"set",target,data});return this;},
+          update(target,data){operations.push({type:"merge",target,data});return this;},
+          delete(target){operations.push({type:"delete",target});return this;},
+          async commit(){
+            const updates={};
+            for(const op of operations){
+              const basePath=pathOf(op.target);
+              if(op.type==="delete"){
+                updates[basePath]=null;
+                continue;
+              }
+              const cleaned=cleanForRtdb(op.data)||{};
+              if(op.type==="set"){
+                updates[basePath]=cleaned;
+              }else{
+                Object.entries(cleaned).forEach(([key,value])=>{updates[[basePath,key].filter(Boolean).join("/")]=value;});
+              }
+            }
+            return dbApi.update(dbApi.ref(db),updates);
+          }
+        };
+      };
+      return {
+        doc,collection,query,orderBy,onSnapshot,getDoc,getDocs,setDoc,updateDoc,deleteDoc,addDoc,writeBatch,
+        serverTimestamp:dbApi.serverTimestamp
+      };
+    }
+
     async function initService(){
       try {
         const provider = ["fire", "base"].join("");
-        const dataModule = ["fire", "store"].join("");
         const sdkRoot = `https://www.gstatic.com/${provider}js/${SDK_VERSION}`;
         const appApi = await import(`${sdkRoot}/${provider}-app.js`);
         const authApi = await import(`${sdkRoot}/${provider}-auth.js`);
-        const dbApi = await import(`${sdkRoot}/${provider}-${dataModule}.js`);
+        const dbApi = await import(`${sdkRoot}/${provider}-database.js`);
         const app = appApi.initializeApp(serviceConfig);
         const userCreationApp = appApi.initializeApp(serviceConfig,"ig-user-creation");
         state.auth = authApi.getAuth(app);
-        state.db = dbApi[`get${["Fire","store"].join("")}`](app);
+        state.db = dbApi.getDatabase(app,serviceConfig.databaseURL);
         state.userCreationAuth = authApi.getAuth(userCreationApp);
-        state.userCreationDb = dbApi[`get${["Fire","store"].join("")}`](userCreationApp);
-        state.serviceApi = {...authApi,...dbApi};
+        state.userCreationDb = dbApi.getDatabase(userCreationApp,serviceConfig.databaseURL);
+        state.serviceApi = {...authApi,...createRealtimeCompat(dbApi)};
         state.connected = true;
         $("connectionDot").classList.remove("demo");
         $("connectionText").textContent="Sistema online";
-        $("systemStatusPanel").innerHTML="<strong>Sistema online.</strong><br>Dados sincronizados com o ambiente online.";
+        $("systemStatusPanel").innerHTML="<strong>Sistema online.</strong><br>Dados sincronizados com o Firebase Realtime Database.";
         if(ACCEPT_TOKEN) await loadPublicContract(ACCEPT_TOKEN);
         else authApi.onAuthStateChanged(state.auth, handleAuthState);
       } catch(err) {
         console.error(err);
         state.connected = false;
-        $("connectionText").textContent="Serviço indisponível";
+        $("connectionText").textContent="Realtime Database indisponível";
         $("systemStatusPanel").innerHTML="<strong>Falha na conexão.</strong><br>Não foi possível acessar o serviço de dados. Verifique a conexão e tente novamente.";
         showAuth();
         showToast("Não foi possível conectar ao sistema. Recarregue a página e tente novamente.","error");
@@ -2137,12 +2156,22 @@
 
     async function handleAuthState(user){
       if(!user){ showAuth(); return; }
-      const {doc,getDoc,setDoc,serverTimestamp}=state.serviceApi;
+      const {doc,collection,getDoc,getDocs,setDoc,serverTimestamp}=state.serviceApi;
       const ref=doc(state.db,"users",user.uid);
       let snap=await getDoc(ref);
       if(!snap.exists()){
-        await setDoc(ref,{name:user.displayName||user.email.split("@")[0],email:user.email,role:"viewer",active:false,permissions:ROLE_PERMISSIONS.viewer,createdAt:serverTimestamp()});
+        const usersSnapshot=await getDocs(collection(state.db,"users"));
+        const firstUser=usersSnapshot.docs.length===0;
+        await setDoc(ref,{
+          name:user.displayName||user.email.split("@")[0],
+          email:user.email,
+          role:firstUser?"master":"viewer",
+          active:firstUser,
+          permissions:firstUser?ROLE_PERMISSIONS.master:ROLE_PERMISSIONS.viewer,
+          createdAt:serverTimestamp()
+        });
         snap=await getDoc(ref);
+        if(firstUser)showToast("Primeiro acesso configurado como administrador Master.");
       }
       const profile={uid:user.uid,...snap.data()};
       if(profile.planSettings){
@@ -2179,7 +2208,6 @@
     function showApp(){
       $("contractAcceptanceScreen").classList.add("hidden");$("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");
       loadLocalPlanSettings();
-      loadLocalIntegrationSettings();
       updateUserUI();applyPermissionUI();renderAll();
     }
     function updateUserUI(){
@@ -2417,431 +2445,58 @@
       showToast("Valores padrão carregados. Clique em salvar para confirmar.");
     }
 
-    const SOLARZ_SESSION_PASSWORD_KEY = "ig_solarz_api_password";
-    const SOLARZ_LOCAL_SETTINGS_KEY = "ig_solarz_integration_settings";
-    function loadLocalIntegrationSettings(){
+    const CLIENT_BASE_CLEANUP_MARKER = "keep-nivaldo-2026-08-18-v1";
+    const KEEP_CLIENT_NAME = "Nivaldo Heidemann";
+    const KEEP_CLIENT_DOCUMENT = "65663551972";
+    const normalizeClientIdentityName = (value="") => String(value||"")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/\s+/g," ").trim().toLowerCase();
+    function findNivaldoClient(list=[]){
+      return list.find(client=>documentDigits(client.document)===KEEP_CLIENT_DOCUMENT)
+        || list.find(client=>normalizeClientIdentityName(client.name)===normalizeClientIdentityName(KEEP_CLIENT_NAME))
+        || null;
+    }
+    async function cleanupClientBaseKeepOnlyNivaldo(allClients=[]){
+      if(state.clientBaseCleanupRunning||!state.connected||!state.currentProfile||!can("clientsDelete"))return;
+      state.clientBaseCleanupRunning=true;
       try{
-        const stored=localStorage.getItem(SOLARZ_LOCAL_SETTINGS_KEY);
-        if(stored) state.integration={...state.integration,...JSON.parse(stored)};
-      }catch(err){console.warn("Não foi possível carregar a configuração local da integração.",err);}
-    }
-    function saveLocalIntegrationSettings(){
-      const cfg={
-        enabled:!!state.integration?.enabled,
-        connectorUrl:state.integration?.connectorUrl||"",
-        apiUsername:state.integration?.apiUsername||"",
-        credentialsConfigured:!!state.integration?.credentialsConfigured,
-        accountLabel:state.integration?.accountLabel||"",
-        clientSource:state.integration?.clientSource||"both",
-        lastTestAt:timestampISO(state.integration?.lastTestAt)||state.integration?.lastTestAt||null,
-        lastTestStatus:state.integration?.lastTestStatus||"",
-        lastTestMessage:state.integration?.lastTestMessage||"",
-        lastSyncAt:timestampISO(state.integration?.lastSyncAt)||state.integration?.lastSyncAt||null,
-        lastSyncResult:state.integration?.lastSyncResult||"",
-        lastSyncStatus:state.integration?.lastSyncStatus||""
-      };
-      localStorage.setItem(SOLARZ_LOCAL_SETTINGS_KEY,JSON.stringify(cfg));
-    }
-    function getSolarZSessionPassword(){
-      return $("integrationApiPassword")?.value || sessionStorage.getItem(SOLARZ_SESSION_PASSWORD_KEY) || "";
-    }
-    function normalizeSolarZBaseUrl(value){
-      const raw=String(value||"").trim().replace(/\/$/,"");
-      if(!raw) return "";
-      try{
-        const url=new URL(raw);
-        return `${url.protocol}//${url.host}`;
-      }catch(_){return raw;}
-    }
-    function basicAuthValue(username,password){
-      const value=`${username}:${password}`;
-      return "Basic "+btoa(unescape(encodeURIComponent(value)));
-    }
-    function integrationConfigured(){
-      const enabled = $("integrationEnabled") ? $("integrationEnabled").checked : !!state.integration?.enabled;
-      const connectorUrl = normalizeSolarZBaseUrl($("integrationConnectorUrl")?.value || state.integration?.connectorUrl || "");
-      const apiUsername = $("integrationApiUsername")?.value.trim() || state.integration?.apiUsername || "";
-      return !!(enabled && connectorUrl && apiUsername && getSolarZSessionPassword());
-    }
-    function updateIntegrationActionButtons(){
-      const allowed=can("integrationsManage");
-      const connectorUrl=normalizeSolarZBaseUrl($("integrationConnectorUrl")?.value || state.integration?.connectorUrl || "");
-      const apiUsername=$("integrationApiUsername")?.value.trim() || state.integration?.apiUsername || "";
-      const password=getSolarZSessionPassword();
-      if($("testIntegrationBtn")) $("testIntegrationBtn").disabled=!allowed||!connectorUrl||!apiUsername||!password;
-      if($("syncIntegrationBtn")) $("syncIntegrationBtn").disabled=!allowed||!integrationConfigured();
-    }
-    function integrationDate(value){
-      const iso=timestampISO(value);
-      return iso ? formatDateTime(iso) : "Nunca realizado";
-    }
-    function renderIntegrationSettings(){
-      const cfg=state.integration||{};
-      if(!$("integrationConnectorUrl")) return;
-      const sessionPassword=getSolarZSessionPassword();
-      $("integrationConnectorUrl").value=cfg.connectorUrl||"https://app.solarz.com.br";
-      $("integrationApiUsername").value=cfg.apiUsername||"";
-      if(!$("integrationApiPassword").value) $("integrationApiPassword").value="";
-      $("integrationApiPassword").placeholder=sessionPassword ? "Senha carregada nesta sessão" : "Informe a senha da API";
-      $("integrationPasswordHint").textContent=sessionPassword
-        ? "A senha está carregada somente nesta aba. Digite outra senha para substituí-la."
-        : "Informe a senha para autenticar diretamente na API nesta sessão.";
-      $("integrationAccountLabel").value=cfg.accountLabel||"";
-      $("integrationClientSource").value=cfg.clientSource||"both";
-      $("integrationEnabled").checked=!!cfg.enabled;
-      $("integrationLastTest").textContent=integrationDate(cfg.lastTestAt);
-      $("integrationLastSync").textContent=integrationDate(cfg.lastSyncAt);
-      $("integrationLastResult").textContent=cfg.lastSyncResult||cfg.lastTestStatus||"Nenhum resultado disponível";
-      const badge=$("integrationStatusBadge");
-      if(!cfg.connectorUrl||!cfg.apiUsername){
-        badge.className="badge gray";badge.innerHTML='<span class="status-dot"></span>Não configurada';
-      }else if(!sessionPassword){
-        badge.className="badge warning";badge.innerHTML='<span class="status-dot"></span>Senha da sessão pendente';
-      }else if(!cfg.enabled){
-        badge.className="badge warning";badge.innerHTML='<span class="status-dot"></span>Desativada';
-      }else if(cfg.lastTestStatus==="Conexão confirmada"){
-        badge.className="badge success";badge.innerHTML='<span class="status-dot"></span>Conectada';
-      }else{
-        badge.className="badge info";badge.innerHTML='<span class="status-dot"></span>Configurada';
-      }
-      const allowed=can("integrationsManage");
-      ["integrationConnectorUrl","integrationApiUsername","integrationApiPassword","integrationAccountLabel","integrationClientSource","integrationEnabled","saveIntegrationBtn","testIntegrationBtn","syncIntegrationBtn"].forEach(id=>{
-        if($(id)) $(id).disabled=!allowed;
-      });
-      updateIntegrationActionButtons();
-    }
-    async function saveIntegrationSettings(event){
-      event.preventDefault();
-      if(!can("integrationsManage")) return;
-      const connectorUrl=normalizeSolarZBaseUrl($("integrationConnectorUrl").value);
-      const apiUsername=$("integrationApiUsername").value.trim();
-      const apiPassword=$("integrationApiPassword").value || sessionStorage.getItem(SOLARZ_SESSION_PASSWORD_KEY) || "";
-      if(!connectorUrl||!/^https:\/\//i.test(connectorUrl)){
-        showToast("Informe uma URL segura iniciada por https://.","error");return;
-      }
-      if(!apiUsername){showToast("Informe o usuário da API.","error");return;}
-      if(!apiPassword){showToast("Informe a senha da API para autenticar nesta sessão.","error");return;}
-      try{
-        sessionStorage.setItem(SOLARZ_SESSION_PASSWORD_KEY,apiPassword);
-        const data={
-          provider:"SolarZ",
-          authMethod:"basic-direct",
-          enabled:$("integrationEnabled").checked,
-          connectorUrl,
-          apiUsername,
-          credentialsConfigured:true,
-          accountLabel:$("integrationAccountLabel").value.trim(),
-          clientSource:$("integrationClientSource").value,
-          updatedBy:state.currentProfile?.name||state.currentProfile?.email||"Operador",
-          updatedAt:new Date().toISOString()
-        };
-        state.integration={...state.integration,...data};
-        saveLocalIntegrationSettings();
-        $("integrationApiPassword").value="";
-        renderIntegrationSettings();
-        showToast("Integração salva neste navegador. A senha permanece ativa somente nesta sessão.");
-      }catch(err){
-        console.error(err);showToast("Não foi possível salvar a integração neste navegador: "+err.message,"error");
-      }
-    }
-    async function solarZRequest(path,options={}){
-      const base=normalizeSolarZBaseUrl($("integrationConnectorUrl").value||state.integration?.connectorUrl||"https://app.solarz.com.br");
-      const username=$("integrationApiUsername").value.trim()||state.integration?.apiUsername||"";
-      const password=getSolarZSessionPassword();
-      if(!base) throw new Error("Informe a URL base da API SolarZ.");
-      if(!username||!password) throw new Error("Informe usuário e senha da API nesta sessão.");
-      const headers={
-        Accept:"application/json",
-        Authorization:basicAuthValue(username,password),
-        ...(options.body?{"Content-Type":"application/json"}:{}),
-        ...(options.headers||{})
-      };
-      let response;
-      try{
-        response=await fetch(`${base}${path}`,{...options,headers,mode:"cors"});
-      }catch(err){
-        throw new Error("O navegador bloqueou a chamada direta. Verifique se a API permite CORS para o domínio deste CRM.");
-      }
-      const text=await response.text();
-      let payload=text;
-      try{payload=text?JSON.parse(text):{};}catch(_){ }
-      if(response.status===401) throw new Error("Usuário ou senha da API inválidos (Unauthorized).");
-      if(response.status===403) throw new Error("A conta não possui permissão para consultar este recurso.");
-      if(!response.ok){
-        const message=typeof payload==="object"?(payload.message||payload.error):String(payload||"");
-        throw new Error(message||`Falha de comunicação (${response.status})`);
-      }
-      return payload;
-    }
-    async function testIntegration(){
-      if(!can("integrationsManage")) return;
-      const btn=$("testIntegrationBtn"),original=btn.textContent;btn.disabled=true;btn.textContent="Testando...";
-      try{
-        const result=await solarZRequest("/openApi/seller/clients",{method:"GET"});
-        const count=Array.isArray(result)?result.length:(Array.isArray(result?.content)?result.content.length:0);
-        const message=`Conexão confirmada${count?` · ${count} clientes retornados`:""}`;
-        state.integration={
-          ...state.integration,
-          lastTestAt:new Date().toISOString(),
-          lastTestStatus:"Conexão confirmada",
-          lastTestMessage:message
-        };
-        saveLocalIntegrationSettings();
-        showToast(message);
-      }catch(err){
-        state.integration={
-          ...state.integration,
-          lastTestAt:new Date().toISOString(),
-          lastTestStatus:"Falha no teste",
-          lastTestMessage:err.message
-        };
-        saveLocalIntegrationSettings();
-        showToast("Falha no teste: "+err.message,"error");
-      }finally{btn.textContent=original;renderIntegrationSettings();}
-    }
-    function extractSolarZItems(payload){
-      if(Array.isArray(payload)) return payload;
-      if(Array.isArray(payload?.content)) return payload.content;
-      if(Array.isArray(payload?.items)) return payload.items;
-      if(Array.isArray(payload?.data)) return payload.data;
-      if(Array.isArray(payload?.results)) return payload.results;
-      return [];
-    }
-    async function fetchSolarZClientDirectory(){
-      const payload=await solarZRequest("/openApi/seller/clients",{method:"GET"});
-      return extractSolarZItems(payload);
-    }
-    function solarZClientFromDirectory(item){
-      const solarzClientId=item?.id??item?.clientId??null;
-      const name=String(item?.name||item?.nome||"Cliente SolarZ").trim();
-      const email=String(item?.email||"").trim();
-      const document=String(item?.cpf||item?.cnpj||item?.document||item?.documento||"").trim();
-      const phone=String(item?.telefone||item?.phone||"").trim();
-      const key=solarzClientId!=null?`client-${solarzClientId}`:(documentDigits(document)||email.toLowerCase()||`directory-${uid()}`);
-      return {key,solarzClientId,name,document,email,phone,city:"",address:"",plantIds:[],plantNames:[]};
-    }
-    async function fetchAllSolarZPlants(onProgress){
-      const all=[];
-      const seen=new Set();
-      const pageSize=100;
-      let previousSignature="";
-      for(let page=1;page<=1000;page++){
-        const payload=await solarZRequest("/openApi/seller/plant/list",{
-          method:"POST",
-          body:JSON.stringify({page:String(page),pageSize:String(pageSize)})
-        });
-        const items=extractSolarZItems(payload);
-        if(!items.length) break;
+        const {doc,getDoc,setDoc,writeBatch,serverTimestamp}=state.serviceApi;
+        const markerRef=doc(state.db,"settings",CLIENT_BASE_CLEANUP_MARKER);
+        const markerSnap=await getDoc(markerRef);
+        if(markerSnap.exists()&&markerSnap.data()?.completed===true)return;
 
-        let added=0;
-        const pageKeys=[];
-        items.forEach((item,index)=>{
-          const itemKey=String(item?.id??item?.plantId??`${page}-${index}-${item?.name||item?.denominacao||""}`);
-          pageKeys.push(itemKey);
-          if(!seen.has(itemKey)){
-            seen.add(itemKey);
-            all.push(item);
-            added++;
-          }
-        });
-        const signature=pageKeys.join("|");
-        if(typeof onProgress==="function") onProgress({page,count:all.length,total:Number(payload?.totalElements||0)});
-
-        // A documentação da API orienta continuar até receber uma página vazia.
-        // Não interromper quando a página vier com menos itens que pageSize,
-        // pois a API pode limitar internamente cada resposta.
-        if(payload?.last===true) break;
-        if(Number(payload?.totalPages)>0&&page>=Number(payload.totalPages)) break;
-        if(page>1&&added===0&&signature===previousSignature) break;
-        previousSignature=signature;
-      }
-      return all;
-    }
-    function solarZClientFromPlant(plant){
-      const customer=plant?.cliente||plant?.client||plant?.owner||{};
-      const address=plant?.endereco||plant?.address||{};
-      const solarzClientId=customer?.id??customer?.clientId??null;
-      const document=String(customer.cpf||customer.cnpj||customer.document||customer.documento||"").trim();
-      const name=String(customer.nome||customer.name||plant?.name||plant?.denominacao||"Cliente SolarZ").trim();
-      const email=String(customer.email||"").trim();
-      const phone=String(customer.telefone||customer.phone||"").trim();
-      const city=String(address.cidade||address.city||"").trim();
-      const stateCode=String(address.siglaEstado||address.state||"").trim();
-      const addressText=[address.logradouro||address.street,address.numero||address.number,address.bairro||address.district,address.cep||address.zipCode,stateCode].filter(Boolean).join(" · ");
-      const key=solarzClientId!=null?`client-${solarzClientId}`:(documentDigits(document)||email.toLowerCase()||`plant-${plant?.id||uid()}`);
-      return {key,solarzClientId,name,document,email,phone,city,address:addressText,plantId:plant?.id||null,plantName:plant?.name||plant?.denominacao||""};
-    }
-    function mergeSolarZClients(directoryItems,plants){
-      const grouped=new Map();
-      const emailIndex=new Map();
-      const documentIndex=new Map();
-
-      directoryItems.forEach(item=>{
-        const record=solarZClientFromDirectory(item);
-        grouped.set(record.key,record);
-        if(record.email&&!emailIndex.has(record.email.toLowerCase())) emailIndex.set(record.email.toLowerCase(),record.key);
-        const docKey=documentDigits(record.document);
-        if(docKey&&!documentIndex.has(docKey)) documentIndex.set(docKey,record.key);
-      });
-
-      plants.forEach(plant=>{
-        const item=solarZClientFromPlant(plant);
-        const emailKey=item.email.toLowerCase();
-        const docKey=documentDigits(item.document);
-        let targetKey=grouped.has(item.key)?item.key:null;
-        if(!targetKey&&emailKey&&emailIndex.has(emailKey)) targetKey=emailIndex.get(emailKey);
-        if(!targetKey&&docKey&&documentIndex.has(docKey)) targetKey=documentIndex.get(docKey);
-        if(!targetKey) targetKey=item.key;
-
-        const current=grouped.get(targetKey)||{
-          ...item,
-          key:targetKey,
-          plantIds:[],
-          plantNames:[]
-        };
-        if(item.solarzClientId!=null&&current.solarzClientId==null) current.solarzClientId=item.solarzClientId;
-        if(item.plantId!=null) current.plantIds.push(item.plantId);
-        if(item.plantName) current.plantNames.push(item.plantName);
-        ["name","document","email","phone","city","address"].forEach(k=>{if(!current[k]&&item[k])current[k]=item[k];});
-        current.plantIds=Array.from(new Set(current.plantIds));
-        current.plantNames=Array.from(new Set(current.plantNames));
-        grouped.set(targetKey,current);
-        if(current.email&&!emailIndex.has(current.email.toLowerCase())) emailIndex.set(current.email.toLowerCase(),targetKey);
-        const currentDoc=documentDigits(current.document);
-        if(currentDoc&&!documentIndex.has(currentDoc)) documentIndex.set(currentDoc,targetKey);
-      });
-      return [...grouped.values()];
-    }
-    async function writeSolarZClients(records,onProgress){
-      let created=0,updated=0,skipped=0;
-      const existingBySolarz=new Map();
-      const existingByDocument=new Map();
-      const existingByEmail=new Map();
-      const claimedExistingIds=new Set();
-      const addToListMap=(map,key,value)=>{
-        if(!key) return;
-        const list=map.get(key)||[];
-        list.push(value);
-        map.set(key,list);
-      };
-      state.clients.forEach(client=>{
-        if(client.solarzKey) existingBySolarz.set(String(client.solarzKey),client);
-        addToListMap(existingByDocument,documentDigits(client.document),client);
-        addToListMap(existingByEmail,String(client.email||"").toLowerCase(),client);
-      });
-      const firstAvailable=(list=[])=>list.find(item=>!claimedExistingIds.has(item.id));
-      const operations=[];
-      for(const record of records){
-        if(!record.name){skipped++;continue;}
-        const docKey=documentDigits(record.document);
-        const emailKey=String(record.email||"").toLowerCase();
-        let existing=existingBySolarz.get(String(record.key));
-        if(existing&&claimedExistingIds.has(existing.id)) existing=null;
-        if(!existing&&docKey) existing=firstAvailable(existingByDocument.get(docKey));
-        if(!existing&&emailKey) existing=firstAvailable(existingByEmail.get(emailKey));
-        if(existing) claimedExistingIds.add(existing.id);
-
-        const sourceData={
-          name:record.name,
-          document:record.document||existing?.document||"",
-          documentType:getClientType(record.document||existing?.document||""),
-          phone:record.phone||existing?.phone||"",
-          email:record.email||existing?.email||"",
-          city:record.city||existing?.city||"",
-          address:record.address||existing?.address||"",
-          solarzKey:record.key,
-          solarzClientId:record.solarzClientId??existing?.solarzClientId??null,
-          solarzPlantIds:Array.from(new Set([...(existing?.solarzPlantIds||[]),...(record.plantIds||[])])),
-          solarzPlantNames:Array.from(new Set([...(existing?.solarzPlantNames||[]),...(record.plantNames||[])])),
-          source:"SolarZ",
-          sourceUpdatedAt:new Date().toISOString()
-        };
-        if(existing && shouldResetImportedPlan(existing)){
-          Object.assign(sourceData,{
-            planActive:false,
-            planStart:null,
-            planEnd:null,
-            planPrice:null,
-            planActivationSource:null,
-            planActivatedAt:null
-          });
+        const keepClient=findNivaldoClient(allClients);
+        if(!keepClient){
+          showToast("Nivaldo Heidemann não foi localizado. Nenhum cliente foi excluído.","error");
+          return;
         }
-        if(existing){operations.push({type:"update",id:existing.id,data:sourceData});updated++;}
-        else{
-          operations.push({type:"create",id:null,data:{...sourceData,planActive:false,services:emptyServices(),paymentStatus:"pending",notes:"Importado da SolarZ. Plano de monitoramento ainda não contratado."}});created++;
-        }
-      }
-      const {doc,collection,writeBatch,serverTimestamp}=state.serviceApi;
-      const totalBatches=Math.ceil(operations.length/400)||1;
-      for(let i=0,batchNumber=1;i<operations.length;i+=400,batchNumber++){
-        const batch=writeBatch(state.db);
-        operations.slice(i,i+400).forEach(op=>{
-          if(op.type==="update") batch.set(doc(state.db,"clients",op.id),{...op.data,updatedAt:serverTimestamp()},{merge:true});
-          else batch.set(doc(collection(state.db,"clients")),{...op.data,createdAt:serverTimestamp(),updatedAt:serverTimestamp()});
-        });
-        if(typeof onProgress==="function") onProgress({processed:Math.min(i+400,operations.length),total:operations.length,batch:batchNumber,totalBatches});
-        await batch.commit();
-      }
-      return {created,updated,skipped,total:records.length};
-    }
-    async function syncIntegrationClients(){
-      if(!can("integrationsManage")) return;
-      if(!$("integrationEnabled").checked){showToast("Ative e salve a integração antes de sincronizar.","error");return;}
-      const btn=$("syncIntegrationBtn"),original=btn.textContent;btn.disabled=true;btn.textContent="Carregando clientes...";
-      try{
-        const directory=await fetchSolarZClientDirectory();
-        btn.textContent=`${directory.length} clientes encontrados · buscando dados...`;
-        const plants=await fetchAllSolarZPlants(({page,count,total})=>{
-          btn.textContent=`Buscando usinas · página ${page} · ${count}${total?`/${total}`:""}`;
-        });
-        let records=mergeSolarZClients(directory,plants);
-        const source=$("integrationClientSource").value||state.integration?.clientSource||"both";
-        if(source==="persons") records=records.filter(r=>documentDigits(r.document).length!==14);
-        if(source==="organizations") records=records.filter(r=>documentDigits(r.document).length===14);
-        const result=await writeSolarZClients(records,({processed,total})=>{
-          btn.textContent=`Salvando clientes · ${processed}/${total}`;
-        });
-        const summary=`${result.total} clientes processados · ${result.created} novos · ${result.updated} atualizados · ${result.skipped} ignorados`;
-        state.integration={...state.integration,lastSyncAt:new Date().toISOString(),lastSyncResult:summary,lastSyncStatus:"success"};
-        saveLocalIntegrationSettings();
-        await logActivity("integration","", "Clientes sincronizados com a SolarZ", summary);
-        showToast(summary);
-      }catch(err){
-        state.integration={...state.integration,lastSyncAt:new Date().toISOString(),lastSyncResult:err.message,lastSyncStatus:"error"};
-        saveLocalIntegrationSettings();
-        showToast("Não foi possível sincronizar: "+err.message,"error");
-      }finally{btn.textContent=original;renderIntegrationSettings();}
-    }
 
-    async function cleanupImportedPlanDates(){
-      if(state.importPlanCleanupRunning || !state.connected || !can("clientsEdit")) return;
-      const targets=state.clients.filter(shouldResetImportedPlan);
-      if(!targets.length) return;
-      state.importPlanCleanupRunning=true;
-      try{
-        const {doc,writeBatch,serverTimestamp}=state.serviceApi;
-        for(let i=0;i<targets.length;i+=400){
+        const removeClients=allClients.filter(client=>client.id!==keepClient.id);
+        for(let i=0;i<removeClients.length;i+=400){
           const batch=writeBatch(state.db);
-          targets.slice(i,i+400).forEach(client=>{
-            batch.update(doc(state.db,"clients",client.id),{
-              planActive:false,
-              planStart:null,
-              planEnd:null,
-              planPrice:null,
-              planActivationSource:null,
-              planActivatedAt:null,
-              importedPlanResetAt:serverTimestamp(),
-              updatedAt:serverTimestamp()
-            });
-          });
+          removeClients.slice(i,i+400).forEach(client=>batch.delete(doc(state.db,"clients",client.id)));
           await batch.commit();
         }
-        showToast(`${targets.length} clientes importados foram mantidos somente como cadastro, sem data de plano.`);
+
+        await setDoc(markerRef,{
+          completed:true,
+          keepClientId:keepClient.id,
+          keepClientName:keepClient.name||KEEP_CLIENT_NAME,
+          keepClientDocument:keepClient.document||KEEP_CLIENT_DOCUMENT,
+          removedCount:removeClients.length,
+          completedAt:serverTimestamp()
+        },{merge:true});
+
+        if(state.selectedClientId && state.selectedClientId!==keepClient.id){
+          state.selectedClientId=null;
+          navigate("clients");
+        }
+        if(removeClients.length)showToast(`${removeClients.length} cliente${removeClients.length===1?"":"s"} removido${removeClients.length===1?"":"s"}. Nivaldo Heidemann foi mantido.`);
       }catch(err){
-        console.error(err);
-        showToast("Não foi possível limpar as datas dos clientes importados: "+err.message,"error");
+        console.error("Falha na limpeza da base de clientes",err);
+        showToast("Não foi possível remover os demais clientes: "+err.message,"error");
       }finally{
-        state.importPlanCleanupRunning=false;
+        state.clientBaseCleanupRunning=false;
       }
     }
 
@@ -2866,7 +2521,7 @@
         renderPlanSettings(true);renderPlanSummary();
       }));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"clients"),orderBy("createdAt","desc")),snap=>{
-        state.clients=snap.docs.map(d=>{
+        const allClients=snap.docs.map(d=>{
           const raw=d.data();
           return {
             id:d.id,
@@ -2876,8 +2531,11 @@
             planActivatedAt:timestampISO(raw.planActivatedAt)||raw.planActivatedAt||null
           };
         });
+        state.clients=allClients;
         renderAll();
-        queueMicrotask(cleanupImportedPlanDates);
+        queueMicrotask(()=>{
+          cleanupClientBaseKeepOnlyNivaldo(allClients);
+        });
       },err=>showToast("Erro ao carregar clientes: "+err.message,"error")));
       state.unsubscribers.push(onSnapshot(collection(state.db,"users"),snap=>{
         state.users=snap.docs.map(d=>({uid:d.id,...d.data()}));
@@ -2905,7 +2563,7 @@
     }
 
     function renderAll(){
-      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderExpirations();renderUsers();renderIntegrationSettings();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderExpirations();renderUsers();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -2963,7 +2621,7 @@
       const list=filteredClients();
       $("clientsTable").innerHTML=list.map(c=>{
         const p=getPlanInfo(c);const used=usedPlanBenefits(c);const total=totalPlanBenefits(c);const contract=getContractForClient(c);
-        const planText=hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano`:`Importado da SolarZ · sem plano`;
+        const planText=hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano`:`Sem plano contratado`;
         const benefitHtml=hasActivePlan(c)?`<span class="badge info">${used}/${total} utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}`:`<span class="badge gray">Plano não ativado</span>`;
         return `<tr>
           <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${planText}</span></div></div></td>
@@ -2986,26 +2644,101 @@
       const queryText=($("contractSearch")?.value||"").trim().toLowerCase();
       const statusFilter=$("contractStatusFilter")?.value||"";
       const clientById=new Map(state.clients.map(c=>[c.id,c]));
-      const list=[...state.contracts].filter(contract=>{
+
+      // Junta os contratos públicos com os resumos que ainda estejam gravados
+      // somente na ficha do cliente. Isso evita que contratos migrados/importados
+      // desapareçam da aba Contratos.
+      const mergedContracts=[];
+      const seenTokens=new Set();
+      state.contracts.forEach(contract=>{
+        mergedContracts.push(contract);
+        if(contract?.token)seenTokens.add(contract.token);
+      });
+      state.clients.forEach(client=>{
+        const summary=client?.contract;
+        if(summary?.token && !seenTokens.has(summary.token)){
+          const restored=hydrateContractClientData({
+            ...summary,
+            token:summary.token,
+            clientId:client.id,
+            clientName:client.name||"",
+            clientDocument:client.document||"",
+            clientPhone:client.phone||"",
+            clientEmail:client.email||"",
+            city:client.city||"",
+            address:client.address||"",
+            clientSeller:client.seller||"",
+            payment:client.payment||"",
+            paymentStatus:client.paymentStatus||"",
+            clientNotes:client.notes||"",
+            planStart:client.planStart||"",
+            planEnd:client.planEnd||"",
+            planPrice:getPlanPrice(client),
+            planLabel:getPlanLabel(client),
+            clientSnapshot:contractClientSnapshot(client),
+            reason:summary.reason||"migration"
+          },client);
+          mergedContracts.push(restored);
+          seenTokens.add(summary.token);
+        }
+      });
+
+      // Clientes com plano ativo também aparecem na aba mesmo quando ainda não
+      // existe contrato gerado. Nesse caso é oferecida a ação para gerar o contrato.
+      state.clients.forEach(client=>{
+        const linked=getContractForClient(client);
+        const alreadyListed=linked?.token && seenTokens.has(linked.token);
+        if(hasActivePlan(client) && !alreadyListed){
+          mergedContracts.push({
+            _clientOnly:true,
+            token:"",
+            number:"Não gerado",
+            status:"not_generated",
+            clientId:client.id,
+            clientName:client.name||"",
+            clientDocument:client.document||"",
+            clientPhone:client.phone||"",
+            planLabel:getPlanLabel(client),
+            planPrice:getPlanPrice(client),
+            planStart:client.planStart||"",
+            planEnd:client.planEnd||"",
+            generatedAt:client.planActivatedAt||client.createdAt||null,
+            reason:"not_generated"
+          });
+        }
+      });
+
+      const list=mergedContracts.filter(contract=>{
         const client=clientById.get(contract.clientId);
         const status=contract.status==="accepted"?"accepted":"pending";
         if(statusFilter && status!==statusFilter) return false;
         const haystack=[contract.number,contract.clientName,contract.clientDocument,contract.clientPhone,client?.name,client?.document,client?.phone].filter(Boolean).join(" ").toLowerCase();
         return !queryText || haystack.includes(queryText);
       }).sort((a,b)=>new Date(timestampISO(b.generatedAt)||0)-new Date(timestampISO(a.generatedAt)||0));
+
       $("contractsCount").textContent=`${list.length} ${list.length===1?"contrato":"contratos"}`;
       $("contractsTable").innerHTML=list.map(contract=>{
         const client=clientById.get(contract.clientId);
         const clientName=contract.clientName||client?.name||"Cliente não localizado";
         const clientDoc=contract.clientDocument||client?.document||"";
         const accepted=contract.status==="accepted";
+        const notGenerated=contract.status==="not_generated"||!contract.token;
+        const generatedLabel=notGenerated
+          ? '<span class="small muted">Contrato ainda não gerado</span>'
+          : (accepted?`<strong>${safe(contract.acceptedBy||"Responsável")}</strong><div class="small muted" style="margin-top:4px">${formatDateTime(timestampISO(contract.acceptedAt))}</div>`:'<span class="small muted">Ainda não aceito</span>');
+        const statusHtml=notGenerated
+          ? '<span class="badge gray"><span class="status-dot"></span>Não gerado</span>'
+          : contractBadge(contract);
+        const primaryAction=notGenerated
+          ? `<button class="btn btn-primary btn-sm" onclick="openContractForClient('${contract.clientId}')" ${can("clientsEdit")?"":"disabled"}>Gerar contrato</button>`
+          : `<button class="btn btn-soft btn-sm" onclick="openContractByToken('${contract.token}')">Ver contrato</button>`;
         return `<tr>
-          <td><strong>${safe(contract.number||"—")}</strong><div class="small muted" style="margin-top:4px">${safe(contract.reason==="renewal"?"Renovação":contract.reason==="activation"?"Ativação":"Contrato do plano")}</div></td>
+          <td><strong>${safe(contract.number||"—")}</strong><div class="small muted" style="margin-top:4px">${safe(contract.reason==="renewal"?"Renovação":contract.reason==="activation"?"Ativação":contract.reason==="not_generated"?"Plano ativo":"Contrato do plano")}</div></td>
           <td><div class="customer-cell"><div class="customer-avatar">${initials(clientName)}</div><div><strong>${safe(clientName)}</strong><span>${safe(clientDoc||contract.clientPhone||"Sem documento")}</span></div></div></td>
-          <td class="mono">${formatDateTime(timestampISO(contract.generatedAt))}</td>
-          <td>${contractBadge(contract)}</td>
-          <td>${accepted?`<strong>${safe(contract.acceptedBy||"Responsável")}</strong><div class="small muted" style="margin-top:4px">${formatDateTime(timestampISO(contract.acceptedAt))}</div>`:'<span class="small muted">Ainda não aceito</span>'}</td>
-          <td class="text-right"><div class="actions"><button class="btn btn-soft btn-sm" onclick="openContractByToken('${contract.token}')">Ver contrato</button>${contract.clientId?`<button class="btn btn-ghost btn-sm" onclick="openClient('${contract.clientId}')">Ver cliente</button>`:""}</div></td>
+          <td class="mono">${contract.generatedAt?formatDateTime(timestampISO(contract.generatedAt)):"—"}</td>
+          <td>${statusHtml}</td>
+          <td>${generatedLabel}</td>
+          <td class="text-right"><div class="actions">${primaryAction}${contract.clientId?`<button class="btn btn-ghost btn-sm" onclick="openClient('${contract.clientId}')">Ver cliente</button>`:""}</div></td>
         </tr>`;
       }).join("");
       $("contractsEmpty").classList.toggle("hidden",list.length>0);
@@ -3085,7 +2818,7 @@
         histories.push({date:timestampISO(contract.generatedAt)||c.createdAt,title:"Contrato gerado",description:`${contract.number} · ${contract.status==="accepted"?"aceito digitalmente":"aguardando aceite"}.`});
         if(contract.status==="accepted")histories.push({date:timestampISO(contract.acceptedAt),title:"Contrato aceito digitalmente",description:`Aceite registrado por ${contract.acceptedBy||"responsável"}.`});
       }
-      histories.push({date:c.createdAt,title:c.source==="SolarZ"?"Cliente importado da SolarZ":"Cliente cadastrado",description:hasActivePlan(c)?`Plano iniciado em ${formatDate(c.planStart)}.`:"Plano de monitoramento ainda não ativado."});
+      histories.push({date:c.createdAt,title:c.source==="CSV Clientes"?"Cliente importado por CSV":"Cliente cadastrado",description:hasActivePlan(c)?`Plano iniciado em ${formatDate(c.planStart)}.`:"Plano de monitoramento ainda não ativado."});
       histories.sort((a,b)=>(toDateObject(b.date)?.getTime()||0)-(toDateObject(a.date)?.getTime()||0));
       $("clientTimeline").innerHTML=histories.map(h=>`<div class="timeline-item"><span class="timeline-dot"></span><strong>${safe(h.title)}</strong><p>${safe(h.description||"")}</p><time>${formatTimelineDate(h.date)}</time></div>`).join("");
       $("clientInfo").innerHTML=`
@@ -3123,13 +2856,21 @@
       $("copyDetailContractLink").disabled=false;
     }
     async function generateContractForClient(client,reason="manual"){
+      if(!client?.id) throw new Error("Cliente sem identificador no banco.");
+      if(!state.connected) throw new Error("Realtime Database indisponível");
       const contract=await createContractRecord(client.id,client,reason);
+      if(!contract?.token) throw new Error("Não foi possível gerar o identificador do contrato.");
       const summary=contractSummary(contract);
-      if(!state.connected) throw new Error("Serviço indisponível");
       const batch=state.serviceApi.writeBatch(state.db);
       batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
       batch.update(state.serviceApi.doc(state.db,"clients",client.id),{contract:summary,updatedAt:state.serviceApi.serverTimestamp()});
       await batch.commit();
+      // Atualiza o estado local imediatamente; o listener do Realtime Database confirmará em seguida.
+      client.contract=summary;
+      const existingIndex=state.contracts.findIndex(c=>c.token===contract.token);
+      if(existingIndex>=0)state.contracts[existingIndex]=contract;else state.contracts.unshift(contract);
+      renderContracts();
+      if(state.selectedClientId===client.id)renderClientDetail();
       await logActivity("contract",client.id,"Contrato do plano gerado",`${client.name} · ${contract.number}`);
       return contract;
     }
@@ -3170,23 +2911,34 @@
     window.openContractByToken=openContractByToken;
 
     async function openContractForClient(clientId){
-      const client=state.clients.find(c=>c.id===clientId);if(!client)return;
+      const client=state.clients.find(c=>c.id===clientId);
+      if(!client){showToast("Cliente não localizado.","error");return;}
       if(!hasActivePlan(client)){
         startPlanActivation(client.id);
         return;
       }
-      let contract=getContractForClient(client);
-      if(contract && !contract.contractHtml && state.connected && contract.token){
-        const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
-        if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
+      try{
+        let contract=getContractForClient(client);
+        if(contract && !contract.contractHtml && state.connected && contract.token){
+          const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
+          if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
+          else contract=null;
+        }
+        if(!contract){
+          if(!can("clientsEdit")){showToast("Você não possui permissão para gerar contratos.","error");return;}
+          showToast("Gerando contrato...");
+          contract=await generateContractForClient(client);
+          showToast(`Contrato ${contract.number} gerado com sucesso.`);
+        }
+        contract=hydrateContractClientData(contract,client);
+        renderContractModal(contract);
+        openModal("contractModalBackdrop");
+      }catch(err){
+        console.error("Erro ao gerar/abrir contrato",err);
+        showToast("Não foi possível gerar o contrato: "+(err?.message||"erro desconhecido"),"error");
       }
-      if(!contract){
-        if(!can("clientsEdit")){showToast("Você não possui permissão para gerar contratos.","error");return;}
-        contract=await generateContractForClient(client);
-      }
-      contract=hydrateContractClientData(contract,client);
-      renderContractModal(contract);openModal("contractModalBackdrop");
     }
+    window.openContractForClient=openContractForClient;
     async function copyText(value){
       try{await navigator.clipboard.writeText(value);showToast("Link de aceite copiado.");}
       catch(_){const input=document.createElement("textarea");input.value=value;document.body.appendChild(input);input.select();document.execCommand("copy");input.remove();showToast("Link de aceite copiado.");}
@@ -3238,7 +2990,7 @@
       if(!state.connected)return {updated:0};
       let updated=0;
       let contracts=[...state.contracts];
-      // Busca diretamente no Firestore para não depender de um snapshot ainda desatualizado na tela.
+      // Busca diretamente no Realtime Database para não depender de um snapshot ainda desatualizado na tela.
       try{
         const snap=await state.serviceApi.getDocs(state.serviceApi.collection(state.db,"publicContracts"));
         contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
@@ -3430,7 +3182,7 @@
       if(!can("clientsDelete"))return;
       const c=state.clients.find(x=>x.id===id);if(!c)return;
       askConfirm("Excluir cliente",`Deseja realmente excluir ${c.name}? Esta ação remove a ficha da plataforma.`,async()=>{
-        if(!state.connected) throw new Error("Serviço indisponível");
+        if(!state.connected) throw new Error("Realtime Database indisponível");
         await state.serviceApi.deleteDoc(state.serviceApi.doc(state.db,"clients",id));
         showToast("Cliente excluído.");
       });
@@ -3453,7 +3205,7 @@
       $("userRole").disabled=protectedLucas;
       $("userActive").disabled=protectedLucas;
       $("userName").readOnly=protectedLucas;
-      // O e-mail identifica a conta no Firebase Authentication e não deve ser alterado apenas no Firestore.
+      // O e-mail identifica a conta no Firebase Authentication e não deve ser alterado apenas no Realtime Database.
       $("userEmail").readOnly=true;
       renderPermissionGrid(protectedLucas?ROLE_PERMISSIONS.master:(u.permissions||ROLE_PERMISSIONS[u.role]||[]),protectedLucas);
       openModal("userModalBackdrop");
@@ -3541,7 +3293,7 @@
     }
 
     async function saveClient(data,id){
-      if(!state.connected) throw new Error("Serviço indisponível");
+      if(!state.connected) throw new Error("Realtime Database indisponível");
       let clientId=id;
       let generatedContract=null;
       const {doc,collection,setDoc,serverTimestamp,writeBatch}=state.serviceApi;
@@ -3565,7 +3317,7 @@
       return {clientId,contract:generatedContract};
     }
     async function logActivity(typeClient,id,title,description){
-      if(!state.connected) throw new Error("Serviço indisponível");
+      if(!state.connected) throw new Error("Realtime Database indisponível");
       const type=typeClient==="client_edit"?"client":typeClient;
       const activity={clientId:id||"",type,title,description,createdAt:new Date().toISOString()};
       await state.serviceApi.addDoc(state.serviceApi.collection(state.db,"activities"),{...activity,createdAt:state.serviceApi.serverTimestamp()});
@@ -3584,7 +3336,7 @@
       const entries=[...currentEntries,entry];
       const service={used:entries.length>0,count:entries.length,entries,date:entry.date,operator:entry.operator,description:entry.description};
       const services={...emptyServices(),...(c.services||{}),[type]:service};
-      if(!state.connected) throw new Error("Serviço indisponível");
+      if(!state.connected) throw new Error("Realtime Database indisponível");
       await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",c.id),{services,updatedAt:state.serviceApi.serverTimestamp()});
       await logActivity("service",c.id,`${benefit.label} registrado`,`${c.name} · ${entries.length}/${limit} · por ${entry.operator}`);
       closeModal("serviceModalBackdrop");$("serviceForm").reset();renderClientDetail();showToast("Benefício registrado no histórico do cliente.");
@@ -3619,7 +3371,7 @@
         payment:completeData.payment,paymentStatus:completeData.paymentStatus,notes:completeData.notes,
         services:emptyServices(),history,contract:contractSummary(contract)
       };
-      if(!state.connected)throw new Error("Serviço indisponível");
+      if(!state.connected)throw new Error("Realtime Database indisponível");
       const batch=state.serviceApi.writeBatch(state.db);
       batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
       batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
@@ -3643,7 +3395,7 @@
       const contract=await createContractRecord(c.id,renewedData,"renewal");
       history.push({date:new Date().toISOString(),title:"Plano renovado",description:`${getPlanLabel(c)} no valor de ${money(getPlanPrice(c))}. Novo contrato: ${contract.number}. Período anterior: ${formatDate(c.planStart)} a ${formatDate(c.planEnd||addYear(c.planStart))}. ${$("renewNotes").value.trim()}`});
       const update={planActive:true,planStart:newStart,planEnd:addYear(newStart),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),documentType:getClientType(c),planPrice:renewedData.planPrice,planLabel:renewedData.planLabel,planBenefits:renewedData.planBenefits,seller:renewedData.seller,services:emptyServices(),history,contract:contractSummary(contract)};
-      if(!state.connected) throw new Error("Serviço indisponível");
+      if(!state.connected) throw new Error("Realtime Database indisponível");
       const batch=state.serviceApi.writeBatch(state.db);
       batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
       batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
@@ -3662,7 +3414,7 @@
         "auth/network-request-failed":"Falha de conexão ao criar a conta. Tente novamente.",
         "permission-denied":"O Firebase bloqueou a gravação do perfil. Revise as regras da coleção users."
       };
-      return messages[error?.code]||messages[String(error?.code||"").replace("firestore/","")]||error?.message||"Não foi possível criar o usuário.";
+      return messages[error?.code]||messages[String(error?.code||"").replace("realtime database/","")]||error?.message||"Não foi possível criar o usuário.";
     }
 
     async function saveUser(event){
@@ -3691,7 +3443,7 @@
         permissions:selectedPermissions,
         updatedBy:state.currentProfile?.email||state.currentProfile?.name||"Administrador"
       };
-      if(!state.connected){showToast("Serviço indisponível.","error");return;}
+      if(!state.connected){showToast("Realtime Database indisponível.","error");return;}
 
       const submitBtn=$("userSubmitBtn");
       submitBtn.disabled=true;
@@ -3774,6 +3526,238 @@
       showToast("Relatório exportado.");
     }
 
+
+    function detectCsvDelimiter(text){
+      const firstLine=String(text||"").replace(/^\uFEFF/,"").split(/\r?\n/).find(line=>line.trim())||"";
+      let quoted=false,semicolons=0,commas=0;
+      for(let i=0;i<firstLine.length;i++){
+        const ch=firstLine[i];
+        if(ch==='"'){
+          if(quoted&&firstLine[i+1]==='"'){i++;continue;}
+          quoted=!quoted;continue;
+        }
+        if(!quoted){if(ch===';')semicolons++;else if(ch===',')commas++;}
+      }
+      return semicolons>=commas?';':',';
+    }
+    function parseClientsCsv(text){
+      const source=String(text||"").replace(/^\uFEFF/,"");
+      const delimiter=detectCsvDelimiter(source);
+      const rows=[];let row=[],field="",quoted=false;
+      for(let i=0;i<source.length;i++){
+        const ch=source[i];
+        if(quoted){
+          if(ch==='"'&&source[i+1]==='"'){field+='"';i++;}
+          else if(ch==='"')quoted=false;
+          else field+=ch;
+          continue;
+        }
+        if(ch==='"'){quoted=true;continue;}
+        if(ch===delimiter){row.push(field);field="";continue;}
+        if(ch==='\n'){row.push(field);rows.push(row);row=[];field="";continue;}
+        if(ch==='\r')continue;
+        field+=ch;
+      }
+      if(field!==""||row.length){row.push(field);rows.push(row);}
+      return rows.filter(r=>r.some(v=>String(v||"").trim()));
+    }
+    const normalizeCsvHeader = (value="") => String(value||"")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+    const csvValue = (record,...names) => {
+      for(const name of names){
+        const key=normalizeCsvHeader(name);
+        if(Object.prototype.hasOwnProperty.call(record,key))return String(record[key]??"").trim();
+      }
+      return "";
+    };
+    function csvMoneyNumber(value){
+      let raw=String(value??"").trim().replace(/R\$/gi,"").replace(/\s/g,"");
+      if(!raw)return NaN;
+      const lastComma=raw.lastIndexOf(','),lastDot=raw.lastIndexOf('.');
+      if(lastComma>-1&&lastDot>-1){
+        raw=lastComma>lastDot?raw.replace(/\./g,"").replace(',', '.'):raw.replace(/,/g,"");
+      }else if(lastComma>-1){
+        raw=raw.replace(/\./g,"").replace(',', '.');
+      }
+      raw=raw.replace(/[^0-9.-]/g,"");
+      return Number(raw);
+    }
+    function csvUsage(value){
+      const match=String(value||"").match(/(\d+)\s*\/\s*(\d+)/);
+      return match?{used:Number(match[1]),limit:Number(match[2])}:{used:0,limit:null};
+    }
+    function csvPlanBenefits(record,document,existing){
+      const benefits=JSON.parse(JSON.stringify(existing?.planBenefits||snapshotPlanBenefits(document)));
+      const columns={
+        technicalCall:"Chamado técnico",
+        appCheck:"Atendimento aplicativo",
+        invoiceAnalysis:"Análise fatura",
+        technicalVisit:"Visita técnica",
+        quarterlyReport:"Relatório trimestral WhatsApp"
+      };
+      Object.entries(columns).forEach(([type,column])=>{
+        const usage=csvUsage(csvValue(record,column));
+        if(usage.limit===null)return;
+        const base=benefits[type]||{};
+        benefits[type]={
+          ...base,
+          label:base.label||SERVICES[type].label,
+          description:base.description||"",
+          enabled:usage.limit>0,
+          limit:usage.limit,
+          contractText:base.contractText||`${usage.limit} ${base.label||SERVICES[type].label}`
+        };
+      });
+      return benefits;
+    }
+    function csvServices(record,existing,planStart){
+      if(existing?.services)return existing.services;
+      const columns={
+        technicalCall:"Chamado técnico",
+        appCheck:"Atendimento aplicativo",
+        invoiceAnalysis:"Análise fatura",
+        technicalVisit:"Visita técnica",
+        quarterlyReport:"Relatório trimestral WhatsApp"
+      };
+      const services=emptyServices();
+      Object.entries(columns).forEach(([type,column])=>{
+        const usage=csvUsage(csvValue(record,column));
+        const entries=Array.from({length:Math.max(0,usage.used)},(_,index)=>({
+          date:planStart||todayISO(),
+          operator:"Importação CSV",
+          description:`Registro ${index+1} restaurado a partir do CSV da aba Clientes.`
+        }));
+        services[type]={used:entries.length>0,count:entries.length,entries};
+      });
+      return services;
+    }
+    function findExistingClientForCsv(record){
+      const document=documentDigits(csvValue(record,"CPF/CNPJ"));
+      if(document){
+        const byDocument=state.clients.find(client=>documentDigits(client.document)===document);
+        if(byDocument)return byDocument;
+      }
+      const email=csvValue(record,"E-mail").toLowerCase();
+      if(email){
+        const byEmail=state.clients.find(client=>(client.email||"").trim().toLowerCase()===email);
+        if(byEmail)return byEmail;
+      }
+      const name=normalizeClientIdentityName(csvValue(record,"Cliente"));
+      const phone=documentDigits(csvValue(record,"Telefone"));
+      if(name&&phone){
+        return state.clients.find(client=>normalizeClientIdentityName(client.name)===name&&documentDigits(client.phone)===phone)||null;
+      }
+      return null;
+    }
+    function prepareClientCsvImport(text){
+      const matrix=parseClientsCsv(text);
+      if(matrix.length<2)throw new Error("O CSV não contém clientes para importar.");
+      const headers=matrix[0].map(normalizeCsvHeader);
+      if(!headers.includes("cliente")||!headers.includes("cpf cnpj"))throw new Error("Use o CSV baixado pela aba Clientes. As colunas Cliente e CPF/CNPJ são obrigatórias.");
+      const records=matrix.slice(1).map(row=>{
+        const record={};headers.forEach((header,index)=>record[header]=row[index]??"");return record;
+      }).filter(record=>csvValue(record,"Cliente")||csvValue(record,"CPF/CNPJ"));
+      const prepared=[];let skipped=0;
+      for(const record of records){
+        const name=csvValue(record,"Cliente");
+        const documentRaw=csvValue(record,"CPF/CNPJ");
+        const document=documentDigits(documentRaw);
+        if(!name||(document.length!==11&&document.length!==14)){skipped++;continue;}
+        const existing=findExistingClientForCsv(record);
+        const planStart=csvValue(record,"Início do plano");
+        const planEnd=csvValue(record,"Fim do plano");
+        const status=normalizeCsvHeader(csvValue(record,"Status"));
+        const planActive=!!planStart&&status!=="no plan"&&status!=="sem plano";
+        const importedPrice=csvMoneyNumber(csvValue(record,"Valor anual"));
+        const planBenefits=csvPlanBenefits(record,documentRaw,existing);
+        const contractNumber=csvValue(record,"Número do contrato");
+        const matchingContract=contractNumber?state.contracts.find(contract=>contract.number===contractNumber):null;
+        const paymentText=normalizeCsvHeader(csvValue(record,"Pagamento"));
+        const data={
+          name,
+          document:documentRaw,
+          documentType:getClientType(documentRaw),
+          planPrice:Number.isFinite(importedPrice)?importedPrice:(existing?.planPrice??getLivePlanPrice(documentRaw)),
+          planLabel:existing?.planLabel||getLivePlanLabel(documentRaw),
+          planBenefits,
+          phone:csvValue(record,"Telefone"),
+          email:csvValue(record,"E-mail"),
+          city:csvValue(record,"Cidade"),
+          address:existing?.address||"",
+          planActive,
+          planStart:planActive?planStart:null,
+          planEnd:planActive?(planEnd||(planStart?addYear(planStart):null)):null,
+          seller:csvValue(record,"Responsável")||existing?.seller||"",
+          payment:existing?.payment||"",
+          paymentStatus:paymentText==="pago"?"paid":"pending",
+          notes:existing?.notes||"Importado pelo CSV da aba Clientes.",
+          services:csvServices(record,existing,planStart),
+          source:"CSV Clientes",
+          csvImportedAt:new Date().toISOString(),
+          importedContractStatus:csvValue(record,"Contrato"),
+          importedContractNumber:contractNumber,
+          importedContractAcceptedAt:csvValue(record,"Aceito em")
+        };
+        if(matchingContract)data.contract=contractSummary(matchingContract);
+        else if(existing?.contract)data.contract=existing.contract;
+        prepared.push({existing,data});
+      }
+      return {prepared,skipped,total:records.length};
+    }
+    async function commitClientCsvImport(prepared){
+      if(!state.connected)throw new Error("Realtime Database indisponível.");
+      const {doc,collection,writeBatch,serverTimestamp}=state.serviceApi;
+      let created=0,updated=0,permissionSkipped=0;
+      const operations=[];
+      for(const item of prepared){
+        if(item.existing){
+          if(!can("clientsEdit")){permissionSkipped++;continue;}
+          operations.push({ref:doc(state.db,"clients",item.existing.id),data:{...item.data,updatedAt:serverTimestamp()},merge:true});updated++;
+        }else{
+          if(!can("clientsCreate")){permissionSkipped++;continue;}
+          operations.push({ref:doc(collection(state.db,"clients")),data:{...item.data,createdAt:serverTimestamp(),updatedAt:serverTimestamp()},merge:false});created++;
+        }
+      }
+      for(let i=0;i<operations.length;i+=350){
+        const batch=writeBatch(state.db);
+        operations.slice(i,i+350).forEach(op=>batch.set(op.ref,op.data,{merge:op.merge}));
+        await batch.commit();
+      }
+      await logActivity("client","","Importação de clientes por CSV",`${created} novos · ${updated} atualizados · ${permissionSkipped} ignorados por permissão`);
+      return {created,updated,permissionSkipped};
+    }
+    async function importClientsCsvFile(file){
+      if(!file)return;
+      if(!can("clientsCreate")&&!can("clientsEdit")){showToast("Você não possui permissão para importar clientes.","error");return;}
+      const btn=$("importClientsCsvBtn");
+      const original=btn.textContent;btn.disabled=true;btn.textContent="Lendo CSV...";
+      try{
+        const text=await file.text();
+        const plan=prepareClientCsvImport(text);
+        if(!plan.prepared.length)throw new Error("Nenhum cliente válido foi encontrado. Confira CPF/CNPJ e o formato do CSV.");
+        const newCount=plan.prepared.filter(item=>!item.existing).length;
+        const updateCount=plan.prepared.length-newCount;
+        askConfirm(
+          "Importar clientes do CSV",
+          `Foram encontrados ${plan.prepared.length} clientes válidos: ${newCount} novos e ${updateCount} já existentes. ${plan.skipped?`${plan.skipped} linha(s) inválida(s) serão ignoradas. `:""}Deseja continuar?`,
+          async()=>{
+            btn.disabled=true;btn.textContent="Importando...";
+            try{
+              const result=await commitClientCsvImport(plan.prepared);
+              showToast(`CSV importado: ${result.created} cliente(s) criado(s), ${result.updated} atualizado(s)${result.permissionSkipped?` e ${result.permissionSkipped} ignorado(s) por permissão`:""}.`);
+              navigate("clients");
+            }finally{btn.disabled=false;btn.textContent=original;}
+          }
+        );
+      }catch(err){
+        console.error("Falha ao importar CSV",err);
+        showToast("Não foi possível importar o CSV: "+err.message,"error");
+      }finally{
+        btn.disabled=false;btn.textContent=original;
+      }
+    }
+
     /* Eventos */
     $$(".auth-tab").forEach(btn=>btn.addEventListener("click",()=>{
       $$(".auth-tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
@@ -3782,14 +3766,14 @@
     }));
     $("loginForm").addEventListener("submit",async e=>{
       e.preventDefault();const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
-      if(!state.connected){showToast("Serviço indisponível. Recarregue a página e tente novamente.","error");return;}
+      if(!state.connected){showToast("Realtime Database indisponível. Recarregue a página e tente novamente.","error");return;}
       try{
         await state.serviceApi.signInWithEmailAndPassword(state.auth,email,password);
       }catch(err){showToast("Não foi possível entrar. Verifique o e-mail e a senha.","error");}
     });
     $("registerForm").addEventListener("submit",async e=>{
       e.preventDefault();
-      if(!state.connected){showToast("Serviço indisponível. Recarregue a página e tente novamente.","error");return;}
+      if(!state.connected){showToast("Realtime Database indisponível. Recarregue a página e tente novamente.","error");return;}
       try{
         const {createUserWithEmailAndPassword,updateProfile,signOut}=state.serviceApi;
         const cred=await createUserWithEmailAndPassword(state.auth,$("registerEmail").value.trim(),$("registerPassword").value);
@@ -3802,7 +3786,6 @@
     $("logoutBtn").addEventListener("click",async()=>{
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
       if(state.connected) await state.serviceApi.signOut(state.auth);
-      sessionStorage.removeItem(SOLARZ_SESSION_PASSWORD_KEY);
       state.currentUser=null;state.currentProfile=null;showAuth();
     });
     $$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
@@ -3816,6 +3799,8 @@
     $("contractSearch").addEventListener("input",renderContracts);$("contractStatusFilter").addEventListener("change",renderContracts);
     $("clientDocument").addEventListener("input",updateClientPlanPreview);
     $("activateDocument").addEventListener("input",updateActivationPlanPreview);
+    $("importClientsCsvBtn").addEventListener("click",()=>$("clientsCsvInput").click());
+    $("clientsCsvInput").addEventListener("change",async event=>{const file=event.target.files?.[0];event.target.value="";if(file)await importClientsCsvFile(file);});
     $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
     $("backClients").addEventListener("click",()=>navigate("clients"));
     $("editDetailClient").addEventListener("click",()=>editClient(state.selectedClientId));
@@ -3844,7 +3829,7 @@
       if(hash!==contract.documentHash){showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;}
       const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent};
       try{
-        if(!state.connected) throw new Error("Serviço indisponível");
+        if(!state.connected) throw new Error("Realtime Database indisponível");
         await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.serviceApi.serverTimestamp()});
         const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
         state.publicContract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
@@ -3919,16 +3904,6 @@
       state.planSettingsDirty=true;renderPlanSettings(false);
     });
     $("restoreDefaultPlansBtn").addEventListener("click",restoreDefaultPlanSettings);
-    $("integrationForm").addEventListener("submit",saveIntegrationSettings);
-    ["integrationConnectorUrl","integrationApiUsername","integrationApiPassword","integrationEnabled"].forEach(id=>{
-      const field=$(id);
-      if(field){
-        field.addEventListener("input",updateIntegrationActionButtons);
-        field.addEventListener("change",updateIntegrationActionButtons);
-      }
-    });
-    $("testIntegrationBtn").addEventListener("click",testIntegration);
-    $("syncIntegrationBtn").addEventListener("click",syncIntegrationClients);
     $("confirmActionBtn").addEventListener("click",async()=>{closeModal("confirmModalBackdrop");if(state.confirmCallback){const cb=state.confirmCallback;state.confirmCallback=null;try{await cb()}catch(err){showToast(err.message,"error")}}});
 
     // Fechar modal com Esc
