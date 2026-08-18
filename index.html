@@ -731,6 +731,12 @@
     .contract-document ul { margin:8px 0 8px 20px; padding:0; }
     .contract-document li { margin:5px 0; }
     .contract-parties { background:#f6f9ef; border-left:4px solid var(--accent); padding:14px 16px; border-radius:8px; }
+    .contract-client-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 18px; margin-top:12px; }
+    .contract-client-field { min-width:0; }
+    .contract-client-field.full { grid-column:1/-1; }
+    .contract-client-field span { display:block; color:#687568; font-size:10px; text-transform:uppercase; letter-spacing:.45px; font-weight:700; margin-bottom:2px; }
+    .contract-client-field strong { display:block; color:#202b22; font-size:12px; overflow-wrap:anywhere; }
+    @media (max-width:650px) { .contract-client-grid { grid-template-columns:1fr; } .contract-client-field.full { grid-column:auto; } }
     .contract-signature-evidence { margin-top:22px; border:1px solid #bdd477; background:#f7faeb; border-radius:12px; padding:15px; }
     .contract-signature-evidence strong { color:#31520b; }
     .acceptance-panel { margin-top:18px; border-top:1px solid var(--line); padding-top:20px; }
@@ -774,6 +780,9 @@
     .plan-editor-head span { display:block;margin-top:4px;font-size:10px;color:var(--muted); }
     .plan-editor-body { padding:16px; }
     .plan-price-row { display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:12px;margin-bottom:16px; }
+    .price-save-control { display:flex;align-items:stretch;gap:8px; }
+    .price-save-control input { min-width:0;flex:1; }
+    .price-save-control .btn { flex:0 0 auto;padding-inline:13px; }
     .benefit-editor-list { display:flex;flex-direction:column;gap:10px; }
     .benefit-editor { border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;transition:.18s; }
     .benefit-editor.inactive { opacity:.68;background:#f5f7f3; }
@@ -793,6 +802,8 @@
     @media (max-width:1100px) { .plan-editors-grid { grid-template-columns:1fr; } }
     @media (max-width:650px) {
       .plan-price-row { grid-template-columns:1fr; }
+      .price-save-control { flex-wrap:wrap; }
+      .price-save-control .btn { width:100%; }
       .benefit-editor-summary { grid-template-columns:auto minmax(0,1fr) 82px; }
       .plan-settings-actions,.plan-settings-actions .btn { width:100%; }
     }
@@ -928,6 +939,7 @@
       <nav class="nav">
         <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span> Visão geral</button>
         <button class="nav-item" data-page="clients" data-permission="clientsView"><span class="nav-icon">♙</span> Clientes</button>
+        <button class="nav-item" data-page="contracts" data-permission="clientsView"><span class="nav-icon">▤</span> Contratos</button>
         <button class="nav-item" data-page="expirations" data-permission="clientsView"><span class="nav-icon">◷</span> Vencimentos</button>
         <button class="nav-item" data-page="users" data-permission="usersManage"><span class="nav-icon">⚙</span> Usuários e permissões</button>
       </nav>
@@ -1081,6 +1093,35 @@
           </div>
         </section>
 
+        <!-- Contratos -->
+        <section id="page-contracts" class="page">
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <div class="search-box"><span>⌕</span><input id="contractSearch" placeholder="Buscar contrato, cliente, CPF/CNPJ ou telefone..."></div>
+              <select id="contractStatusFilter" class="filter-select">
+                <option value="">Todos os contratos</option>
+                <option value="accepted">Aceitos</option>
+                <option value="pending">Aguardando aceite</option>
+              </select>
+            </div>
+            <div class="toolbar-right">
+              <span id="contractsCount" class="badge info">0 contratos</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">Arquivo de contratos</div><div class="card-subtitle">Todos os contratos gerados permanecem disponíveis para consulta, inclusive após aceite e renovação</div></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Contrato</th><th>Cliente</th><th>Gerado em</th><th>Status</th><th>Aceite</th><th></th></tr></thead>
+                <tbody id="contractsTable"></tbody>
+              </table>
+            </div>
+            <div id="contractsEmpty" class="empty hidden"><div class="empty-icon">▤</div><strong>Nenhum contrato encontrado</strong><span>Os contratos gerados aparecerão aqui e continuarão disponíveis para consulta.</span></div>
+          </div>
+        </section>
+
         <!-- Vencimentos -->
         <section id="page-expirations" class="page">
           <div class="stats-grid">
@@ -1159,7 +1200,7 @@
                     <div class="plan-editor-body">
                       <div class="plan-price-row">
                         <div class="field"><label>Nome exibido do plano</label><input id="planCpfLabel" required></div>
-                        <div class="field"><label>Valor anual (R$)</label><input id="planCpfPrice" type="number" min="0" step="0.01" required></div>
+                        <div class="field"><label>Valor anual (R$)</label><div class="price-save-control"><input id="planCpfPrice" type="number" min="0" step="0.01" required><button id="saveCpfPriceBtn" type="button" class="btn btn-primary btn-sm" data-permission="plansManage">Salvar preço</button></div></div>
                       </div>
                       <div class="card-subtitle" style="margin-bottom:10px">Benefícios disponíveis no plano CPF</div>
                       <div id="planBenefitsCpf" class="benefit-editor-list"></div>
@@ -1171,7 +1212,7 @@
                     <div class="plan-editor-body">
                       <div class="plan-price-row">
                         <div class="field"><label>Nome exibido do plano</label><input id="planCnpjLabel" required></div>
-                        <div class="field"><label>Valor anual (R$)</label><input id="planCnpjPrice" type="number" min="0" step="0.01" required></div>
+                        <div class="field"><label>Valor anual (R$)</label><div class="price-save-control"><input id="planCnpjPrice" type="number" min="0" step="0.01" required><button id="saveCnpjPriceBtn" type="button" class="btn btn-primary btn-sm" data-permission="plansManage">Salvar preço</button></div></div>
                       </div>
                       <div class="card-subtitle" style="margin-bottom:10px">Benefícios disponíveis no plano CNPJ</div>
                       <div id="planBenefitsCnpj" class="benefit-editor-list"></div>
@@ -1687,6 +1728,8 @@
       },
       confirmCallback: null,
       syncedContractTokens: new Set(),
+      syncedContractClientDataTokens: new Set(),
+      contractClientDataSyncRunning: false,
       importPlanCleanupRunning: false,
       unsubscribers: []
     };
@@ -1780,21 +1823,91 @@
     const makeContractToken = () => `${uid().replace(/-/g,"")}${Math.random().toString(36).slice(2,12)}`;
     const maskDocument = (document) => {
       const digits = documentDigits(document);
-      const last = digits.slice(-4);
-      return digits.length === 14 ? `**.***.***/****-${last.slice(-2)}` : `***.***.***-${last.slice(-2)}`;
+      if(digits.length===11) return `***.${digits.slice(3,6)}.${digits.slice(6,9)}-**`;
+      if(digits.length===14) return `**.${digits.slice(2,5)}.${digits.slice(5,8)}/****-**`;
+      return document||"—";
     };
-    async function hashText(value){
-      const normalized=String(value||"");
-      if(window.crypto?.subtle){
-        const bytes=new TextEncoder().encode(normalized);
-        const digest=await crypto.subtle.digest("SHA-256",bytes);
-        return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
+    const contractValue = (value, fallback="Não informado") => {
+      const text=String(value??"").trim();
+      return text||fallback;
+    };
+    function contractClientSnapshot(data={}){
+      return {
+        name:data.name||data.clientName||"",
+        document:data.document||data.clientDocument||"",
+        phone:data.phone||data.clientPhone||"",
+        email:data.email||data.clientEmail||"",
+        city:data.city||"",
+        address:data.address||"",
+        seller:data.seller||data.clientSeller||"",
+        payment:data.payment||"",
+        paymentStatus:data.paymentStatus||"",
+        notes:data.notes||data.clientNotes||"",
+        planStart:data.planStart||"",
+        planEnd:data.planEnd||(data.planStart?addYear(data.planStart):"")
+      };
+    }
+    function contractPartiesHtml(data={}){
+      const c=contractClientSnapshot(data);
+      const paymentStatus=c.paymentStatus==="paid"?"Pago":c.paymentStatus==="pending"?"Pendente":contractValue(c.paymentStatus);
+      return `<div class="contract-parties">
+        <strong>CONTRATADA:</strong> Group Holding Service, inscrita no CNPJ nº 50.533.476/0001-66.<br>
+        <strong>CONTRATANTE:</strong> ${safe(contractValue(c.name))}.
+        <div class="contract-client-grid">
+          <div class="contract-client-field"><span>Nome / Razão social</span><strong>${safe(contractValue(c.name))}</strong></div>
+          <div class="contract-client-field"><span>${getClientType(c.document).toUpperCase()}</span><strong>${safe(contractValue(c.document))}</strong></div>
+          <div class="contract-client-field"><span>Telefone / WhatsApp</span><strong>${safe(contractValue(c.phone))}</strong></div>
+          <div class="contract-client-field"><span>E-mail</span><strong>${safe(contractValue(c.email))}</strong></div>
+          <div class="contract-client-field"><span>Cidade</span><strong>${safe(contractValue(c.city))}</strong></div>
+          <div class="contract-client-field full"><span>Endereço</span><strong>${safe(contractValue(c.address))}</strong></div>
+          <div class="contract-client-field"><span>Responsável pela venda</span><strong>${safe(contractValue(c.seller))}</strong></div>
+          <div class="contract-client-field"><span>Forma de pagamento</span><strong>${safe(contractValue(c.payment))}</strong></div>
+          <div class="contract-client-field"><span>Situação do pagamento</span><strong>${safe(paymentStatus)}</strong></div>
+          <div class="contract-client-field"><span>Início do plano</span><strong>${safe(c.planStart?formatDate(c.planStart):"Não informado")}</strong></div>
+          <div class="contract-client-field"><span>Fim do plano</span><strong>${safe(c.planEnd?formatDate(c.planEnd):"Não informado")}</strong></div>
+          <div class="contract-client-field full"><span>Observações do cadastro</span><strong>${safe(contractValue(c.notes,"Nenhuma observação"))}</strong></div>
+        </div>
+      </div>`;
+    }
+    function injectFullClientDataIntoContractHtml(html,data={}){
+      const parties=contractPartiesHtml(data);
+      const source=String(html||"");
+      if(/<div class=["']contract-parties["']>[\s\S]*?<\/div>\s*(?=<h2>)/i.test(source)){
+        return source.replace(/<div class=["']contract-parties["']>[\s\S]*?<\/div>\s*(?=<h2>)/i,parties);
       }
-      return btoa(unescape(encodeURIComponent(normalized)));
+      if(/<div class=["']contract-number["'][^>]*>[\s\S]*?<\/div>/i.test(source)){
+        return source.replace(/(<div class=["']contract-number["'][^>]*>[\s\S]*?<\/div>)/i,`$1${parties}`);
+      }
+      return parties+source;
+    }
+    function hydrateContractClientData(contract,client){
+      if(!contract)return contract;
+      const snapshot=contractClientSnapshot(client||contract.clientSnapshot||contract);
+      const hydrated={
+        ...contract,
+        clientName:snapshot.name||contract.clientName||"",
+        clientDocument:snapshot.document||contract.clientDocument||"",
+        documentType:getClientType(snapshot.document||contract.clientDocument||""),
+        clientPhone:snapshot.phone||contract.clientPhone||"",
+        clientEmail:snapshot.email||contract.clientEmail||"",
+        city:snapshot.city||contract.city||"",
+        address:snapshot.address||contract.address||"",
+        clientSeller:snapshot.seller||contract.clientSeller||"",
+        payment:snapshot.payment||contract.payment||"",
+        paymentStatus:snapshot.paymentStatus||contract.paymentStatus||"",
+        clientNotes:snapshot.notes||contract.clientNotes||"",
+        planStart:snapshot.planStart||contract.planStart||"",
+        planEnd:snapshot.planEnd||contract.planEnd||"",
+        clientSnapshot:snapshot
+      };
+      hydrated.contractHtml=injectFullClientDataIntoContractHtml(contract.contractHtml||"",snapshot);
+      if(hydrated.status==="accepted" && !hydrated.acceptedDocument && snapshot.document) hydrated.acceptedDocument=snapshot.document;
+      return hydrated;
     }
     const getContractForClient = (client) => {
       const token=client?.contract?.token;
-      return (token && state.contracts.find(c=>c.token===token)) || client?.contract || null;
+      const contract=(token && state.contracts.find(c=>c.token===token)) || client?.contract || null;
+      return contract?hydrateContractClientData(contract,client):null;
     };
     const contractBadge = (contract) => {
       if(!contract) return '<span class="badge gray">Não gerado</span>';
@@ -1805,15 +1918,16 @@
     const contractSummary = (contract) => ({
       token:contract.token, number:contract.number, status:contract.status,
       generatedAt:timestampISO(contract.generatedAt), acceptedAt:timestampISO(contract.acceptedAt),
-      acceptedBy:contract.acceptedBy||"", acceptedDocumentMasked:contract.acceptedDocumentMasked||""
+      acceptedBy:contract.acceptedBy||"", acceptedDocument:contract.acceptedDocument||"", acceptedDocumentMasked:contract.acceptedDocumentMasked||""
     });
     function contractEvidenceHtml(contract){
       if(contract?.status!=="accepted") return "";
-      return `<div class="contract-signature-evidence"><strong>ACEITE ELETRÔNICO REGISTRADO</strong><br>Responsável: ${safe(contract.acceptedBy||"—")}<br>Documento confirmado: ${safe(contract.acceptedDocumentMasked||"—")}<br>Data e hora: ${formatDateTime(timestampISO(contract.acceptedAt))}<br>Registro: aceite expresso por meio do link individual deste contrato.</div>`;
+      const acceptedDocument=contract.acceptedDocument||contract.clientDocument||contract.clientSnapshot?.document||contract.acceptedDocumentMasked||"—";
+      return `<div class="contract-signature-evidence"><strong>ACEITE ELETRÔNICO REGISTRADO</strong><br>Responsável: ${safe(contract.acceptedBy||"—")}<br>Documento confirmado: ${safe(acceptedDocument)}<br>Data e hora: ${formatDateTime(timestampISO(contract.acceptedAt))}<br>Registro: aceite expresso por meio do link individual deste contrato.</div>`;
     }
     function buildContractHtml(data, number){
-      const planLabel=getPlanLabel(data);
       const price=money(getPlanPrice(data));
+      const planLabel=getPlanLabel(data);
       const benefits=Object.values(getPlanBenefits(data)).map(item=>`<li>${safe(item.contractText)};</li>`).join("");
       const contractConfig=state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract;
       const renewalText=safe(contractConfig.renewalClause||DEFAULT_PLAN_SETTINGS.contract.renewalClause).replace(/\n/g,"<br>");
@@ -1823,7 +1937,7 @@
       const nextSection=contractConfig.automaticRenewalEnabled?6:5;
       return `<h1>Contrato de adesão ao plano de monitoramento</h1>
         <div class="contract-number">Contrato nº ${safe(number)} · Versão ${CONTRACT_VERSION}</div>
-        <div class="contract-parties"><strong>CONTRATADA:</strong> IG Energia Renovável.<br><strong>CONTRATANTE:</strong> ${safe(data.name)} — ${getClientType(data).toUpperCase()} ${safe(maskDocument(data.document))}${data.address?` — ${safe(data.address)}`:""}${data.city?` — ${safe(data.city)}`:""}.</div>
+        ${contractPartiesHtml(data)}
         <h2>1. Objeto</h2><p>Este contrato formaliza a adesão do CONTRATANTE ao ${safe(planLabel)}, destinado ao acompanhamento do sistema de energia solar durante o período anual contratado.</p>
         <h2>2. Serviços incluídos</h2><p>Durante a vigência, o plano concede os benefícios abaixo, respeitando os limites anuais indicados:</p><ul>${benefits}</ul>
         <h2>3. Valor e pagamento</h2><p>O valor anual deste contrato é de <strong>${price}</strong>, definido conforme o documento do CONTRATANTE. A forma de pagamento cadastrada é ${safe(data.payment||"a combinar")}.</p>
@@ -1840,13 +1954,14 @@
       const generatedAt=new Date().toISOString();
       return {
         token, number, version:CONTRACT_VERSION, reason, clientId,
-        clientName:data.name, documentType:getClientType(data), documentMasked:maskDocument(data.document),
+        clientName:data.name, clientDocument:data.document||"", documentType:getClientType(data), documentMasked:maskDocument(data.document),
         documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data),
         planStart:data.planStart, planEnd:data.planEnd||addYear(data.planStart), city:data.city||"", address:data.address||"",
-        clientPhone:data.phone||"", clientEmail:data.email||"", payment:data.payment||"", status:"pending", generatedAt, acceptedAt:null, acceptedBy:"",
+        clientPhone:data.phone||"", clientEmail:data.email||"", clientSeller:data.seller||"", payment:data.payment||"", paymentStatus:data.paymentStatus||"", clientNotes:data.notes||"",
+        clientSnapshot:contractClientSnapshot(data), status:"pending", generatedAt, acceptedAt:null, acceptedBy:"",
         automaticRenewalEnabled:!!(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).automaticRenewalEnabled,
         renewalClause:(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).renewalClause||"",
-        acceptedDocumentMasked:"", contractHtml:buildContractHtml(data,number)
+        acceptedDocument:"", acceptedDocumentMasked:"", contractHtml:buildContractHtml(data,number)
       };
     }
     const addYear = (dateStr) => {
@@ -2132,6 +2247,49 @@
       if(!Object.values(settings.cpf.benefits).some(item=>item.enabled))throw new Error("Ative pelo menos um benefício para pessoa física.");
       if(!Object.values(settings.cnpj.benefits).some(item=>item.enabled))throw new Error("Ative pelo menos um benefício para pessoa jurídica.");
       return normalizePlanSettings(settings);
+    }
+    function recomputePlanSettingsDirty(){
+      try{
+        const formSettings=readPlanSettingsForm();
+        state.planSettingsDirty=JSON.stringify(formSettings)!==JSON.stringify(normalizePlanSettings(state.planSettings));
+      }catch(err){
+        state.planSettingsDirty=true;
+      }
+    }
+    async function savePlanPrice(planType){
+      if(!can("plansManage")){showToast("Você não possui permissão para alterar os preços.","error");return;}
+      const isCpf=planType==="cpf";
+      const input=$(isCpf?"planCpfPrice":"planCnpjPrice");
+      const value=Number(input?.value);
+      if(!Number.isFinite(value)||value<0){showToast("Informe um valor anual válido.","error");input?.focus();return;}
+      const settings=normalizePlanSettings({
+        ...state.planSettings,
+        [planType]:{...state.planSettings[planType],price:value}
+      });
+      state.planSettings=settings;
+      state.planSettingsUpdatedAt=new Date().toISOString();
+      saveLocalPlanSettings(settings);
+      state.planSettingsSource="local";
+      recomputePlanSettingsDirty();
+      renderPlanSummary();
+      renderPlanSettings(false);
+      const label=isCpf?"Pessoa Física":"Pessoa Jurídica";
+      if(!state.connected){
+        showToast(`Preço de ${label} salvo neste navegador. O sistema está sem conexão online.`,"error");
+        return;
+      }
+      try{
+        await savePlanSettingsInAuthorizedProfile(settings);
+        state.planSettingsSource="online";
+        state.planSettingsUpdatedAt=new Date().toISOString();
+        renderPlanSettings(false);
+        showToast(`Preço de ${label} salvo: ${money(value)} por ano.`);
+      }catch(profileError){
+        console.warn("Não foi possível sincronizar o preço no perfil autorizado.",profileError);
+        state.planSettingsSource="local";
+        renderPlanSettings(false);
+        showToast(`Preço de ${label} ficou salvo somente neste navegador. Verifique as permissões no Firebase.`,"error");
+      }
     }
     async function savePlanSettings(event){
       event.preventDefault();
@@ -2639,12 +2797,12 @@
       }));
       state.unsubscribers.push(onSnapshot(collection(state.db,"publicContracts"),snap=>{
         state.contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
-        renderClients();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();
+        renderClients();renderContracts();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();
       }));
     }
 
     function renderAll(){
-      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderExpirations();renderUsers();renderIntegrationSettings();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderExpirations();renderUsers();renderIntegrationSettings();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -2713,12 +2871,43 @@
           <td>${hasActivePlan(c)?contractBadge(contract):'<span class="badge gray">Aguardando ativação</span>'}${contract?.number?`<div class="small muted" style="margin-top:5px">${safe(contract.number)}</div>`:""}</td>
           <td>${benefitHtml}</td>
           <td><div class="actions"><button class="btn btn-soft btn-sm" onclick="${hasActivePlan(c)?`openClient('${c.id}')`:`startPlanActivation('${c.id}')`}">${hasActivePlan(c)?"Ver ficha":"Ativar plano"}</button>
+          ${contract?`<button class="btn btn-ghost btn-sm" onclick="openContractByToken('${contract.token}')" title="Visualizar contrato">▤ Ver contrato</button>`:""}
           <button class="btn btn-ghost btn-sm" onclick="editClient('${c.id}')" ${can("clientsEdit")?"":"disabled"}>✎</button>
           <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')" ${can("clientsDelete")?"":"disabled"}>×</button></div></td>
         </tr>`;
       }).join("");
       $("clientsEmpty").classList.toggle("hidden",list.length>0);
     }
+    function renderContracts(){
+      if(!$("contractsTable")) return;
+      const queryText=($("contractSearch")?.value||"").trim().toLowerCase();
+      const statusFilter=$("contractStatusFilter")?.value||"";
+      const clientById=new Map(state.clients.map(c=>[c.id,c]));
+      const list=[...state.contracts].filter(contract=>{
+        const client=clientById.get(contract.clientId);
+        const status=contract.status==="accepted"?"accepted":"pending";
+        if(statusFilter && status!==statusFilter) return false;
+        const haystack=[contract.number,contract.clientName,contract.clientDocument,contract.clientPhone,client?.name,client?.document,client?.phone].filter(Boolean).join(" ").toLowerCase();
+        return !queryText || haystack.includes(queryText);
+      }).sort((a,b)=>new Date(timestampISO(b.generatedAt)||0)-new Date(timestampISO(a.generatedAt)||0));
+      $("contractsCount").textContent=`${list.length} ${list.length===1?"contrato":"contratos"}`;
+      $("contractsTable").innerHTML=list.map(contract=>{
+        const client=clientById.get(contract.clientId);
+        const clientName=contract.clientName||client?.name||"Cliente não localizado";
+        const clientDoc=contract.clientDocument||client?.document||"";
+        const accepted=contract.status==="accepted";
+        return `<tr>
+          <td><strong>${safe(contract.number||"—")}</strong><div class="small muted" style="margin-top:4px">${safe(contract.reason==="renewal"?"Renovação":contract.reason==="activation"?"Ativação":"Contrato do plano")}</div></td>
+          <td><div class="customer-cell"><div class="customer-avatar">${initials(clientName)}</div><div><strong>${safe(clientName)}</strong><span>${safe(clientDoc||contract.clientPhone||"Sem documento")}</span></div></div></td>
+          <td class="mono">${formatDateTime(timestampISO(contract.generatedAt))}</td>
+          <td>${contractBadge(contract)}</td>
+          <td>${accepted?`<strong>${safe(contract.acceptedBy||"Responsável")}</strong><div class="small muted" style="margin-top:4px">${formatDateTime(timestampISO(contract.acceptedAt))}</div>`:'<span class="small muted">Ainda não aceito</span>'}</td>
+          <td class="text-right"><div class="actions"><button class="btn btn-soft btn-sm" onclick="openContractByToken('${contract.token}')">Ver contrato</button>${contract.clientId?`<button class="btn btn-ghost btn-sm" onclick="openClient('${contract.clientId}')">Ver cliente</button>`:""}</div></td>
+        </tr>`;
+      }).join("");
+      $("contractsEmpty").classList.toggle("hidden",list.length>0);
+    }
+
     function renderExpirations(){
       const info=state.clients.map(c=>({client:c,...getPlanInfo(c)}));
       const list=info.filter(x=>x.status!=="no_plan"&&x.days<=60).sort((a,b)=>a.days-b.days);
@@ -2857,6 +3046,23 @@
       $("sendContractWhatsAppBtn").disabled=!phone;
       $("sendContractWhatsAppBtn").title=phone?"Enviar o link de aceite pelo WhatsApp":"Cadastre um telefone para enviar pelo WhatsApp";
     }
+    async function openContractByToken(token){
+      if(!token)return;
+      let contract=state.contracts.find(c=>c.token===token)||null;
+      if((!contract || !contract.contractHtml) && state.connected){
+        try{
+          const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",token));
+          if(snap.exists()) contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
+        }catch(err){console.error(err);}
+      }
+      if(!contract){showToast("Contrato não localizado.","error");return;}
+      const client=state.clients.find(c=>c.id===contract.clientId);
+      contract=hydrateContractClientData(contract,client);
+      renderContractModal(contract);
+      openModal("contractModalBackdrop");
+    }
+    window.openContractByToken=openContractByToken;
+
     async function openContractForClient(clientId){
       const client=state.clients.find(c=>c.id===clientId);if(!client)return;
       if(!hasActivePlan(client)){
@@ -2872,6 +3078,7 @@
         if(!can("clientsEdit")){showToast("Você não possui permissão para gerar contratos.","error");return;}
         contract=await generateContractForClient(client);
       }
+      contract=hydrateContractClientData(contract,client);
       renderContractModal(contract);openModal("contractModalBackdrop");
     }
     async function copyText(value){
@@ -2881,9 +3088,36 @@
     function printContract(contract){
       const win=window.open("","_blank","width=900,height=800");
       if(!win){showToast("O navegador bloqueou a janela de impressão.","error");return;}
-      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${contract.contractHtml||""}${contractEvidenceHtml(contract)}</body></html>`);
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin-top:12px}.contract-client-field.full{grid-column:1/-1}.contract-client-field span{display:block;color:#687568;font-size:10px;text-transform:uppercase;font-weight:700}.contract-client-field strong{display:block;font-size:12px;overflow-wrap:anywhere}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${contract.contractHtml||""}${contractEvidenceHtml(contract)}</body></html>`);
       win.document.close();win.focus();setTimeout(()=>win.print(),300);
     }
+    async function syncContractClientData(){
+      if(!state.connected||!state.currentProfile||!can("clientsEdit")||state.contractClientDataSyncRunning)return;
+      state.contractClientDataSyncRunning=true;
+      try{
+        for(const rawContract of state.contracts){
+          if(state.syncedContractClientDataTokens.has(rawContract.token))continue;
+          const client=state.clients.find(c=>c.id===rawContract.clientId);
+          if(!client){state.syncedContractClientDataTokens.add(rawContract.token);continue;}
+          const fullDocument=String(rawContract.clientDocument||rawContract.clientSnapshot?.document||"").trim();
+          const hasFullBlock=/contract-client-grid/i.test(rawContract.contractHtml||"");
+          const snapshotComplete=!!rawContract.clientSnapshot && String(rawContract.clientSnapshot.name||"").trim()!=="";
+          if(fullDocument && hasFullBlock && snapshotComplete){state.syncedContractClientDataTokens.add(rawContract.token);continue;}
+          const contract=hydrateContractClientData(rawContract,client);
+          try{
+            await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"publicContracts",rawContract.token),{
+              clientName:contract.clientName, clientDocument:contract.clientDocument, documentType:contract.documentType,
+              clientPhone:contract.clientPhone, clientEmail:contract.clientEmail, city:contract.city, address:contract.address,
+              clientSeller:contract.clientSeller, payment:contract.payment, paymentStatus:contract.paymentStatus, clientNotes:contract.clientNotes,
+              planStart:contract.planStart, planEnd:contract.planEnd, clientSnapshot:contract.clientSnapshot, contractHtml:contract.contractHtml,
+              ...(contract.acceptedDocument?{acceptedDocument:contract.acceptedDocument}:{})
+            },{merge:true});
+            state.syncedContractClientDataTokens.add(rawContract.token);
+          }catch(err){console.warn("Não foi possível completar os dados do contrato",rawContract.token,err);}
+        }
+      }finally{state.contractClientDataSyncRunning=false;}
+    }
+
     async function syncAcceptedContracts(){
       if(!state.connected||!state.currentProfile||!can("clientsEdit"))return;
       for(const contract of state.contracts.filter(c=>c.status==="accepted")){
@@ -2972,7 +3206,7 @@
       $$(".page").forEach(p=>p.classList.remove("active"));
       $(`page-${page}`).classList.add("active");
       $$(".nav-item[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===page));
-      const titles={dashboard:"Visão geral",clients:"Clientes",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
+      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
       $("topPageTitle").textContent=titles[page]||"CRM";
       $("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open");
       window.scrollTo({top:0,behavior:"smooth"});
@@ -3321,6 +3555,7 @@
     $$(".modal-backdrop").forEach(back=>back.addEventListener("click",e=>{if(e.target===back)closeModal(back.id)}));
     $("quickAddClient").addEventListener("click",openNewClient);$("addClientBtn").addEventListener("click",openNewClient);
     $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
+    $("contractSearch").addEventListener("input",renderContracts);$("contractStatusFilter").addEventListener("change",renderContracts);
     $("clientDocument").addEventListener("input",updateClientPlanPreview);
     $("activateDocument").addEventListener("input",updateActivationPlanPreview);
     $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
@@ -3340,7 +3575,7 @@
       window.open(`https://wa.me/${countryPhone}?text=${encodeURIComponent(message)}`,"_blank");
     });
     $("openAcceptanceBtn").addEventListener("click",()=>{if(state.selectedContractToken)window.open(getContractLink(state.selectedContractToken),"_blank")});
-    $("printContractBtn").addEventListener("click",()=>{const contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract)printContract(contract);});
+    $("printContractBtn").addEventListener("click",()=>{let contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract){const client=state.clients.find(c=>c.id===(contract.clientId||state.selectedContractClientId));contract=hydrateContractClientData(contract,client);printContract(contract);}});
     $("publicAcceptanceForm").addEventListener("submit",async e=>{
       e.preventDefault();const contract=state.publicContract;if(!contract||contract.status==="accepted")return;
       const name=$("publicSignerName").value.trim();const document=$("publicSignerDocument").value.trim();
@@ -3349,7 +3584,7 @@
       if(renewalEnabled&&!$("publicRenewalAcceptanceCheck").checked){showToast("Confirme a autorização expressa da renovação automática.","error");return;}
       const hash=await hashText(documentDigits(document));
       if(hash!==contract.documentHash){showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;}
-      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent};
+      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent};
       try{
         if(!state.connected) throw new Error("Serviço indisponível");
         await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.serviceApi.serverTimestamp()});
@@ -3402,6 +3637,8 @@
     $("restoreRolePermissionsBtn").addEventListener("click",()=>{const role=$("userRole").value;renderPermissionGrid(ROLE_PERMISSIONS[role]||[],role==="master");});
     $("userForm").addEventListener("submit",saveUser);
     $("planSettingsForm").addEventListener("submit",savePlanSettings);
+    $("saveCpfPriceBtn").addEventListener("click",()=>savePlanPrice("cpf"));
+    $("saveCnpjPriceBtn").addEventListener("click",()=>savePlanPrice("cnpj"));
     $("planSettingsForm").addEventListener("input",event=>{
       state.planSettingsDirty=true;
       if(event.target.matches("[data-benefit-label]")){
