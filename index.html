@@ -1881,6 +1881,13 @@
       }
       return parties+source;
     }
+    function normalizeContractHtml(html,data={}){
+      let normalized=injectFullClientDataIntoContractHtml(html||"",data);
+      normalized=normalized
+        .replace(/(<strong>\s*CONTRATADA:\s*<\/strong>\s*)(?:IG Energia Renovável\.?|IG Energia\.?)/gi,'$1Group Holding Service, inscrita no CNPJ nº 50.533.476/0001-66.')
+        .replace(/(<strong>\s*CONTRATADA:\s*<\/strong>\s*)Group Holding Service(?!, inscrita no CNPJ nº 50\.533\.476\/0001-66)/gi,'$1Group Holding Service, inscrita no CNPJ nº 50.533.476/0001-66');
+      return normalized;
+    }
     function getLivePlanPrice(clientOrDocument){
       return Number(getConfiguredPlan(clientOrDocument).price||0);
     }
@@ -1938,8 +1945,8 @@
       // Contratos pendentes sempre refletem o preço vigente e os dados atuais do cliente.
       // Contratos aceitos preservam o texto/valor assinado, mas continuam exibindo os dados completos já gravados.
       hydrated.contractHtml=useLivePrice
-        ? buildContractHtml(data,contract.number)
-        : injectFullClientDataIntoContractHtml(contract.contractHtml||buildContractHtml(data,contract.number),snapshot);
+        ? normalizeContractHtml(buildContractHtml(data,contract.number),snapshot)
+        : normalizeContractHtml(contract.contractHtml||buildContractHtml(data,contract.number),snapshot);
       if(hydrated.status==="accepted" && !hydrated.acceptedDocument && snapshot.document) hydrated.acceptedDocument=snapshot.document;
       return hydrated;
     }
@@ -3080,7 +3087,8 @@
       $("contractModalNumber").textContent=contract.number||"—";
       $("contractModalStatus").innerHTML=contractBadge(contract);
       $("contractLinkInput").value=getContractLink(contract.token);
-      $("contractPreview").innerHTML=(contract.contractHtml||"")+contractEvidenceHtml(contract);
+      const normalizedContractHtml=normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract);
+      $("contractPreview").innerHTML=normalizedContractHtml+contractEvidenceHtml(contract);
       const accepted=contract.status==="accepted";
       $("contractModalAccepted").classList.toggle("hidden",!accepted);
       if(accepted)$("contractModalAccepted").innerHTML=`<strong>Contrato aceito.</strong><br>${safe(contract.acceptedBy||"Responsável")} confirmou o aceite em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
@@ -3132,7 +3140,7 @@
     function printContract(contract){
       const win=window.open("","_blank","width=900,height=800");
       if(!win){showToast("O navegador bloqueou a janela de impressão.","error");return;}
-      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin-top:12px}.contract-client-field.full{grid-column:1/-1}.contract-client-field span{display:block;color:#687568;font-size:10px;text-transform:uppercase;font-weight:700}.contract-client-field strong{display:block;font-size:12px;overflow-wrap:anywhere}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${contract.contractHtml||""}${contractEvidenceHtml(contract)}</body></html>`);
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin-top:12px}.contract-client-field.full{grid-column:1/-1}.contract-client-field span{display:block;color:#687568;font-size:10px;text-transform:uppercase;font-weight:700}.contract-client-field strong{display:block;font-size:12px;overflow-wrap:anywhere}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract)}${contractEvidenceHtml(contract)}</body></html>`);
       win.document.close();win.focus();setTimeout(()=>win.print(),300);
     }
     function publicContractPayload(contract){
@@ -3154,7 +3162,7 @@
         planPrice:Number(contract.planPrice||0),
         planLabel:contract.planLabel||"",
         clientSnapshot:contract.clientSnapshot||{},
-        contractHtml:contract.contractHtml||""
+        contractHtml:normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract)
       };
     }
     async function refreshPendingContractForClient(clientId,clientData=null){
@@ -3251,6 +3259,21 @@
         const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",token));
         if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
         if(!contract)throw new Error("not-found");
+        const linkedClient=state.clients.find(c=>c.id===contract.clientId);
+        if(linkedClient){
+          contract=hydrateContractClientData(contract,linkedClient);
+          if(contract.status!=="accepted"){
+            try{
+              await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"publicContracts",token),{
+                ...publicContractPayload(contract),
+                documentHash:await hashText(documentDigits(contract.clientDocument)),
+                documentMasked:maskDocument(contract.clientDocument)
+              },{merge:true});
+            }catch(syncErr){console.warn("Não foi possível sincronizar o contrato público ao abrir o aceite",syncErr);}
+          }
+        }else{
+          contract={...contract,contractHtml:normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract)};
+        }
         state.publicContract=contract;renderPublicContract(contract);
       }catch(err){
         console.error(err);$("publicContractLoading").classList.add("hidden");$("publicContractError").classList.remove("hidden");
@@ -3258,7 +3281,8 @@
     }
     function renderPublicContract(contract){
       $("publicContractLoading").classList.add("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.remove("hidden");
-      $("publicContractDocument").innerHTML=(contract.contractHtml||"")+contractEvidenceHtml(contract);
+      const normalizedPublicContractHtml=normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract);
+      $("publicContractDocument").innerHTML=normalizedPublicContractHtml+contractEvidenceHtml(contract);
       const acceptanceSnapshot=contractClientSnapshot(contract.clientSnapshot||contract);
       const acceptancePaymentStatus=contract.paymentStatus==="paid"?"Pago":contract.paymentStatus==="pending"?"Pendente":contractValue(contract.paymentStatus);
       $("publicClientAcceptanceData").innerHTML=`<strong>DADOS DO CONTRATANTE PARA O ACEITE</strong>
