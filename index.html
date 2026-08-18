@@ -818,7 +818,7 @@
     <div class="contract-public-shell">
       <header class="contract-public-header">
         <div class="contract-public-brand">
-          <strong>IG Energia Renovável</strong>
+          <strong>Group Holding Service</strong>
           <span>Contrato digital do plano de monitoramento</span>
         </div>
         <span class="badge warning">Aceite eletrônico</span>
@@ -1743,10 +1743,41 @@
     };
     const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
     const safe = (value="") => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-    const initials = (name="") => name.trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase() || "IG";
-    const parseDate = (dateStr) => dateStr ? new Date(dateStr + "T12:00:00") : new Date();
-    const formatDate = (dateStr) => dateStr ? new Intl.DateTimeFormat("pt-BR").format(parseDate(dateStr)) : "—";
-    const formatDateTime = (iso) => iso ? new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(new Date(iso)) : "—";
+    const initials = (name="") => String(name||"").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase() || "IG";
+    const toDateObject = (value) => {
+      if(!value)return null;
+      if(value instanceof Date)return Number.isNaN(value.getTime())?null:value;
+      if(typeof value?.toDate === "function"){
+        const date=value.toDate();
+        return date instanceof Date && !Number.isNaN(date.getTime())?date:null;
+      }
+      if(typeof value === "object"){
+        const seconds=Number(value.seconds ?? value._seconds);
+        const nanos=Number(value.nanoseconds ?? value._nanoseconds ?? 0);
+        if(Number.isFinite(seconds)){
+          const date=new Date((seconds*1000)+(Number.isFinite(nanos)?Math.floor(nanos/1e6):0));
+          return Number.isNaN(date.getTime())?null:date;
+        }
+      }
+      if(typeof value === "string"){
+        const source=value.trim();
+        if(!source)return null;
+        const date=/^\d{4}-\d{2}-\d{2}$/.test(source)?new Date(source+"T12:00:00"):new Date(source);
+        return Number.isNaN(date.getTime())?null:date;
+      }
+      const date=new Date(value);
+      return Number.isNaN(date.getTime())?null:date;
+    };
+    const parseDate = (value) => toDateObject(value) || new Date();
+    const formatDate = (value) => {
+      const date=toDateObject(value);
+      return date?new Intl.DateTimeFormat("pt-BR").format(date):"—";
+    };
+    const formatDateTime = (value) => {
+      const date=toDateObject(value);
+      return date?new Intl.DateTimeFormat("pt-BR",{dateStyle:"short",timeStyle:"short"}).format(date):"—";
+    };
+    const formatTimelineDate = (value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim()) ? formatDate(value) : formatDateTime(value);
     const money = (v) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:2}).format(v||0);
     const documentDigits = (value="") => String(value).replace(/\D/g, "");
     const getClientType = (clientOrDocument) => {
@@ -1820,7 +1851,10 @@
     const totalPlanBenefits = (client) => Object.values(getPlanBenefits(client)).reduce((sum,item)=>sum+(item.limit||0),0);
     const usedPlanBenefits = (client) => Object.keys(getPlanBenefits(client)).reduce((sum,type)=>sum+Math.min(serviceUsage(client,type),serviceLimit(client,type)),0);
     const emptyServices = () => Object.keys(SERVICES).reduce((acc,type)=>({...acc,[type]:{used:false,count:0,entries:[]}}),{});
-    const timestampISO = (value) => value?.toDate ? value.toDate().toISOString() : (value || null);
+    const timestampISO = (value) => {
+      const date=toDateObject(value);
+      return date?date.toISOString():null;
+    };
     const makeContractToken = () => `${uid().replace(/-/g,"")}${Math.random().toString(36).slice(2,12)}`;
     const maskDocument = (document) => {
       const digits = documentDigits(document);
@@ -2211,12 +2245,23 @@
       const owner=getPlanSettingsOwnerProfile(false);
       if(!owner?.uid)throw new Error("Não foi possível localizar o perfil responsável pelas configurações.");
       const {doc,setDoc,serverTimestamp}=state.serviceApi;
+      const updatedBy=state.currentProfile?.name||state.currentProfile?.email||"Usuário";
       const payload={
         planSettings:settings,
         planSettingsUpdatedAt:serverTimestamp(),
-        planSettingsUpdatedBy:state.currentProfile?.name||state.currentProfile?.email||"Usuário"
+        planSettingsUpdatedBy:updatedBy
       };
       await setDoc(doc(state.db,"users",owner.uid),payload,{merge:true});
+      // Mantém uma configuração central para que CRM, contratos e aceite público usem o mesmo preço vigente.
+      try{
+        await setDoc(doc(state.db,"settings","plans"),{
+          ...settings,
+          updatedAt:serverTimestamp(),
+          updatedBy
+        },{merge:true});
+      }catch(settingsErr){
+        console.warn("Não foi possível atualizar settings/plans; os contratos pendentes ainda serão sincronizados diretamente.",settingsErr);
+      }
       if(state.currentProfile?.uid===owner.uid)state.currentProfile={...state.currentProfile,...payload,planSettingsUpdatedAt:new Date().toISOString()};
       const listIndex=state.users.findIndex(user=>user.uid===owner.uid);
       if(listIndex>=0)state.users[listIndex]={...state.users[listIndex],...payload,planSettingsUpdatedAt:new Date().toISOString()};
@@ -2821,7 +2866,16 @@
         renderPlanSettings(true);renderPlanSummary();
       }));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"clients"),orderBy("createdAt","desc")),snap=>{
-        state.clients=snap.docs.map(d=>({id:d.id,...d.data()}));
+        state.clients=snap.docs.map(d=>{
+          const raw=d.data();
+          return {
+            id:d.id,
+            ...raw,
+            createdAt:timestampISO(raw.createdAt)||raw.createdAt||null,
+            updatedAt:timestampISO(raw.updatedAt)||raw.updatedAt||null,
+            planActivatedAt:timestampISO(raw.planActivatedAt)||raw.planActivatedAt||null
+          };
+        });
         renderAll();
         queueMicrotask(cleanupImportedPlanDates);
       },err=>showToast("Erro ao carregar clientes: "+err.message,"error")));
@@ -3032,8 +3086,8 @@
         if(contract.status==="accepted")histories.push({date:timestampISO(contract.acceptedAt),title:"Contrato aceito digitalmente",description:`Aceite registrado por ${contract.acceptedBy||"responsável"}.`});
       }
       histories.push({date:c.createdAt,title:c.source==="SolarZ"?"Cliente importado da SolarZ":"Cliente cadastrado",description:hasActivePlan(c)?`Plano iniciado em ${formatDate(c.planStart)}.`:"Plano de monitoramento ainda não ativado."});
-      histories.sort((a,b)=>new Date(b.date)-new Date(a.date));
-      $("clientTimeline").innerHTML=histories.map(h=>`<div class="timeline-item"><span class="timeline-dot"></span><strong>${safe(h.title)}</strong><p>${safe(h.description||"")}</p><time>${h.date?.includes?.("T")?formatDateTime(h.date):formatDate(h.date)}</time></div>`).join("");
+      histories.sort((a,b)=>(toDateObject(b.date)?.getTime()||0)-(toDateObject(a.date)?.getTime()||0));
+      $("clientTimeline").innerHTML=histories.map(h=>`<div class="timeline-item"><span class="timeline-dot"></span><strong>${safe(h.title)}</strong><p>${safe(h.description||"")}</p><time>${formatTimelineDate(h.date)}</time></div>`).join("");
       $("clientInfo").innerHTML=`
         ${infoLine("Telefone",c.phone)}${infoLine("E-mail",c.email)}${infoLine("Documento",c.document)}
         ${infoLine("Tipo de plano",hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))} por ano`:"Sem plano contratado")}
@@ -3183,31 +3237,49 @@
     async function propagateLivePriceToPendingContracts(planType){
       if(!state.connected)return {updated:0};
       let updated=0;
-      const pending=state.contracts.filter(contract=>{
+      let contracts=[...state.contracts];
+      // Busca diretamente no Firestore para não depender de um snapshot ainda desatualizado na tela.
+      try{
+        const snap=await state.serviceApi.getDocs(state.serviceApi.collection(state.db,"publicContracts"));
+        contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
+      }catch(err){
+        console.warn("Não foi possível reler todos os contratos; usando os contratos carregados no CRM.",err);
+      }
+      const pending=contracts.filter(contract=>{
         if(contract.status==="accepted")return false;
         const client=state.clients.find(c=>c.id===contract.clientId);
         const reference=client||contract.clientDocument||contract.clientSnapshot?.document||"";
         return getClientType(reference)===planType;
       });
       for(const rawContract of pending){
-        const client=state.clients.find(c=>c.id===rawContract.clientId);
-        if(!client)continue;
+        const client=state.clients.find(c=>c.id===rawContract.clientId)||null;
         const refreshed=hydrateContractClientData(rawContract,client);
         await state.serviceApi.setDoc(
           state.serviceApi.doc(state.db,"publicContracts",rawContract.token),
-          {...publicContractPayload(refreshed),documentHash:await hashText(documentDigits(refreshed.clientDocument))},
+          {
+            ...publicContractPayload(refreshed),
+            documentHash:await hashText(documentDigits(refreshed.clientDocument)),
+            documentMasked:maskDocument(refreshed.clientDocument),
+            priceSyncedAt:state.serviceApi.serverTimestamp()
+          },
           {merge:true}
         );
-        try{
-          await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",client.id),{
-            planPrice:refreshed.planPrice,
-            planLabel:refreshed.planLabel,
-            updatedAt:state.serviceApi.serverTimestamp()
-          });
-        }catch(err){console.warn("Preço atualizado no contrato, mas não foi possível atualizar a ficha do cliente",client.id,err);}
+        if(client){
+          try{
+            await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",client.id),{
+              planPrice:refreshed.planPrice,
+              planLabel:refreshed.planLabel,
+              updatedAt:state.serviceApi.serverTimestamp()
+            });
+          }catch(err){console.warn("Preço atualizado no contrato, mas não foi possível atualizar a ficha do cliente",client.id,err);}
+        }
+        const stateIndex=state.contracts.findIndex(c=>c.token===rawContract.token);
+        if(stateIndex>=0)state.contracts[stateIndex]={...state.contracts[stateIndex],...refreshed};
         updated++;
         state.syncedContractClientDataTokens.delete(rawContract.token);
       }
+      renderContracts();
+      if(state.selectedClientId)renderClientDetail();
       return {updated};
     }
 
@@ -3250,6 +3322,23 @@
         catch(err){console.warn("Não foi possível sincronizar o aceite no cliente",err);}
       }
     }
+    async function refreshPublicPlanSettings(){
+      if(!state.connected)return false;
+      try{
+        const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"settings","plans"));
+        if(!snap.exists())return false;
+        const incoming=normalizePlanSettings(snap.data());
+        state.planSettings=incoming;
+        state.planSettingsSource="online";
+        state.planSettingsUpdatedAt=timestampISO(snap.data().updatedAt)||new Date().toISOString();
+        saveLocalPlanSettings(incoming);
+        return true;
+      }catch(err){
+        // Em instalações onde a configuração não é pública, o aceite usa o preço já sincronizado no próprio contrato.
+        console.warn("Configuração central não disponível na página pública; usando o valor sincronizado no contrato.",err);
+        return false;
+      }
+    }
     async function loadPublicContract(token){
       showPublicContract();
       $("publicContractLoading").classList.remove("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.add("hidden");
@@ -3259,19 +3348,21 @@
         const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",token));
         if(snap.exists())contract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
         if(!contract)throw new Error("not-found");
-        const linkedClient=state.clients.find(c=>c.id===contract.clientId);
-        if(linkedClient){
+        const linkedClient=state.clients.find(c=>c.id===contract.clientId)||null;
+        if(contract.status!=="accepted"){
+          // O aceite pendente sempre confere o preço vigente antes de ser exibido.
+          await refreshPublicPlanSettings();
           contract=hydrateContractClientData(contract,linkedClient);
-          if(contract.status!=="accepted"){
-            try{
-              await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"publicContracts",token),{
-                ...publicContractPayload(contract),
-                documentHash:await hashText(documentDigits(contract.clientDocument)),
-                documentMasked:maskDocument(contract.clientDocument)
-              },{merge:true});
-            }catch(syncErr){console.warn("Não foi possível sincronizar o contrato público ao abrir o aceite",syncErr);}
-          }
+          try{
+            await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"publicContracts",token),{
+              ...publicContractPayload(contract),
+              documentHash:await hashText(documentDigits(contract.clientDocument)),
+              documentMasked:maskDocument(contract.clientDocument),
+              priceSyncedAt:state.serviceApi.serverTimestamp()
+            },{merge:true});
+          }catch(syncErr){console.warn("Não foi possível persistir a atualização do contrato público ao abrir o aceite",syncErr);}
         }else{
+          // Documento já aceito preserva exatamente o valor assinado.
           contract={...contract,contractHtml:normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract)};
         }
         state.publicContract=contract;renderPublicContract(contract);
@@ -3285,6 +3376,9 @@
       $("publicContractDocument").innerHTML=normalizedPublicContractHtml+contractEvidenceHtml(contract);
       const acceptanceSnapshot=contractClientSnapshot(contract.clientSnapshot||contract);
       const acceptancePaymentStatus=contract.paymentStatus==="paid"?"Pago":contract.paymentStatus==="pending"?"Pendente":contractValue(contract.paymentStatus);
+      const acceptanceReference=contract.clientDocument||acceptanceSnapshot.document||contract.documentType||"";
+      const acceptancePlanPrice=contract.status==="accepted"?Number(contract.planPrice||0):Number(getLivePlanPrice(acceptanceReference));
+      if(contract.status!=="accepted"&&Number.isFinite(acceptancePlanPrice))contract.planPrice=acceptancePlanPrice;
       $("publicClientAcceptanceData").innerHTML=`<strong>DADOS DO CONTRATANTE PARA O ACEITE</strong>
         <div class="contract-client-grid" style="margin-top:12px">
           <div class="contract-client-field"><span>Nome / Razão social</span><strong>${safe(contractValue(contract.clientName||acceptanceSnapshot.name))}</strong></div>
@@ -3294,7 +3388,7 @@
           <div class="contract-client-field"><span>Cidade</span><strong>${safe(contractValue(contract.city||acceptanceSnapshot.city))}</strong></div>
           <div class="contract-client-field full"><span>Endereço</span><strong>${safe(contractValue(contract.address||acceptanceSnapshot.address))}</strong></div>
           <div class="contract-client-field"><span>Plano</span><strong>${safe(contractValue(contract.planLabel))}</strong></div>
-          <div class="contract-client-field"><span>Valor anual</span><strong>${money(Number(contract.planPrice||0))}</strong></div>
+          <div class="contract-client-field"><span>Valor anual</span><strong>${money(Number(contract.status==="accepted"?contract.planPrice:acceptancePlanPrice)||0)}</strong></div>
           <div class="contract-client-field"><span>Forma de pagamento</span><strong>${safe(contractValue(contract.payment||acceptanceSnapshot.payment))}</strong></div>
           <div class="contract-client-field"><span>Situação</span><strong>${safe(acceptancePaymentStatus)}</strong></div>
         </div>`;
@@ -3314,7 +3408,12 @@
     }
 
     window.openClient=(id)=>{
-      state.selectedClientId=id;renderClientDetail();navigate("client-detail");
+      const client=state.clients.find(x=>x.id===id);
+      if(!client){showToast("Cliente não localizado.","error");return;}
+      state.selectedClientId=id;
+      navigate("client-detail");
+      try{renderClientDetail();}
+      catch(err){console.error("Erro ao abrir ficha do cliente",err);showToast("Não foi possível abrir a ficha deste cliente. Verifique os dados cadastrados.","error");}
     };
     window.editClient=(id)=>{
       if(!can("clientsEdit"))return;
