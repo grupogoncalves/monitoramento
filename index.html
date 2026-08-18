@@ -842,6 +842,7 @@
               <div class="card-title" style="font-size:19px">Aceite digital</div>
               <p class="muted small" style="line-height:1.6;margin:5px 0 0">Preencha os dados abaixo para confirmar sua identidade e registrar o aceite deste contrato.</p>
             </div>
+            <div id="publicClientAcceptanceData" class="contract-parties" style="margin-bottom:17px"></div>
             <div class="form-grid">
               <div class="field"><label>Nome completo do responsável *</label><input id="publicSignerName" required></div>
               <div class="field"><label>CPF ou CNPJ do contratante *</label><input id="publicSignerDocument" required placeholder="Mesmo documento do cadastro"></div>
@@ -1186,7 +1187,7 @@
                 <div class="plan-settings-intro">
                   <div>
                     <strong style="font-size:13px">Configuração comercial dos planos</strong>
-                    <p class="muted small">As alterações serão usadas em novos cadastros, ativações e renovações. Clientes já contratados mantêm o preço e os benefícios registrados no momento da contratação.</p>
+                    <p class="muted small">As alterações serão usadas em novos cadastros, ativações e renovações. Alterações de preço também atualizam contratos ainda aguardando aceite. Contratos já aceitos preservam o valor registrado no momento da assinatura.</p>
                   </div>
                   <div class="field" style="min-width:min(360px,100%)">
                     <label>Nome geral do produto</label>
@@ -1880,9 +1881,41 @@
       }
       return parties+source;
     }
+    function getLivePlanPrice(clientOrDocument){
+      return Number(getConfiguredPlan(clientOrDocument).price||0);
+    }
+    function getLivePlanLabel(clientOrDocument){
+      return getConfiguredPlan(clientOrDocument).label||getPlanLabel(clientOrDocument);
+    }
+    function contractDataFromClient(contract,client,{useLivePrice=false}={}){
+      const source=client||contract?.clientSnapshot||contract||{};
+      const snapshot=contractClientSnapshot(source);
+      const planPrice=useLivePrice?getLivePlanPrice(source):Number(contract?.planPrice ?? getPlanPrice(source));
+      const planLabel=contract?.planLabel||source?.planLabel||getLivePlanLabel(source);
+      return {
+        ...source,
+        name:snapshot.name,
+        document:snapshot.document,
+        phone:snapshot.phone,
+        email:snapshot.email,
+        city:snapshot.city,
+        address:snapshot.address,
+        seller:snapshot.seller,
+        payment:snapshot.payment,
+        paymentStatus:snapshot.paymentStatus,
+        notes:snapshot.notes,
+        planStart:snapshot.planStart,
+        planEnd:snapshot.planEnd,
+        planPrice:Number.isFinite(planPrice)?planPrice:getLivePlanPrice(source),
+        planLabel,
+        planBenefits:source?.planBenefits||undefined
+      };
+    }
     function hydrateContractClientData(contract,client){
       if(!contract)return contract;
-      const snapshot=contractClientSnapshot(client||contract.clientSnapshot||contract);
+      const useLivePrice=contract.status!=="accepted";
+      const data=contractDataFromClient(contract,client,{useLivePrice});
+      const snapshot=contractClientSnapshot(data);
       const hydrated={
         ...contract,
         clientName:snapshot.name||contract.clientName||"",
@@ -1898,9 +1931,15 @@
         clientNotes:snapshot.notes||contract.clientNotes||"",
         planStart:snapshot.planStart||contract.planStart||"",
         planEnd:snapshot.planEnd||contract.planEnd||"",
+        planPrice:useLivePrice?data.planPrice:(Number(contract.planPrice ?? data.planPrice)),
+        planLabel:contract.planLabel||data.planLabel,
         clientSnapshot:snapshot
       };
-      hydrated.contractHtml=injectFullClientDataIntoContractHtml(contract.contractHtml||"",snapshot);
+      // Contratos pendentes sempre refletem o preço vigente e os dados atuais do cliente.
+      // Contratos aceitos preservam o texto/valor assinado, mas continuam exibindo os dados completos já gravados.
+      hydrated.contractHtml=useLivePrice
+        ? buildContractHtml(data,contract.number)
+        : injectFullClientDataIntoContractHtml(contract.contractHtml||buildContractHtml(data,contract.number),snapshot);
       if(hydrated.status==="accepted" && !hydrated.acceptedDocument && snapshot.document) hydrated.acceptedDocument=snapshot.document;
       return hydrated;
     }
@@ -2282,8 +2321,9 @@
         await savePlanSettingsInAuthorizedProfile(settings);
         state.planSettingsSource="online";
         state.planSettingsUpdatedAt=new Date().toISOString();
+        const propagation=await propagateLivePriceToPendingContracts(planType);
         renderPlanSettings(false);
-        showToast(`Preço de ${label} salvo: ${money(value)} por ano.`);
+        showToast(`Preço de ${label} salvo: ${money(value)} por ano. ${propagation.updated} contrato(s) pendente(s) atualizado(s).`);
       }catch(profileError){
         console.warn("Não foi possível sincronizar o preço no perfil autorizado.",profileError);
         state.planSettingsSource="local";
@@ -2306,8 +2346,10 @@
       try{
         await savePlanSettingsInAuthorizedProfile(settings);
         state.planSettingsSource="online";
+        const cpfPropagation=await propagateLivePriceToPendingContracts("cpf");
+        const cnpjPropagation=await propagateLivePriceToPendingContracts("cnpj");
         renderPlanSettings(true);
-        showToast("Valores, benefícios e cláusulas foram salvos e sincronizados.");
+        showToast(`Valores, benefícios e cláusulas foram salvos. ${cpfPropagation.updated+cnpjPropagation.updated} contrato(s) pendente(s) sincronizado(s).`);
       }catch(profileError){
         console.warn("Não foi possível sincronizar as configurações no perfil autorizado.",profileError);
         state.planSettingsSource="local";
@@ -3031,6 +3073,8 @@
       return contract;
     }
     function renderContractModal(contract){
+      const modalClient=state.clients.find(c=>c.id===contract?.clientId);
+      if(modalClient)contract=hydrateContractClientData(contract,modalClient);
       state.selectedContractToken=contract.token;
       state.selectedContractClientId=contract.clientId||null;
       $("contractModalNumber").textContent=contract.number||"—";
@@ -3091,6 +3135,74 @@
       win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin-top:12px}.contract-client-field.full{grid-column:1/-1}.contract-client-field span{display:block;color:#687568;font-size:10px;text-transform:uppercase;font-weight:700}.contract-client-field strong{display:block;font-size:12px;overflow-wrap:anywhere}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${contract.contractHtml||""}${contractEvidenceHtml(contract)}</body></html>`);
       win.document.close();win.focus();setTimeout(()=>win.print(),300);
     }
+    function publicContractPayload(contract){
+      return {
+        clientName:contract.clientName||"",
+        clientDocument:contract.clientDocument||"",
+        documentType:contract.documentType||getClientType(contract.clientDocument||""),
+        documentMasked:maskDocument(contract.clientDocument||""),
+        clientPhone:contract.clientPhone||"",
+        clientEmail:contract.clientEmail||"",
+        city:contract.city||"",
+        address:contract.address||"",
+        clientSeller:contract.clientSeller||"",
+        payment:contract.payment||"",
+        paymentStatus:contract.paymentStatus||"",
+        clientNotes:contract.clientNotes||"",
+        planStart:contract.planStart||"",
+        planEnd:contract.planEnd||"",
+        planPrice:Number(contract.planPrice||0),
+        planLabel:contract.planLabel||"",
+        clientSnapshot:contract.clientSnapshot||{},
+        contractHtml:contract.contractHtml||""
+      };
+    }
+    async function refreshPendingContractForClient(clientId,clientData=null){
+      if(!state.connected||!clientId)return;
+      const client=clientData||state.clients.find(c=>c.id===clientId);
+      if(!client)return;
+      const contracts=state.contracts.filter(c=>c.clientId===clientId && c.status!=="accepted");
+      for(const rawContract of contracts){
+        const refreshed=hydrateContractClientData(rawContract,client);
+        await state.serviceApi.setDoc(
+          state.serviceApi.doc(state.db,"publicContracts",rawContract.token),
+          {...publicContractPayload(refreshed),documentHash:await hashText(documentDigits(refreshed.clientDocument))},
+          {merge:true}
+        );
+        state.syncedContractClientDataTokens.delete(rawContract.token);
+      }
+    }
+    async function propagateLivePriceToPendingContracts(planType){
+      if(!state.connected)return {updated:0};
+      let updated=0;
+      const pending=state.contracts.filter(contract=>{
+        if(contract.status==="accepted")return false;
+        const client=state.clients.find(c=>c.id===contract.clientId);
+        const reference=client||contract.clientDocument||contract.clientSnapshot?.document||"";
+        return getClientType(reference)===planType;
+      });
+      for(const rawContract of pending){
+        const client=state.clients.find(c=>c.id===rawContract.clientId);
+        if(!client)continue;
+        const refreshed=hydrateContractClientData(rawContract,client);
+        await state.serviceApi.setDoc(
+          state.serviceApi.doc(state.db,"publicContracts",rawContract.token),
+          {...publicContractPayload(refreshed),documentHash:await hashText(documentDigits(refreshed.clientDocument))},
+          {merge:true}
+        );
+        try{
+          await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",client.id),{
+            planPrice:refreshed.planPrice,
+            planLabel:refreshed.planLabel,
+            updatedAt:state.serviceApi.serverTimestamp()
+          });
+        }catch(err){console.warn("Preço atualizado no contrato, mas não foi possível atualizar a ficha do cliente",client.id,err);}
+        updated++;
+        state.syncedContractClientDataTokens.delete(rawContract.token);
+      }
+      return {updated};
+    }
+
     async function syncContractClientData(){
       if(!state.connected||!state.currentProfile||!can("clientsEdit")||state.contractClientDataSyncRunning)return;
       state.contractClientDataSyncRunning=true;
@@ -3099,21 +3211,22 @@
           if(state.syncedContractClientDataTokens.has(rawContract.token))continue;
           const client=state.clients.find(c=>c.id===rawContract.clientId);
           if(!client){state.syncedContractClientDataTokens.add(rawContract.token);continue;}
-          const fullDocument=String(rawContract.clientDocument||rawContract.clientSnapshot?.document||"").trim();
-          const hasFullBlock=/contract-client-grid/i.test(rawContract.contractHtml||"");
-          const snapshotComplete=!!rawContract.clientSnapshot && String(rawContract.clientSnapshot.name||"").trim()!=="";
-          if(fullDocument && hasFullBlock && snapshotComplete){state.syncedContractClientDataTokens.add(rawContract.token);continue;}
           const contract=hydrateContractClientData(rawContract,client);
+          const payload=publicContractPayload(contract);
+          // Pendente: mantém preço/dados sincronizados. Aceito: só completa dados faltantes, sem trocar preço/texto assinado.
+          if(rawContract.status==="accepted"){
+            delete payload.planPrice;
+            delete payload.planLabel;
+            delete payload.contractHtml;
+          }
           try{
             await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"publicContracts",rawContract.token),{
-              clientName:contract.clientName, clientDocument:contract.clientDocument, documentType:contract.documentType,
-              clientPhone:contract.clientPhone, clientEmail:contract.clientEmail, city:contract.city, address:contract.address,
-              clientSeller:contract.clientSeller, payment:contract.payment, paymentStatus:contract.paymentStatus, clientNotes:contract.clientNotes,
-              planStart:contract.planStart, planEnd:contract.planEnd, clientSnapshot:contract.clientSnapshot, contractHtml:contract.contractHtml,
+              ...payload,
+              ...(rawContract.status!=="accepted"?{documentHash:await hashText(documentDigits(contract.clientDocument)),documentMasked:maskDocument(contract.clientDocument)}:{}),
               ...(contract.acceptedDocument?{acceptedDocument:contract.acceptedDocument}:{})
             },{merge:true});
             state.syncedContractClientDataTokens.add(rawContract.token);
-          }catch(err){console.warn("Não foi possível completar os dados do contrato",rawContract.token,err);}
+          }catch(err){console.warn("Não foi possível sincronizar os dados do contrato",rawContract.token,err);}
         }
       }finally{state.contractClientDataSyncRunning=false;}
     }
@@ -3146,13 +3259,34 @@
     function renderPublicContract(contract){
       $("publicContractLoading").classList.add("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.remove("hidden");
       $("publicContractDocument").innerHTML=(contract.contractHtml||"")+contractEvidenceHtml(contract);
+      const acceptanceSnapshot=contractClientSnapshot(contract.clientSnapshot||contract);
+      const acceptancePaymentStatus=contract.paymentStatus==="paid"?"Pago":contract.paymentStatus==="pending"?"Pendente":contractValue(contract.paymentStatus);
+      $("publicClientAcceptanceData").innerHTML=`<strong>DADOS DO CONTRATANTE PARA O ACEITE</strong>
+        <div class="contract-client-grid" style="margin-top:12px">
+          <div class="contract-client-field"><span>Nome / Razão social</span><strong>${safe(contractValue(contract.clientName||acceptanceSnapshot.name))}</strong></div>
+          <div class="contract-client-field"><span>${getClientType(contract.clientDocument||acceptanceSnapshot.document).toUpperCase()}</span><strong>${safe(contractValue(contract.clientDocument||acceptanceSnapshot.document))}</strong></div>
+          <div class="contract-client-field"><span>Telefone / WhatsApp</span><strong>${safe(contractValue(contract.clientPhone||acceptanceSnapshot.phone))}</strong></div>
+          <div class="contract-client-field"><span>E-mail</span><strong>${safe(contractValue(contract.clientEmail||acceptanceSnapshot.email))}</strong></div>
+          <div class="contract-client-field"><span>Cidade</span><strong>${safe(contractValue(contract.city||acceptanceSnapshot.city))}</strong></div>
+          <div class="contract-client-field full"><span>Endereço</span><strong>${safe(contractValue(contract.address||acceptanceSnapshot.address))}</strong></div>
+          <div class="contract-client-field"><span>Plano</span><strong>${safe(contractValue(contract.planLabel))}</strong></div>
+          <div class="contract-client-field"><span>Valor anual</span><strong>${money(Number(contract.planPrice||0))}</strong></div>
+          <div class="contract-client-field"><span>Forma de pagamento</span><strong>${safe(contractValue(contract.payment||acceptanceSnapshot.payment))}</strong></div>
+          <div class="contract-client-field"><span>Situação</span><strong>${safe(acceptancePaymentStatus)}</strong></div>
+        </div>`;
       const accepted=contract.status==="accepted";
       const renewalEnabled=!!contract.automaticRenewalEnabled || /Renovação automática e encerramento/i.test(contract.contractHtml||"");
       $("publicRenewalAcceptanceRow").classList.toggle("hidden",!renewalEnabled);
       $("publicRenewalAcceptanceCheck").required=renewalEnabled;
       $("publicAcceptedBanner").classList.toggle("hidden",!accepted);$("publicAcceptanceForm").classList.toggle("hidden",accepted);
       if(accepted)$("publicAcceptedText").textContent=`Aceite registrado por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
-      else{$("publicSignerName").value="";$("publicSignerDocument").value="";$("publicAcceptanceWord").value="";$("publicAcceptanceCheck").checked=false;$("publicRenewalAcceptanceCheck").checked=false;}
+      else{
+        $("publicSignerName").value=contract.clientName||acceptanceSnapshot.name||"";
+        $("publicSignerDocument").value=contract.clientDocument||acceptanceSnapshot.document||"";
+        $("publicAcceptanceWord").value="";
+        $("publicAcceptanceCheck").checked=false;
+        $("publicRenewalAcceptanceCheck").checked=false;
+      }
     }
 
     window.openClient=(id)=>{
@@ -3290,6 +3424,7 @@
       const {doc,collection,setDoc,serverTimestamp,writeBatch}=state.serviceApi;
       if(id){
         await setDoc(doc(state.db,"clients",id),{...data,updatedAt:serverTimestamp()},{merge:true});
+        await refreshPendingContractForClient(id,{...state.clients.find(c=>c.id===id),...data,id});
       }else{
         data.planActive=true;
         data.planActivationSource="manual";
@@ -3601,8 +3736,7 @@
       if(digits.length!==11 && digits.length!==14){showToast("Informe um CPF com 11 dígitos ou um CNPJ com 14 dígitos.","error");return;}
       const existingClient=id?state.clients.find(client=>client.id===id):null;
       const preserveExistingPlan=existingClient&&getClientType(existingClient)===getClientType(document);
-      const planReference=preserveExistingPlan?existingClient:document;
-      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(planReference),planLabel:getPlanLabel(planReference),planBenefits:preserveExistingPlan&&existingClient?.planBenefits?existingClient.planBenefits:snapshotPlanBenefits(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
+      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:getLivePlanPrice(document),planLabel:getLivePlanLabel(document),planBenefits:preserveExistingPlan&&existingClient?.planBenefits?existingClient.planBenefits:snapshotPlanBenefits(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
       if(!id)data.services=emptyServices();
       try{const result=await saveClient(data,id);closeModal("clientModalBackdrop");showToast(id?"Ficha atualizada.":"Cliente cadastrado e contrato gerado.");if(!id&&result.contract){renderContractModal(result.contract);openModal("contractModalBackdrop");}}catch(err){showToast("Erro ao salvar cliente: "+err.message,"error");}
     });
