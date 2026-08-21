@@ -4468,11 +4468,23 @@
       const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent,faceEvidenceDataUrl:faceEvidence.dataUrl,faceEvidenceCapturedAt:faceEvidence.capturedAt,faceEvidenceMethod:faceEvidence.method,faceEvidenceConsent:true,faceEvidenceHash:await hashText(faceEvidence.dataUrl)};
       try{
         if(!state.connected) throw new Error("Realtime Database indisponível");
-        await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.serviceApi.serverTimestamp()});
+        // O aceite público não atualiza o contrato inteiro. Cada campo de evidência
+        // é gravado no seu próprio caminho em uma única operação atômica,
+        // respeitando as regras públicas específicas do Realtime Database.
+        const acceptancePayload={...accepted,acceptedAt:state.serviceApi.serverTimestamp()};
+        const batch=state.serviceApi.writeBatch(state.db);
+        Object.entries(acceptancePayload).forEach(([field,value])=>{
+          batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token,field),value);
+        });
+        await batch.commit();
         const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
         state.publicContract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
         renderPublicContract(state.publicContract);showToast("Contrato aceito com sucesso.");
-      }catch(err){console.error(err);showToast("Não foi possível registrar o aceite. Tente novamente.","error");}
+      }catch(err){
+        console.error("Erro ao registrar aceite público:",err);
+        const code=String(err?.code||"").replace(/^database\//i,"").replace(/_/g," ");
+        showToast(`Não foi possível registrar o aceite.${code?` (${code})`:""} Tente novamente.`,"error");
+      }
     });
     $("clientForm").addEventListener("submit",async e=>{
       e.preventDefault();
