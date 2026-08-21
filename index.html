@@ -726,6 +726,35 @@
     .acceptance-panel { margin-top:18px; border-top:1px solid var(--line); padding-top:20px; }
     .acceptance-check { display:flex; align-items:flex-start; gap:10px; padding:13px; border:1px solid var(--line); border-radius:12px; background:#fafcf7; }
     .acceptance-check input { margin-top:3px; accent-color:var(--primary); }
+    .face-capture-card {
+      border:1px solid #d7e3cf; background:linear-gradient(180deg,#fbfdf8,#f4f8ee);
+      border-radius:16px; padding:16px; margin-top:2px;
+    }
+    .face-capture-head { display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px; }
+    .face-capture-head strong { display:block;color:var(--primary);font-size:13px; }
+    .face-capture-head span { display:block;color:var(--muted);font-size:10px;line-height:1.5;margin-top:4px; }
+    .face-capture-badge { flex:0 0 auto;background:#eef4df;color:var(--primary);border:1px solid #d6e2b1;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px; }
+    .face-camera-stage {
+      position:relative; width:min(420px,100%); aspect-ratio:4/3; margin:0 auto; overflow:hidden;
+      border-radius:16px; background:#102318; border:1px solid rgba(4,60,9,.18); display:grid;place-items:center;
+    }
+    .face-camera-stage video,.face-camera-stage img { width:100%;height:100%;object-fit:cover;display:block; }
+    .face-camera-stage video { transform:scaleX(-1); }
+    .face-camera-placeholder { color:rgba(255,255,255,.72);text-align:center;padding:24px;font-size:11px;line-height:1.6; }
+    .face-guide { position:absolute;inset:10% 22%;border:2px solid rgba(216,230,79,.92);border-radius:48% 48% 44% 44%;box-shadow:0 0 0 999px rgba(0,0,0,.20);pointer-events:none; }
+    .face-scan-line { position:absolute;left:25%;right:25%;height:2px;background:rgba(216,230,79,.95);box-shadow:0 0 10px rgba(216,230,79,.8);animation:faceScan 2.1s ease-in-out infinite;pointer-events:none; }
+    @keyframes faceScan { 0%,100%{top:24%;opacity:.45}50%{top:72%;opacity:1} }
+    .face-capture-actions { display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px; }
+    .face-capture-status { text-align:center;color:var(--muted);font-size:10px;line-height:1.5;margin-top:10px; }
+    .face-capture-status.ok { color:var(--success);font-weight:700; }
+    .face-consent { margin-top:13px; }
+    .face-evidence-preview { margin-top:12px;display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #cfe1c6;background:#fff;border-radius:12px; }
+    .face-evidence-preview img { width:68px;height:68px;object-fit:cover;border-radius:12px; }
+    .face-evidence-preview strong { display:block;font-size:11px;color:var(--primary); }
+    .face-evidence-preview span { display:block;font-size:9px;color:var(--muted);margin-top:4px;line-height:1.4; }
+    .contract-signature-face { margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap; }
+    .contract-signature-face img { width:92px;height:92px;object-fit:cover;border-radius:12px;border:2px solid #d4e3aa;background:#fff; }
+    @media (max-width:650px) { .face-camera-stage{width:100%;} .face-guide{inset:9% 20%;} .face-capture-actions .btn{flex:1;} }
     .contract-summary-card {
       display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
       background:#fff; border:1px solid var(--line); border-left:5px solid var(--accent);
@@ -792,6 +821,53 @@
       .plan-settings-actions,.plan-settings-actions .btn { width:100%; }
     }
 
+
+
+    /* Preventivas, limpeza e ordens de serviço */
+    .maintenance-flow { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:18px; }
+    .maintenance-step { background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 14px;box-shadow:var(--shadow-sm);min-width:0; }
+    .maintenance-step strong { display:block;font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;font-size:15px;color:var(--primary); }
+    .maintenance-step span { display:block;margin-top:4px;font-size:9px;color:var(--muted);line-height:1.4; }
+    .maintenance-step.active { border-top:4px solid var(--accent);padding-top:10px; }
+    .maintenance-kpi { font-family:Manrope,sans-serif;font-weight:800;font-size:24px;margin-top:8px;color:var(--ink); }
+    .maintenance-status-line { display:flex;gap:7px;align-items:center;flex-wrap:wrap; }
+    .maintenance-actions { display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end; }
+    .maintenance-detail-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+    .maintenance-detail-item { border:1px solid var(--line);background:#fafcf7;border-radius:11px;padding:12px;min-width:0; }
+    .maintenance-detail-item span { display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.55px;font-weight:800;margin-bottom:5px; }
+    .maintenance-detail-item strong { display:block;font-size:12px;overflow-wrap:anywhere; }
+    .maintenance-detail-item.full { grid-column:1/-1; }
+    .maintenance-process { margin-top:16px;border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff; }
+    .maintenance-process-row { display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid #edf2e9; }
+    .maintenance-process-row:last-child { border-bottom:0; }
+    .maintenance-process-mark { width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#eef2e9;color:#7a877c;font-size:11px;font-weight:800; }
+    .maintenance-process-row.done .maintenance-process-mark { background:var(--success-bg);color:var(--success); }
+    .maintenance-process-row strong { font-size:11px; }
+    .maintenance-process-row span { font-size:9px;color:var(--muted); }
+    .service-order-sheet { background:#fff;color:#1f2b21;border:1px solid #dfe6dc;border-radius:12px;padding:28px;font-family:Arial,sans-serif;font-size:12px;line-height:1.55; }
+    .service-order-head { display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:3px solid var(--accent);padding-bottom:16px;margin-bottom:18px; }
+    .service-order-head h2 { margin:0;color:var(--primary);font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;font-size:25px; }
+    .service-order-number { text-align:right;font-weight:800;color:var(--primary); }
+    .service-order-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin:13px 0; }
+    .service-order-field span { display:block;color:#687568;font-size:9px;text-transform:uppercase;font-weight:700;margin-bottom:2px; }
+    .service-order-field strong { display:block;font-size:11px;overflow-wrap:anywhere; }
+    .service-order-section { margin-top:18px; }
+    .service-order-section h3 { margin:0 0 8px;color:var(--primary);font-size:12px;text-transform:uppercase;border-bottom:1px solid #dfe6dc;padding-bottom:6px; }
+    .service-order-checklist { display:grid;grid-template-columns:1fr 1fr;gap:6px 18px; }
+    .service-order-check { display:flex;gap:8px;align-items:flex-start;font-size:10px; }
+    .service-order-check::before { content:"☐";font-size:14px;line-height:1; }
+    .service-order-signatures { display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:40px; }
+    .service-order-signature { text-align:center;border-top:1px solid #526055;padding-top:7px;font-size:9px;color:#526055; }
+    @media (max-width:1100px) { .maintenance-flow { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:650px) {
+      .maintenance-flow,.maintenance-detail-grid,.service-order-grid,.service-order-checklist,.service-order-signatures { grid-template-columns:1fr; }
+      .maintenance-detail-item.full { grid-column:auto; }
+      .maintenance-actions { justify-content:flex-start; }
+      .service-order-sheet { padding:18px 14px; }
+      .service-order-head { flex-direction:column; }
+      .service-order-number { text-align:left; }
+    }
+
   </style>
 </head>
 <body>
@@ -839,6 +915,36 @@
                 <input id="publicRenewalAcceptanceCheck" type="checkbox">
                 <span>Autorizo expressamente a renovação automática do plano por novos períodos anuais e estou ciente de que, para impedir a próxima renovação, devo solicitar a não renovação ou o encerramento com antecedência mínima de 30 dias.</span>
               </label>
+              <div class="face-capture-card field full">
+                <div class="face-capture-head">
+                  <div>
+                    <strong>Registro facial do responsável *</strong>
+                    <span>Faça uma selfie ao vivo pela câmera frontal para vincular uma evidência visual a este aceite eletrônico. Não é permitido selecionar imagens da galeria ou de arquivos do aparelho. A imagem não é usada para reconhecimento ou comparação biométrica automática.</span>
+                  </div>
+                  <span class="face-capture-badge">Evidência do aceite</span>
+                </div>
+                <div id="publicFaceCameraStage" class="face-camera-stage">
+                  <div id="publicFacePlaceholder" class="face-camera-placeholder">
+                    <div style="font-size:31px;margin-bottom:8px">◉</div>
+                    Toque em <strong>Ativar câmera</strong> e posicione o rosto dentro do guia.
+                  </div>
+                  <video id="publicFaceVideo" class="hidden" autoplay playsinline muted></video>
+                  <img id="publicFacePreview" class="hidden" alt="Selfie capturada para registro do aceite">
+                  <div id="publicFaceGuide" class="face-guide hidden"></div>
+                  <div id="publicFaceScanLine" class="face-scan-line hidden"></div>
+                </div>
+                <canvas id="publicFaceCanvas" class="hidden"></canvas>
+                <div class="face-capture-actions">
+                  <button id="publicStartFaceCamera" class="btn btn-soft btn-sm" type="button">Ativar câmera</button>
+                  <button id="publicCaptureFace" class="btn btn-primary btn-sm hidden" type="button">Capturar selfie</button>
+                  <button id="publicRetakeFace" class="btn btn-ghost btn-sm hidden" type="button">Refazer foto</button>
+                </div>
+                <div id="publicFaceStatus" class="face-capture-status">Nenhuma selfie ao vivo registrada.</div>
+                <label class="acceptance-check face-consent">
+                  <input id="publicFaceConsent" type="checkbox" required>
+                  <span>Autorizo a captura e o armazenamento desta imagem exclusivamente para comprovação do meu aceite eletrônico e registro contratual.</span>
+                </label>
+              </div>
             </div>
             <button id="publicAcceptBtn" class="btn btn-primary w-full" type="submit" style="margin-top:16px;padding:14px">Aceitar e assinar eletronicamente</button>
           </form>
@@ -925,6 +1031,7 @@
         <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span> Visão geral</button>
         <button class="nav-item" data-page="clients" data-permission="clientsView"><span class="nav-icon">♙</span> Clientes</button>
         <button class="nav-item" data-page="contracts" data-permission="clientsView"><span class="nav-icon">▤</span> Contratos</button>
+        <button class="nav-item" data-page="maintenance" data-permission="maintenanceView"><span class="nav-icon">✦</span> Preventivas e limpeza</button>
         <button class="nav-item" data-page="expirations" data-permission="clientsView"><span class="nav-icon">◷</span> Vencimentos</button>
         <button class="nav-item" data-page="users" data-permission="usersManage"><span class="nav-icon">⚙</span> Usuários e permissões</button>
       </nav>
@@ -1109,6 +1216,54 @@
           </div>
         </section>
 
+
+
+        <!-- Preventivas e limpeza -->
+        <section id="page-maintenance" class="page">
+          <div class="toolbar">
+            <div>
+              <div class="card-title" style="font-size:21px">Preventivas e limpeza</div>
+              <div class="muted small" style="margin-top:5px">Orçamento, aprovação, pagamento e ordem de serviço em um único fluxo.</div>
+            </div>
+            <button id="addMaintenanceBtn" class="btn btn-primary btn-sm" data-permission="maintenanceCreate">＋ Novo serviço</button>
+          </div>
+
+          <div class="maintenance-flow">
+            <div class="maintenance-step active"><strong>Orçamentos</strong><div id="maintenanceQuoteCount" class="maintenance-kpi">0</div><span>Em preparação ou ainda não enviados.</span></div>
+            <div class="maintenance-step"><strong>Aguardando cliente</strong><div id="maintenanceApprovalCount" class="maintenance-kpi">0</div><span>Orçamento enviado e aguardando aprovação.</span></div>
+            <div class="maintenance-step"><strong>Aguardando pagamento</strong><div id="maintenancePaymentCount" class="maintenance-kpi">0</div><span>Aprovados pelo cliente e ainda não pagos.</span></div>
+            <div class="maintenance-step"><strong>Liberados / execução</strong><div id="maintenanceExecutionCount" class="maintenance-kpi">0</div><span>OS gerada, agendada ou em execução.</span></div>
+            <div class="maintenance-step"><strong>Concluídos</strong><div id="maintenanceCompletedCount" class="maintenance-kpi">0</div><span>Serviços finalizados pela equipe.</span></div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <div class="search-box"><span>⌕</span><input id="maintenanceSearch" placeholder="Buscar cliente, OS, cidade ou serviço..."></div>
+              <select id="maintenanceStatusFilter" class="filter-select">
+                <option value="">Todos os status</option>
+                <option value="quote">Orçamento</option>
+                <option value="awaiting_approval">Aguardando aprovação</option>
+                <option value="awaiting_payment">Aguardando pagamento</option>
+                <option value="ready">OS liberada</option>
+                <option value="executing">Em execução</option>
+                <option value="completed">Concluído</option>
+              </select>
+            </div>
+            <div class="toolbar-right"><span id="maintenanceCount" class="badge info">0 serviços</span></div>
+          </div>
+
+          <div class="card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Solicitação</th><th>Cliente</th><th>Serviço</th><th>Módulos</th><th>Valor</th><th>Status</th><th>Ordem de serviço</th><th></th></tr></thead>
+                <tbody id="maintenanceTable"></tbody>
+              </table>
+            </div>
+            <div id="maintenanceEmpty" class="empty hidden"><div class="empty-icon">✦</div><strong>Nenhum serviço cadastrado</strong><span>Cadastre uma preventiva ou limpeza para iniciar o fluxo comercial.</span></div>
+          </div>
+        </section>
+
+
         <!-- Vencimentos -->
         <section id="page-expirations" class="page">
           <div class="stats-grid">
@@ -1261,6 +1416,7 @@
               <div><h2 id="detailName">Cliente</h2><p id="detailMeta">CPF · Cidade</p></div>
             </div>
             <div class="detail-actions">
+              <button id="newMaintenanceFromClient" class="btn btn-soft btn-sm" data-permission="maintenanceCreate">✦ Preventiva / limpeza</button>
               <button id="editDetailClient" class="btn btn-ghost btn-sm" data-permission="clientsEdit">✎ Editar ficha</button>
               <button id="renewClientBtn" class="btn btn-accent btn-sm" data-permission="clientsEdit">↻ Renovar plano</button>
             </div>
@@ -1338,6 +1494,69 @@
       </div>
     </main>
   </section>
+
+
+
+  <!-- MODAL PREVENTIVA / LIMPEZA -->
+  <div id="maintenanceModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3 id="maintenanceModalTitle">Novo serviço</h3><button class="close-btn" data-close="maintenanceModalBackdrop">×</button></div>
+      <form id="maintenanceForm">
+        <div class="modal-body">
+          <input id="maintenanceId" type="hidden">
+          <div class="form-grid">
+            <div class="field full"><label>Cliente *</label><select id="maintenanceClientId" required><option value="">Selecione um cliente</option></select><span id="maintenanceClientPreview" class="small muted">Os dados da ficha do cliente serão usados na ordem de serviço.</span></div>
+            <div class="field"><label>Tipo de serviço *</label><select id="maintenanceServiceType" required><option value="preventive">Manutenção preventiva</option><option value="cleaning">Limpeza de módulos</option><option value="both">Preventiva + limpeza</option></select></div>
+            <div class="field"><label>Quantidade de módulos *</label><input id="maintenanceModuleCount" type="number" min="1" step="1" required placeholder="Ex.: 32"></div>
+            <div class="field"><label>Valor total do serviço (R$) *</label><input id="maintenanceAmount" type="number" min="0" step="0.01" required placeholder="0,00"></div>
+            <div class="field"><label>Data desejada / referência</label><input id="maintenanceRequestedDate" type="date"></div>
+            <div class="field full"><label>Operadora responsável pelo orçamento</label><input id="maintenanceOperator" readonly></div>
+            <div class="field full"><label>Observações e particularidades do local</label><textarea id="maintenanceNotes" placeholder="Acesso ao telhado, restrições de horário, tipo de cobertura, necessidade de EPI especial, observações do cliente..."></textarea></div>
+          </div>
+          <div class="demo-note"><strong>Fluxo automático.</strong><br>A ordem de serviço será gerada somente quando o orçamento estiver aprovado e o pagamento registrado como pago.</div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="maintenanceModalBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Salvar orçamento</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DETALHES PREVENTIVA / LIMPEZA -->
+  <div id="maintenanceDetailBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3>Detalhes do serviço</h3><button class="close-btn" data-close="maintenanceDetailBackdrop">×</button></div>
+      <div class="modal-body"><div id="maintenanceDetailContent"></div></div>
+      <div id="maintenanceDetailActions" class="modal-footer"></div>
+    </div>
+  </div>
+
+  <!-- MODAL PROGRAMAÇÃO DA EXECUÇÃO -->
+  <div id="maintenanceScheduleBackdrop" class="modal-backdrop">
+    <div class="modal sm">
+      <div class="modal-header"><h3>Programar execução</h3><button class="close-btn" data-close="maintenanceScheduleBackdrop">×</button></div>
+      <form id="maintenanceScheduleForm">
+        <div class="modal-body">
+          <input id="maintenanceScheduleId" type="hidden">
+          <div class="form-grid">
+            <div class="field"><label>Data da execução *</label><input id="maintenanceScheduledDate" type="date" required></div>
+            <div class="field"><label>Horário</label><input id="maintenanceScheduledTime" type="time"></div>
+            <div class="field full"><label>Técnico / equipe responsável *</label><input id="maintenanceTeam" required placeholder="Nome do técnico ou equipe"></div>
+            <div class="field full"><label>Orientações para execução</label><textarea id="maintenanceExecutionNotes" placeholder="Contato no local, acesso, equipamentos necessários, observações técnicas..."></textarea></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="maintenanceScheduleBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Salvar programação</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL ORDEM DE SERVIÇO -->
+  <div id="serviceOrderBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3>Ordem de serviço</h3><button class="close-btn" data-close="serviceOrderBackdrop">×</button></div>
+      <div class="modal-body"><div id="serviceOrderPreview" class="service-order-sheet"></div></div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="serviceOrderBackdrop">Fechar</button><button id="printServiceOrderBtn" type="button" class="btn btn-primary">Imprimir / Salvar PDF</button></div>
+    </div>
+  </div>
+
 
   <!-- MODAL CLIENTE -->
   <div id="clientModalBackdrop" class="modal-backdrop">
@@ -1593,7 +1812,10 @@
       servicesRegister: "Registrar benefícios",
       reportsExport: "Exportar relatórios",
       usersManage: "Gerenciar usuários",
-      plansManage: "Gerenciar planos e benefícios"
+      plansManage: "Gerenciar planos e benefícios",
+      maintenanceView: "Visualizar preventivas e limpeza",
+      maintenanceCreate: "Cadastrar orçamentos de preventiva/limpeza",
+      maintenanceManage: "Gerenciar aprovação, pagamento e ordens de serviço"
     };
     const ROLE_LABELS = {
       master: "Master",
@@ -1606,10 +1828,10 @@
     const ROLE_PERMISSIONS = {
       master: Object.keys(PERMISSION_LABELS),
       admin: Object.keys(PERMISSION_LABELS),
-      manager: ["clientsView","clientsCreate","clientsEdit","servicesRegister","reportsExport"],
-      sales: ["clientsView","clientsCreate","clientsEdit","reportsExport"],
-      technical: ["clientsView","servicesRegister"],
-      viewer: ["clientsView"]
+      manager: ["clientsView","clientsCreate","clientsEdit","servicesRegister","reportsExport","maintenanceView","maintenanceCreate","maintenanceManage"],
+      sales: ["clientsView","clientsCreate","clientsEdit","reportsExport","maintenanceView","maintenanceCreate","maintenanceManage"],
+      technical: ["clientsView","servicesRegister","maintenanceView","maintenanceManage"],
+      viewer: ["clientsView","maintenanceView"]
     };
 
     const state = {
@@ -1625,6 +1847,9 @@
       users: [],
       activities: [],
       contracts: [],
+      maintenanceJobs: [],
+      selectedMaintenanceId: null,
+      selectedServiceOrderId: null,
       planSettings: JSON.parse(JSON.stringify(DEFAULT_PLAN_SETTINGS)),
       planSettingsSource: "default",
       planSettingsUpdatedAt: null,
@@ -1634,6 +1859,8 @@
       selectedContractToken: null,
       selectedContractClientId: null,
       publicContract: null,
+      publicFaceStream: null,
+      publicFaceEvidence: null,
       confirmCallback: null,
       syncedContractTokens: new Set(),
       syncedContractClientDataTokens: new Set(),
@@ -1943,7 +2170,10 @@
     function contractEvidenceHtml(contract){
       if(contract?.status!=="accepted") return "";
       const acceptedDocument=contract.acceptedDocument||contract.clientDocument||contract.clientSnapshot?.document||contract.acceptedDocumentMasked||"—";
-      return `<div class="contract-signature-evidence"><strong>ACEITE ELETRÔNICO REGISTRADO</strong><br>Responsável: ${safe(contract.acceptedBy||"—")}<br>Documento confirmado: ${safe(acceptedDocument)}<br>Data e hora: ${formatDateTime(timestampISO(contract.acceptedAt))}<br>Registro: aceite expresso por meio do link individual deste contrato.</div>`;
+      const faceData=typeof contract.faceEvidenceDataUrl==="string" && /^data:image\/jpeg;base64,/i.test(contract.faceEvidenceDataUrl)?contract.faceEvidenceDataUrl:"";
+      const faceInfo=contract.faceEvidenceCapturedAt?`Selfie registrada em ${formatDateTime(timestampISO(contract.faceEvidenceCapturedAt))}.`:"Selfie vinculada ao aceite.";
+      const faceHtml=faceData?`<div class="contract-signature-face"><img src="${safe(faceData)}" alt="Registro facial do responsável"><div><strong>REGISTRO FACIAL ANEXADO</strong><br>${safe(faceInfo)}<br>Método: câmera frontal do dispositivo (captura ao vivo).</div></div>`:"";
+      return `<div class="contract-signature-evidence"><strong>ACEITE ELETRÔNICO REGISTRADO</strong><br>Responsável: ${safe(contract.acceptedBy||"—")}<br>Documento confirmado: ${safe(acceptedDocument)}<br>Data e hora: ${formatDateTime(timestampISO(contract.acceptedAt))}<br>Registro: aceite expresso por meio do link individual deste contrato.${faceHtml}</div>`;
     }
     function buildContractHtml(data, number){
       const price=money(getPlanPrice(data));
@@ -2655,10 +2885,16 @@
         state.contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
         renderClients();renderContracts();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();
       }));
+      state.unsubscribers.push(onSnapshot(query(collection(state.db,"maintenanceJobs"),orderBy("createdAt","desc")),snap=>{
+        state.maintenanceJobs=snap.docs.map(d=>{const raw=d.data();return {id:d.id,...raw,createdAt:timestampISO(raw.createdAt)||raw.createdAt||null,updatedAt:timestampISO(raw.updatedAt)||raw.updatedAt||null,approvedAt:timestampISO(raw.approvedAt)||raw.approvedAt||null,paidAt:timestampISO(raw.paidAt)||raw.paidAt||null,osGeneratedAt:timestampISO(raw.osGeneratedAt)||raw.osGeneratedAt||null,startedAt:timestampISO(raw.startedAt)||raw.startedAt||null,completedAt:timestampISO(raw.completedAt)||raw.completedAt||null};});
+        renderMaintenanceJobs();
+        if(state.selectedMaintenanceId && $("maintenanceDetailBackdrop")?.classList.contains("open")) openMaintenanceDetail(state.selectedMaintenanceId);
+        if(state.selectedServiceOrderId && $("serviceOrderBackdrop")?.classList.contains("open")) renderServiceOrder(state.selectedServiceOrderId);
+      },err=>showToast("Erro ao carregar preventivas e limpeza: "+err.message,"error")));
     }
 
     function renderAll(){
-      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderExpirations();renderUsers();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderMaintenanceJobs();renderExpirations();renderUsers();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -3045,7 +3281,7 @@
     function printContract(contract){
       const win=window.open("","_blank","width=900,height=800");
       if(!win){showToast("O navegador bloqueou a janela de impressão.","error");return;}
-      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin-top:12px}.contract-client-field.full{grid-column:1/-1}.contract-client-field span{display:block;color:#687568;font-size:10px;text-transform:uppercase;font-weight:700}.contract-client-field strong{display:block;font-size:12px;overflow-wrap:anywhere}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract)}${contractEvidenceHtml(contract)}</body></html>`);
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(contract.number)}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:36px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:21px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:23px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px}.contract-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin-top:12px}.contract-client-field.full{grid-column:1/-1}.contract-client-field span{display:block;color:#687568;font-size:10px;text-transform:uppercase;font-weight:700}.contract-client-field strong{display:block;font-size:12px;overflow-wrap:anywhere}.contract-signature-evidence{margin-top:22px;border:1px solid #bdd477;background:#f7faeb;border-radius:8px;padding:15px}.contract-signature-face{margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.contract-signature-face img{width:92px;height:92px;object-fit:cover;border-radius:12px;border:2px solid #d4e3aa;background:#fff}p{text-align:justify} @media print{body{padding:0}}</style></head><body>${normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract)}${contractEvidenceHtml(contract)}</body></html>`);
       win.document.close();win.focus();setTimeout(()=>win.print(),300);
     }
     function publicContractPayload(contract){
@@ -3199,6 +3435,80 @@
       }
       return false;
     }
+    function stopPublicFaceCamera(){
+      if(state.publicFaceStream){
+        state.publicFaceStream.getTracks().forEach(track=>track.stop());
+        state.publicFaceStream=null;
+      }
+      const video=$("publicFaceVideo");
+      if(video)video.srcObject=null;
+    }
+    function resetPublicFaceCapture(){
+      stopPublicFaceCamera();
+      state.publicFaceEvidence=null;
+      if($("publicFacePreview")){ $("publicFacePreview").src=""; $("publicFacePreview").classList.add("hidden"); }
+      $("publicFaceVideo")?.classList.add("hidden");
+      $("publicFacePlaceholder")?.classList.remove("hidden");
+      $("publicFaceGuide")?.classList.add("hidden");
+      $("publicFaceScanLine")?.classList.add("hidden");
+      $("publicCaptureFace")?.classList.add("hidden");
+      $("publicRetakeFace")?.classList.add("hidden");
+      $("publicStartFaceCamera")?.classList.remove("hidden");
+      if($("publicFaceStatus")){ $("publicFaceStatus").textContent="Nenhuma selfie ao vivo registrada."; $("publicFaceStatus").classList.remove("ok"); }
+      if($("publicFaceConsent"))$("publicFaceConsent").checked=false;
+    }
+    function setPublicFaceEvidence(dataUrl,method){
+      if(method!=="camera")throw new Error("Somente captura ao vivo pela câmera é permitida");
+      if(!/^data:image\/jpeg;base64,/i.test(dataUrl||""))throw new Error("Formato de imagem inválido");
+      stopPublicFaceCamera();
+      state.publicFaceEvidence={dataUrl,method,capturedAt:new Date().toISOString()};
+      $("publicFacePreview").src=dataUrl;
+      $("publicFacePreview").classList.remove("hidden");
+      $("publicFaceVideo").classList.add("hidden");
+      $("publicFacePlaceholder").classList.add("hidden");
+      $("publicFaceGuide").classList.add("hidden");
+      $("publicFaceScanLine").classList.add("hidden");
+      $("publicCaptureFace").classList.add("hidden");
+      $("publicStartFaceCamera").classList.add("hidden");
+      $("publicRetakeFace").classList.remove("hidden");
+      $("publicFaceStatus").textContent="Selfie capturada e pronta para ser vinculada ao aceite.";
+      $("publicFaceStatus").classList.add("ok");
+    }
+    async function startPublicFaceCamera(){
+      if(!navigator.mediaDevices?.getUserMedia){
+        showToast("A câmera frontal é obrigatória para registrar a selfie. Abra este link em um navegador compatível e permita o acesso à câmera.","error");
+        return;
+      }
+      try{
+        stopPublicFaceCamera();
+        const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:720},height:{ideal:720}},audio:false});
+        state.publicFaceStream=stream;
+        const video=$("publicFaceVideo");video.srcObject=stream;await video.play();
+        $("publicFacePreview").src="";$("publicFacePreview").classList.add("hidden");
+        $("publicFacePlaceholder").classList.add("hidden");
+        video.classList.remove("hidden");
+        $("publicFaceGuide").classList.remove("hidden");
+        $("publicFaceScanLine").classList.remove("hidden");
+        $("publicCaptureFace").classList.remove("hidden");
+        $("publicStartFaceCamera").classList.add("hidden");
+        $("publicRetakeFace").classList.add("hidden");
+        $("publicFaceStatus").textContent="Câmera ativa. Centralize o rosto no guia e capture a selfie.";
+        $("publicFaceStatus").classList.remove("ok");
+      }catch(err){
+        console.warn("Acesso à câmera não autorizado ou indisponível.",err);
+        showToast("Não foi possível acessar a câmera frontal. Permita o acesso à câmera para continuar com a assinatura.","error");
+      }
+    }
+    function capturePublicFaceFromVideo(){
+      const video=$("publicFaceVideo");
+      if(!video.videoWidth||!video.videoHeight){showToast("A câmera ainda não está pronta.","error");return;}
+      const canvas=$("publicFaceCanvas"),ctx=canvas.getContext("2d");
+      const size=Math.min(video.videoWidth,video.videoHeight),sx=(video.videoWidth-size)/2,sy=(video.videoHeight-size)/2;
+      canvas.width=480;canvas.height=480;
+      // Espelha a captura para corresponder à prévia exibida ao usuário.
+      ctx.save();ctx.translate(480,0);ctx.scale(-1,1);ctx.drawImage(video,sx,sy,size,size,0,0,480,480);ctx.restore();
+      setPublicFaceEvidence(canvas.toDataURL("image/jpeg",.72),"camera");
+    }
     async function loadPublicContract(token){
       showPublicContract();
       $("publicContractLoading").classList.remove("hidden");$("publicContractError").classList.add("hidden");$("publicContractContent").classList.add("hidden");
@@ -3258,13 +3568,14 @@
       $("publicRenewalAcceptanceRow").classList.toggle("hidden",!renewalEnabled);
       $("publicRenewalAcceptanceCheck").required=renewalEnabled;
       $("publicAcceptedBanner").classList.toggle("hidden",!accepted);$("publicAcceptanceForm").classList.toggle("hidden",accepted);
-      if(accepted)$("publicAcceptedText").textContent=`Aceite registrado por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
+      if(accepted){stopPublicFaceCamera();$("publicAcceptedText").textContent=`Aceite registrado por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;}
       else{
         $("publicSignerName").value=contract.clientName||acceptanceSnapshot.name||"";
         $("publicSignerDocument").value=contract.clientDocument||acceptanceSnapshot.document||"";
         $("publicAcceptanceWord").value="";
         $("publicAcceptanceCheck").checked=false;
         $("publicRenewalAcceptanceCheck").checked=false;
+        resetPublicFaceCapture();
       }
     }
 
@@ -3347,11 +3658,170 @@
       },false);
     };
 
+
+
+    const MAINTENANCE_SERVICE_LABELS={preventive:"Manutenção preventiva",cleaning:"Limpeza de módulos",both:"Preventiva + limpeza"};
+    const maintenanceServiceLabel=type=>MAINTENANCE_SERVICE_LABELS[type]||"Serviço técnico";
+    function maintenanceClient(job){return state.clients.find(c=>c.id===job?.clientId)||job?.clientSnapshot||{};}
+    function maintenanceComputedStatus(job={}){
+      if(job.completedAt||job.status==="completed")return "completed";
+      if(job.startedAt||job.status==="executing")return "executing";
+      if(job.serviceOrderNumber && job.approved && job.paymentStatus==="paid")return "ready";
+      if(job.approved && job.paymentStatus!=="paid")return "awaiting_payment";
+      if(job.budgetSentAt)return "awaiting_approval";
+      return "quote";
+    }
+    function maintenanceStatusBadge(job){
+      const status=maintenanceComputedStatus(job);
+      const map={quote:["gray","Orçamento"],awaiting_approval:["warning","Aguardando aprovação"],awaiting_payment:["warning","Aguardando pagamento"],ready:["success","OS liberada"],executing:["info","Em execução"],completed:["success","Concluído"]};
+      const [cls,label]=map[status]||["gray",status];
+      return `<span class="badge ${cls}"><span class="status-dot"></span>${label}</span>`;
+    }
+    function maintenanceRequestNumber(job){return job.requestNumber||`SOL-${String(job.id||"").slice(-6).toUpperCase()}`;}
+    function newMaintenanceRequestNumber(){return `SOL-${new Date().getFullYear()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;}
+    function newServiceOrderNumber(){return `OS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;}
+    function maintenanceUnitValue(job){const q=Number(job.moduleCount)||0,a=Number(job.amount)||0;return q?money(a/q):"—";}
+    function maintenanceSnapshot(client={}){return {name:client.name||"",document:client.document||"",phone:client.phone||"",email:client.email||"",city:client.city||"",address:client.address||""};}
+    function refreshMaintenanceClientOptions(selectedId=""){
+      const select=$("maintenanceClientId");if(!select)return;
+      const current=selectedId||select.value;
+      select.innerHTML='<option value="">Selecione um cliente</option>'+state.clients.slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"pt-BR")).map(c=>`<option value="${safe(c.id)}" ${c.id===current?"selected":""}>${safe(c.name||"Sem nome")} · ${safe(c.document||c.city||"sem documento")}</option>`).join("");
+      updateMaintenanceClientPreview();
+    }
+    function updateMaintenanceClientPreview(){
+      const c=state.clients.find(x=>x.id===$("maintenanceClientId")?.value);
+      if(!$("maintenanceClientPreview"))return;
+      $("maintenanceClientPreview").textContent=c?`${c.phone||"Sem telefone"} · ${c.city||"Cidade não informada"} · ${c.address||"Endereço não informado"}`:"Os dados da ficha do cliente serão usados na ordem de serviço.";
+    }
+    function renderMaintenanceJobs(){
+      if(!$("maintenanceTable"))return;
+      refreshMaintenanceClientOptions();
+      const counts={quote:0,awaiting_approval:0,awaiting_payment:0,ready:0,executing:0,completed:0};
+      state.maintenanceJobs.forEach(j=>counts[maintenanceComputedStatus(j)]++);
+      $("maintenanceQuoteCount").textContent=counts.quote;
+      $("maintenanceApprovalCount").textContent=counts.awaiting_approval;
+      $("maintenancePaymentCount").textContent=counts.awaiting_payment;
+      $("maintenanceExecutionCount").textContent=counts.ready+counts.executing;
+      $("maintenanceCompletedCount").textContent=counts.completed;
+      const term=($("maintenanceSearch")?.value||"").trim().toLowerCase();
+      const filter=$("maintenanceStatusFilter")?.value||"";
+      const rows=state.maintenanceJobs.filter(job=>{
+        const c=maintenanceClient(job);const status=maintenanceComputedStatus(job);
+        const hay=[maintenanceRequestNumber(job),job.serviceOrderNumber,c.name,c.document,c.phone,c.city,c.address,maintenanceServiceLabel(job.serviceType)].join(" ").toLowerCase();
+        return (!term||hay.includes(term))&&(!filter||status===filter);
+      });
+      $("maintenanceCount").textContent=`${rows.length} serviço${rows.length===1?"":"s"}`;
+      $("maintenanceTable").innerHTML=rows.map(job=>{const c=maintenanceClient(job),status=maintenanceComputedStatus(job);return `<tr>
+        <td><strong class="mono">${safe(maintenanceRequestNumber(job))}</strong><div class="small muted" style="margin-top:3px">${formatDate(timestampISO(job.createdAt)||job.createdAt)}</div></td>
+        <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name||job.clientSnapshot?.name)}</div><div><strong>${safe(c.name||job.clientSnapshot?.name||"Cliente")}</strong><span>${safe(c.city||job.clientSnapshot?.city||"Cidade não informada")}</span></div></div></td>
+        <td>${safe(maintenanceServiceLabel(job.serviceType))}</td><td class="mono">${Number(job.moduleCount)||0}</td>
+        <td><strong>${money(Number(job.amount)||0)}</strong><div class="small muted">${maintenanceUnitValue(job)} / módulo</div></td>
+        <td>${maintenanceStatusBadge(job)}</td>
+        <td>${job.serviceOrderNumber?`<span class="badge success">${safe(job.serviceOrderNumber)}</span>`:'<span class="badge gray">Ainda não gerada</span>'}</td>
+        <td class="text-right"><div class="maintenance-actions"><button class="btn btn-soft btn-sm" onclick="openMaintenanceDetail('${job.id}')">Abrir</button>${job.serviceOrderNumber?`<button class="btn btn-ghost btn-sm" onclick="openServiceOrder('${job.id}')">OS</button>`:""}</div></td>
+      </tr>`}).join("");
+      $("maintenanceEmpty").classList.toggle("hidden",rows.length>0);
+    }
+    function resetMaintenanceForm(){
+      $("maintenanceForm").reset();$("maintenanceId").value="";$("maintenanceModalTitle").textContent="Novo serviço";
+      $("maintenanceOperator").value=state.currentProfile?.name||state.currentProfile?.email||"";$("maintenanceRequestedDate").value=todayISO();refreshMaintenanceClientOptions();
+    }
+    function openNewMaintenance(){if(!can("maintenanceCreate"))return;resetMaintenanceForm();openModal("maintenanceModalBackdrop");}
+    function openMaintenanceForClient(clientId){if(!can("maintenanceCreate"))return;resetMaintenanceForm();refreshMaintenanceClientOptions(clientId);openModal("maintenanceModalBackdrop");}
+    window.editMaintenance=(id)=>{
+      const job=state.maintenanceJobs.find(j=>j.id===id);if(!job||!can("maintenanceCreate"))return;
+      $("maintenanceId").value=job.id;$("maintenanceModalTitle").textContent="Editar orçamento";refreshMaintenanceClientOptions(job.clientId);
+      $("maintenanceServiceType").value=job.serviceType||"preventive";$("maintenanceModuleCount").value=job.moduleCount||"";$("maintenanceAmount").value=job.amount??"";$("maintenanceRequestedDate").value=job.requestedDate||"";$("maintenanceOperator").value=job.operator||state.currentProfile?.name||"";$("maintenanceNotes").value=job.notes||"";openModal("maintenanceModalBackdrop");
+    };
+    async function saveMaintenanceJob(event){
+      event.preventDefault();if(!state.connected){showToast("Realtime Database indisponível.","error");return;}
+      const id=$("maintenanceId").value;const client=state.clients.find(c=>c.id===$("maintenanceClientId").value);
+      if(!client){showToast("Selecione um cliente cadastrado.","error");return;}
+      const moduleCount=Math.max(0,Math.floor(Number($("maintenanceModuleCount").value)||0)),amount=Number($("maintenanceAmount").value);
+      if(moduleCount<1){showToast("Informe a quantidade de módulos.","error");return;}if(!Number.isFinite(amount)||amount<0){showToast("Informe um valor válido.","error");return;}
+      const payload={clientId:client.id,clientSnapshot:maintenanceSnapshot(client),serviceType:$("maintenanceServiceType").value,moduleCount,amount,requestedDate:$("maintenanceRequestedDate").value||"",operator:$("maintenanceOperator").value.trim()||state.currentProfile?.name||"",notes:$("maintenanceNotes").value.trim(),updatedAt:state.serviceApi.serverTimestamp()};
+      try{
+        if(id){await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"maintenanceJobs",id),payload,{merge:true});await logActivity("maintenance",client.id,"Orçamento de serviço atualizado",`${client.name} · ${maintenanceServiceLabel(payload.serviceType)} · ${money(amount)}`);}
+        else{const ref=state.serviceApi.doc(state.serviceApi.collection(state.db,"maintenanceJobs"));await state.serviceApi.setDoc(ref,{...payload,requestNumber:newMaintenanceRequestNumber(),budgetSentAt:null,approved:false,paymentStatus:"pending",status:"quote",serviceOrderNumber:"",createdAt:state.serviceApi.serverTimestamp()});await logActivity("maintenance",client.id,"Novo orçamento de preventiva/limpeza",`${client.name} · ${maintenanceServiceLabel(payload.serviceType)} · ${moduleCount} módulos · ${money(amount)}`);}
+        closeModal("maintenanceModalBackdrop");showToast(id?"Orçamento atualizado.":"Orçamento cadastrado.");
+      }catch(err){showToast("Erro ao salvar serviço: "+err.message,"error");}
+    }
+    async function maintenancePatch(id,patch,title,description){
+      const job=state.maintenanceJobs.find(j=>j.id===id);if(!job)throw new Error("Serviço não encontrado.");
+      await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"maintenanceJobs",id),{...patch,updatedAt:state.serviceApi.serverTimestamp()},{merge:true});
+      try{await logActivity("maintenance",job.clientId,title,description||`${maintenanceClient(job).name||"Cliente"} · ${maintenanceServiceLabel(job.serviceType)}`);}catch(e){console.warn(e)}
+    }
+    async function maintenanceReleaseOrderIfEligible(id,extraPatch={}){
+      const job=state.maintenanceJobs.find(j=>j.id===id);if(!job)return;
+      const merged={...job,...extraPatch};const patch={...extraPatch};
+      if(merged.approved && merged.paymentStatus==="paid" && !merged.serviceOrderNumber){patch.serviceOrderNumber=newServiceOrderNumber();patch.osGeneratedAt=state.serviceApi.serverTimestamp();patch.status="ready";}
+      await maintenancePatch(id,patch,patch.serviceOrderNumber?"Ordem de serviço gerada":"Fluxo de serviço atualizado",patch.serviceOrderNumber?`${maintenanceClient(job).name||"Cliente"} · ${patch.serviceOrderNumber}`:undefined);
+      return {...merged,...patch};
+    }
+    window.maintenanceMarkSent=(id)=>askConfirm("Marcar orçamento como enviado","Confirma que o orçamento foi enviado ao cliente?",async()=>{await maintenancePatch(id,{budgetSentAt:state.serviceApi.serverTimestamp(),status:"awaiting_approval"},"Orçamento enviado ao cliente");showToast("Orçamento marcado como enviado.");},false);
+    window.maintenanceApprove=(id)=>askConfirm("Registrar aprovação","Confirma que o cliente aprovou este orçamento?",async()=>{const result=await maintenanceReleaseOrderIfEligible(id,{approved:true,approvedAt:state.serviceApi.serverTimestamp(),approvedBy:state.currentProfile?.name||"",status:"awaiting_payment"});showToast(result?.serviceOrderNumber?`Aprovado e pago. ${result.serviceOrderNumber} gerada automaticamente.`:"Aprovação registrada. Aguardando pagamento.");},false);
+    window.maintenanceMarkPaid=(id)=>askConfirm("Registrar pagamento","Confirma que o pagamento deste serviço foi recebido?",async()=>{const result=await maintenanceReleaseOrderIfEligible(id,{paymentStatus:"paid",paidAt:state.serviceApi.serverTimestamp(),paidBy:state.currentProfile?.name||""});showToast(result?.serviceOrderNumber?`Pagamento registrado. ${result.serviceOrderNumber} liberada para execução.`:"Pagamento registrado.");},false);
+    window.openMaintenanceDetail=(id)=>{
+      const job=state.maintenanceJobs.find(j=>j.id===id);if(!job)return;state.selectedMaintenanceId=id;const c=maintenanceClient(job),status=maintenanceComputedStatus(job);
+      const process=[
+        [true,"Orçamento cadastrado",formatDateTime(timestampISO(job.createdAt)||job.createdAt)],
+        [!!job.budgetSentAt,"Enviado ao cliente",job.budgetSentAt?formatDateTime(timestampISO(job.budgetSentAt)||job.budgetSentAt):"Pendente"],
+        [!!job.approved,"Aprovado pelo cliente",job.approvedAt?formatDateTime(timestampISO(job.approvedAt)||job.approvedAt):"Pendente"],
+        [job.paymentStatus==="paid","Pagamento recebido",job.paidAt?formatDateTime(timestampISO(job.paidAt)||job.paidAt):"Pendente"],
+        [!!job.serviceOrderNumber,"Ordem de serviço liberada",job.serviceOrderNumber||"Pendente"],
+        [status==="completed","Execução concluída",job.completedAt?formatDateTime(timestampISO(job.completedAt)||job.completedAt):"Pendente"]
+      ];
+      $("maintenanceDetailContent").innerHTML=`<div class="maintenance-status-line" style="margin-bottom:15px">${maintenanceStatusBadge(job)}<span class="badge gray">${safe(maintenanceRequestNumber(job))}</span>${job.serviceOrderNumber?`<span class="badge success">${safe(job.serviceOrderNumber)}</span>`:""}</div>
+        <div class="maintenance-detail-grid">
+          <div class="maintenance-detail-item"><span>Cliente</span><strong>${safe(c.name||"—")}</strong></div><div class="maintenance-detail-item"><span>CPF / CNPJ</span><strong>${safe(c.document||"—")}</strong></div><div class="maintenance-detail-item"><span>Telefone</span><strong>${safe(c.phone||"—")}</strong></div>
+          <div class="maintenance-detail-item"><span>Serviço</span><strong>${safe(maintenanceServiceLabel(job.serviceType))}</strong></div><div class="maintenance-detail-item"><span>Quantidade de módulos</span><strong>${Number(job.moduleCount)||0}</strong></div><div class="maintenance-detail-item"><span>Valor</span><strong>${money(Number(job.amount)||0)} · ${maintenanceUnitValue(job)}/módulo</strong></div>
+          <div class="maintenance-detail-item"><span>Operadora</span><strong>${safe(job.operator||"—")}</strong></div><div class="maintenance-detail-item"><span>Data solicitada</span><strong>${job.requestedDate?formatDate(job.requestedDate):"—"}</strong></div><div class="maintenance-detail-item"><span>Pagamento</span><strong>${job.paymentStatus==="paid"?"Pago":"Pendente"}</strong></div>
+          <div class="maintenance-detail-item full"><span>Endereço da execução</span><strong>${safe([c.address,c.city].filter(Boolean).join(" · ")||"Não informado")}</strong></div>
+          <div class="maintenance-detail-item full"><span>Observações</span><strong>${safe(job.notes||"Nenhuma observação")}</strong></div>
+          ${job.scheduledDate?`<div class="maintenance-detail-item"><span>Execução agendada</span><strong>${formatDate(job.scheduledDate)}${job.scheduledTime?` · ${safe(job.scheduledTime)}`:""}</strong></div><div class="maintenance-detail-item"><span>Equipe</span><strong>${safe(job.team||"—")}</strong></div><div class="maintenance-detail-item"><span>Situação da execução</span><strong>${status==="executing"?"Em execução":status==="completed"?"Concluída":"Programada"}</strong></div>`:""}
+        </div><div class="maintenance-process">${process.map((x,i)=>`<div class="maintenance-process-row ${x[0]?"done":""}"><div class="maintenance-process-mark">${x[0]?"✓":i+1}</div><strong>${x[1]}</strong><span>${safe(x[2]||"")}</span></div>`).join("")}</div>`;
+      const actions=[];
+      if(can("maintenanceCreate") && ["quote","awaiting_approval"].includes(status))actions.push(`<button class="btn btn-ghost" onclick="closeModal('maintenanceDetailBackdrop');editMaintenance('${id}')">Editar orçamento</button>`);
+      if(can("maintenanceManage") && status==="quote")actions.push(`<button class="btn btn-soft" onclick="maintenanceMarkSent('${id}')">Marcar como enviado</button>`);
+      if(can("maintenanceManage") && status==="awaiting_approval")actions.push(`<button class="btn btn-primary" onclick="maintenanceApprove('${id}')">Registrar aprovação</button>`);
+      if(can("maintenanceManage") && status==="awaiting_payment")actions.push(`<button class="btn btn-primary" onclick="maintenanceMarkPaid('${id}')">Registrar pagamento</button>`);
+      if(job.serviceOrderNumber)actions.push(`<button class="btn btn-ghost" onclick="openServiceOrder('${id}')">Ver ordem de serviço</button>`);
+      if(can("maintenanceManage") && status==="ready")actions.push(`<button class="btn btn-soft" onclick="openMaintenanceSchedule('${id}')">${job.scheduledDate?"Alterar programação":"Programar execução"}</button>`);
+      if(can("maintenanceManage") && status==="ready" && job.scheduledDate && job.team)actions.push(`<button class="btn btn-primary" onclick="maintenanceStart('${id}')">Iniciar execução</button>`);
+      if(can("maintenanceManage") && status==="executing")actions.push(`<button class="btn btn-primary" onclick="maintenanceComplete('${id}')">Concluir serviço</button>`);
+      $("maintenanceDetailActions").innerHTML=actions.join("")||'<button class="btn btn-ghost" data-close="maintenanceDetailBackdrop" onclick="closeModal(\'maintenanceDetailBackdrop\')">Fechar</button>';
+      openModal("maintenanceDetailBackdrop");
+    };
+    window.openMaintenanceSchedule=(id)=>{const job=state.maintenanceJobs.find(j=>j.id===id);if(!job)return;$("maintenanceScheduleId").value=id;$("maintenanceScheduledDate").value=job.scheduledDate||job.requestedDate||todayISO();$("maintenanceScheduledTime").value=job.scheduledTime||"";$("maintenanceTeam").value=job.team||"";$("maintenanceExecutionNotes").value=job.executionNotes||"";openModal("maintenanceScheduleBackdrop");};
+    async function saveMaintenanceSchedule(event){event.preventDefault();const id=$("maintenanceScheduleId").value;try{await maintenancePatch(id,{scheduledDate:$("maintenanceScheduledDate").value,scheduledTime:$("maintenanceScheduledTime").value,team:$("maintenanceTeam").value.trim(),executionNotes:$("maintenanceExecutionNotes").value.trim(),scheduledBy:state.currentProfile?.name||""},"Execução programada");closeModal("maintenanceScheduleBackdrop");showToast("Execução programada.");}catch(err){showToast(err.message,"error");}}
+    window.maintenanceStart=(id)=>askConfirm("Iniciar execução","Confirma que a equipe iniciou esta ordem de serviço?",async()=>{await maintenancePatch(id,{status:"executing",startedAt:state.serviceApi.serverTimestamp(),startedBy:state.currentProfile?.name||""},"Execução iniciada");showToast("Ordem de serviço em execução.");},false);
+    window.maintenanceComplete=(id)=>askConfirm("Concluir serviço","Confirma que a preventiva/limpeza foi concluída pela equipe?",async()=>{await maintenancePatch(id,{status:"completed",completedAt:state.serviceApi.serverTimestamp(),completedBy:state.currentProfile?.name||""},"Serviço concluído");showToast("Serviço concluído.");},false);
+    function maintenanceChecklist(job){
+      const preventive=["Inspeção visual dos módulos, estrutura e fixações","Verificar cabos, conectores e sinais de aquecimento","Verificar proteções CC/CA, disjuntores e DPS","Inspecionar inversor, ventilação, alarmes e comunicação","Verificar anomalias visuais, trincas, sombreamento e pontos críticos","Registrar fotos técnicas antes e depois da intervenção"];
+      const cleaning=["Registrar condição dos módulos antes da limpeza","Inspecionar módulos trincados ou danificados antes de lavar","Executar limpeza com método e materiais adequados ao fabricante","Evitar produtos abrasivos e pressão inadequada sobre os módulos","Registrar fotos após a limpeza","Conferir organização, resíduos e condições finais da área"];
+      return job.serviceType==="preventive"?preventive:job.serviceType==="cleaning"?cleaning:[...preventive,...cleaning.filter(x=>!x.includes("Registrar fotos"))];
+    }
+    function serviceOrderHtml(job){
+      const c=maintenanceClient(job),checklist=maintenanceChecklist(job),status=maintenanceComputedStatus(job);
+      return `<div class="service-order-head"><div><h2>Ordem de Serviço</h2><div>Preventivas e Limpeza · Group Holding Service / IG Energia</div></div><div class="service-order-number">${safe(job.serviceOrderNumber||"OS não liberada")}<br><span style="font-size:9px;font-weight:400;color:#687568">Solicitação ${safe(maintenanceRequestNumber(job))}</span></div></div>
+        <div class="service-order-grid"><div class="service-order-field"><span>Cliente</span><strong>${safe(c.name||"—")}</strong></div><div class="service-order-field"><span>CPF / CNPJ</span><strong>${safe(c.document||"—")}</strong></div><div class="service-order-field"><span>Telefone / WhatsApp</span><strong>${safe(c.phone||"—")}</strong></div><div class="service-order-field"><span>E-mail</span><strong>${safe(c.email||"—")}</strong></div><div class="service-order-field"><span>Cidade</span><strong>${safe(c.city||"—")}</strong></div><div class="service-order-field"><span>Endereço da execução</span><strong>${safe(c.address||"—")}</strong></div></div>
+        <div class="service-order-section"><h3>Escopo autorizado</h3><div class="service-order-grid"><div class="service-order-field"><span>Serviço</span><strong>${safe(maintenanceServiceLabel(job.serviceType))}</strong></div><div class="service-order-field"><span>Quantidade de módulos</span><strong>${Number(job.moduleCount)||0}</strong></div><div class="service-order-field"><span>Pagamento</span><strong>${job.paymentStatus==="paid"?"PAGO":"PENDENTE"}</strong></div><div class="service-order-field"><span>Aprovação</span><strong>${job.approved?`Aprovado${job.approvedAt?` em ${formatDateTime(timestampISO(job.approvedAt)||job.approvedAt)}`:""}`:"Pendente"}</strong></div><div class="service-order-field"><span>OS liberada em</span><strong>${job.osGeneratedAt?formatDateTime(timestampISO(job.osGeneratedAt)||job.osGeneratedAt):"—"}</strong></div></div></div>
+        <div class="service-order-section"><h3>Programação</h3><div class="service-order-grid"><div class="service-order-field"><span>Data</span><strong>${job.scheduledDate?formatDate(job.scheduledDate):"A definir"}</strong></div><div class="service-order-field"><span>Horário</span><strong>${safe(job.scheduledTime||"A definir")}</strong></div><div class="service-order-field"><span>Técnico / equipe</span><strong>${safe(job.team||"A definir")}</strong></div><div class="service-order-field"><span>Status</span><strong>${safe(status==="completed"?"Concluído":status==="executing"?"Em execução":"Liberado para execução")}</strong></div></div></div>
+        <div class="service-order-section"><h3>Checklist de execução</h3><div class="service-order-checklist">${checklist.map(i=>`<div class="service-order-check">${safe(i)}</div>`).join("")}</div></div>
+        <div class="service-order-section"><h3>Orientações e observações</h3><p><strong>Observações comerciais/local:</strong> ${safe(job.notes||"Nenhuma observação informada.")}</p><p><strong>Orientações para a equipe:</strong> ${safe(job.executionNotes||"Seguir procedimentos internos de segurança, NR aplicáveis, bloqueio elétrico quando necessário e recomendações do fabricante.")}</p><p><strong>Registro obrigatório:</strong> fotografar condições antes/depois, anotar anomalias encontradas e comunicar qualquer necessidade de serviço adicional antes de executá-lo.</p></div>
+        <div class="service-order-section"><h3>Encerramento em campo</h3><div class="service-order-grid"><div class="service-order-field"><span>Horário de início</span><strong>____:____</strong></div><div class="service-order-field"><span>Horário de término</span><strong>____:____</strong></div><div class="service-order-field"><span>Anomalias encontradas</span><strong>________________________________________</strong></div><div class="service-order-field"><span>Materiais utilizados</span><strong>________________________________________</strong></div></div></div>
+        <div class="service-order-signatures"><div class="service-order-signature">Responsável técnico / equipe</div><div class="service-order-signature">Cliente / responsável no local</div></div>`;
+    }
+    window.renderServiceOrder=(id)=>{const job=state.maintenanceJobs.find(j=>j.id===id);if(!job||!job.serviceOrderNumber)return;state.selectedServiceOrderId=id;$("serviceOrderPreview").innerHTML=serviceOrderHtml(job);};
+    window.openServiceOrder=(id)=>{renderServiceOrder(id);if(state.selectedServiceOrderId)openModal("serviceOrderBackdrop");};
+    function printServiceOrder(){const job=state.maintenanceJobs.find(j=>j.id===state.selectedServiceOrderId);if(!job)return;const win=window.open("","_blank","width=980,height=900");if(!win){showToast("O navegador bloqueou a janela de impressão.","error");return;}win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${safe(job.serviceOrderNumber)}</title><style>body{font-family:Arial,sans-serif;color:#1f2b21;padding:28px;font-size:12px;line-height:1.55}.service-order-head{display:flex;justify-content:space-between;gap:20px;border-bottom:3px solid #b1c903;padding-bottom:16px;margin-bottom:18px}.service-order-head h2{margin:0;color:#043c09;font-size:25px;text-transform:uppercase}.service-order-number{text-align:right;font-weight:800;color:#043c09}.service-order-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px;margin:13px 0}.service-order-field span{display:block;color:#687568;font-size:9px;text-transform:uppercase;font-weight:700}.service-order-field strong{display:block;font-size:11px}.service-order-section{margin-top:18px}.service-order-section h3{margin:0 0 8px;color:#043c09;font-size:12px;text-transform:uppercase;border-bottom:1px solid #dfe6dc;padding-bottom:6px}.service-order-checklist{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}.service-order-check{font-size:10px}.service-order-check:before{content:'☐ ';font-size:14px}.service-order-signatures{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:40px}.service-order-signature{text-align:center;border-top:1px solid #526055;padding-top:7px;font-size:9px}@media print{body{padding:0}}<\/style></head><body>${serviceOrderHtml(job)}</body></html>`);win.document.close();setTimeout(()=>win.print(),250);}
+
+
     function navigate(page){
       $$(".page").forEach(p=>p.classList.remove("active"));
       $(`page-${page}`).classList.add("active");
       $$(".nav-item[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===page));
-      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
+      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos",maintenance:"Preventivas e limpeza",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
       $("topPageTitle").textContent=titles[page]||"CRM";
       $("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open");
       window.scrollTo({top:0,behavior:"smooth"});
@@ -3944,12 +4414,19 @@
     $("quickAddClient").addEventListener("click",openNewClient);$("addClientBtn").addEventListener("click",openNewClient);
     $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
     $("contractSearch").addEventListener("input",renderContracts);$("contractStatusFilter").addEventListener("change",renderContracts);
+    $("maintenanceSearch").addEventListener("input",renderMaintenanceJobs);$("maintenanceStatusFilter").addEventListener("change",renderMaintenanceJobs);
+    $("addMaintenanceBtn").addEventListener("click",openNewMaintenance);
+    $("maintenanceClientId").addEventListener("change",updateMaintenanceClientPreview);
+    $("maintenanceForm").addEventListener("submit",saveMaintenanceJob);
+    $("maintenanceScheduleForm").addEventListener("submit",saveMaintenanceSchedule);
+    $("printServiceOrderBtn").addEventListener("click",printServiceOrder);
     $("clientDocument").addEventListener("input",updateClientPlanPreview);
     $("activateDocument").addEventListener("input",updateActivationPlanPreview);
     $("importClientsCsvBtn").addEventListener("click",()=>$("clientsCsvInput").click());
     $("clientsCsvInput").addEventListener("change",async event=>{const file=event.target.files?.[0];event.target.value="";if(file)await importClientsCsvFile(file);});
     $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
     $("backClients").addEventListener("click",()=>navigate("clients"));
+    $("newMaintenanceFromClient").addEventListener("click",()=>openMaintenanceForClient(state.selectedClientId));
     $("editDetailClient").addEventListener("click",()=>editClient(state.selectedClientId));
     $("primaryContractActionBtn").addEventListener("click",()=>openContractForClient(state.selectedClientId));
     $("copyDetailContractLink").addEventListener("click",()=>{const c=state.clients.find(x=>x.id===state.selectedClientId),contract=getContractForClient(c);if(contract)copyText(getContractLink(contract.token));});
@@ -3966,10 +4443,17 @@
     });
     $("openAcceptanceBtn").addEventListener("click",()=>{if(state.selectedContractToken)window.open(getContractLink(state.selectedContractToken),"_blank")});
     $("printContractBtn").addEventListener("click",()=>{let contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract){const client=state.clients.find(c=>c.id===(contract.clientId||state.selectedContractClientId));contract=hydrateContractClientData(contract,client);printContract(contract);}});
+    $("publicStartFaceCamera").addEventListener("click",startPublicFaceCamera);
+    $("publicCaptureFace").addEventListener("click",capturePublicFaceFromVideo);
+    $("publicRetakeFace").addEventListener("click",()=>{state.publicFaceEvidence=null;startPublicFaceCamera();});
+    document.addEventListener("visibilitychange",()=>{if(document.hidden)stopPublicFaceCamera();});
+    window.addEventListener("beforeunload",stopPublicFaceCamera);
     $("publicAcceptanceForm").addEventListener("submit",async e=>{
       e.preventDefault();const contract=state.publicContract;if(!contract||contract.status==="accepted")return;
       const name=$("publicSignerName").value.trim();const document=$("publicSignerDocument").value.trim();
       if($("publicAcceptanceWord").value.trim().toUpperCase()!=="ACEITO"){showToast("Digite a palavra ACEITO para confirmar.","error");return;}
+      if(!state.publicFaceEvidence?.dataUrl || state.publicFaceEvidence?.method!=="camera"){showToast("Capture uma selfie ao vivo pela câmera frontal para registrar o aceite.","error");return;}
+      if(!$("publicFaceConsent").checked){showToast("Confirme a autorização para o registro da selfie.","error");return;}
       const renewalEnabled=!!contract.automaticRenewalEnabled || /Renovação automática e encerramento/i.test(contract.contractHtml||"");
       if(renewalEnabled&&!$("publicRenewalAcceptanceCheck").checked){showToast("Confirme a autorização expressa da renovação automática.","error");return;}
       const enteredDocument=documentDigits(document);
@@ -3980,7 +4464,8 @@
       }else if(storedDocument && enteredDocument!==storedDocument){
         showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;
       }
-      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent};
+      const faceEvidence=state.publicFaceEvidence;
+      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent,faceEvidenceDataUrl:faceEvidence.dataUrl,faceEvidenceCapturedAt:faceEvidence.capturedAt,faceEvidenceMethod:faceEvidence.method,faceEvidenceConsent:true,faceEvidenceHash:await hashText(faceEvidence.dataUrl)};
       try{
         if(!state.connected) throw new Error("Realtime Database indisponível");
         await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...accepted,acceptedAt:state.serviceApi.serverTimestamp()});
