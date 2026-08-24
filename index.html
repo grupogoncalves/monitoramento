@@ -328,6 +328,17 @@
     .plan-card h3 { font-family:Manrope;margin:7px 0 10px;font-size:26px; }
     .plan-dates { display:flex;gap:22px;flex-wrap:wrap;color:rgba(255,255,255,.7);font-size:10px; }
     .plan-dates strong { color:#fff;display:block;font-size:12px;margin-top:4px; }
+    .client-plan-price-editor { margin-top:16px;max-width:430px;position:relative;z-index:2; }
+    .client-plan-price-editor > label { display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.68);margin-bottom:7px; }
+    .client-plan-price-row { display:flex;gap:8px;align-items:stretch; }
+    .client-plan-price-input { display:flex;align-items:center;min-width:0;flex:1;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:10px;overflow:hidden;backdrop-filter:blur(5px); }
+    .client-plan-price-input span { padding:0 0 0 12px;font-size:11px;font-weight:800;color:rgba(255,255,255,.74); }
+    .client-plan-price-input input { width:100%;min-width:0;border:0;background:transparent;color:#fff;padding:10px 11px 10px 7px;outline:none;font-weight:800;font-variant-numeric:tabular-nums; }
+    .client-plan-price-input input::placeholder { color:rgba(255,255,255,.45); }
+    .client-plan-price-input:focus-within { border-color:rgba(216,230,79,.9);box-shadow:0 0 0 3px rgba(216,230,79,.12); }
+    .client-plan-price-row .btn { flex:0 0 auto; }
+    .client-plan-price-hint { margin-top:7px;font-size:9px;line-height:1.45;color:rgba(255,255,255,.62); }
+    .client-plan-price-hint.custom { color:#e6f36f;font-weight:700; }
     .days-ring { width:106px;height:106px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--accent) var(--ring),rgba(255,255,255,.16) 0);z-index:1; }
     .days-ring::before { content:"";position:absolute;inset:8px;border-radius:50%;background:#074b8d; }
     .days-ring-content { position:relative;text-align:center;z-index:2; }
@@ -405,6 +416,8 @@
       .search-box { min-width:0;width:100%; }
       .filter-select { flex:1; }
       .plan-card { grid-template-columns:1fr; }
+      .client-plan-price-row { flex-direction:column; }
+      .client-plan-price-row .btn { width:100%; }
       .days-ring { width:94px;height:94px; }
       .permission-grid { grid-template-columns:1fr; }
       .modal-backdrop { padding:0;align-items:flex-end; }
@@ -1426,6 +1439,14 @@
             <div>
               <div id="detailPlanLabel" class="plan-name">Plano anual de monitoramento</div>
               <h3 id="detailPlanPrice">R$ 120,00 / ano</h3>
+              <div id="detailPlanPriceEditor" class="client-plan-price-editor">
+                <label for="detailPlanPriceInput">Ajustar valor anual deste cliente</label>
+                <div class="client-plan-price-row">
+                  <div class="client-plan-price-input"><span>R$</span><input id="detailPlanPriceInput" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+                  <button id="saveDetailPlanPrice" type="button" class="btn btn-primary btn-sm" data-permission="clientsEdit">Salvar valor</button>
+                </div>
+                <div id="detailPlanPriceHint" class="client-plan-price-hint">O valor pode ser personalizado somente para este cliente.</div>
+              </div>
               <div class="plan-dates">
                 <div>Início do plano<strong id="detailStart">—</strong></div>
                 <div>Fim do período<strong id="detailEnd">—</strong></div>
@@ -2095,7 +2116,10 @@
     function contractDataFromClient(contract,client,{useLivePrice=false}={}){
       const source=client||contract?.clientSnapshot||contract||{};
       const snapshot=contractClientSnapshot(source);
-      const planPrice=useLivePrice?getLivePlanPrice(source):Number(contract?.planPrice ?? getPlanPrice(source));
+      const planPriceCustom=!!(client?.planPriceCustom || contract?.planPriceCustom || source?.planPriceCustom);
+      const planPrice=useLivePrice
+        ? (planPriceCustom ? getPlanPrice(client||contract||source) : getLivePlanPrice(source))
+        : Number(contract?.planPrice ?? getPlanPrice(source));
       const planLabel=contract?.planLabel||source?.planLabel||getLivePlanLabel(source);
       return {
         ...source,
@@ -2112,6 +2136,7 @@
         planStart:snapshot.planStart,
         planEnd:snapshot.planEnd,
         planPrice:Number.isFinite(planPrice)?planPrice:getLivePlanPrice(source),
+        planPriceCustom,
         planLabel,
         planBenefits:source?.planBenefits||undefined
       };
@@ -2137,6 +2162,7 @@
         planStart:snapshot.planStart||contract.planStart||"",
         planEnd:snapshot.planEnd||contract.planEnd||"",
         planPrice:useLivePrice?data.planPrice:(Number(contract.planPrice ?? data.planPrice)),
+        planPriceCustom:!!data.planPriceCustom,
         planLabel:contract.planLabel||data.planLabel,
         clientSnapshot:snapshot
       };
@@ -2205,7 +2231,7 @@
       return {
         token, number, version:CONTRACT_VERSION, reason, clientId,
         clientName:data.name, clientDocument:data.document||"", documentType:getClientType(data), documentMasked:maskDocument(data.document),
-        documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data),
+        documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data), planPriceCustom:!!data.planPriceCustom,
         planStart:data.planStart, planEnd:data.planEnd||addYear(data.planStart), city:data.city||"", address:data.address||"",
         clientPhone:data.phone||"", clientEmail:data.email||"", clientSeller:data.seller||"", payment:data.payment||"", paymentStatus:data.paymentStatus||"", clientNotes:data.notes||"",
         clientSnapshot:contractClientSnapshot(data), status:"pending", generatedAt,
@@ -3113,6 +3139,40 @@
       $("usersEmpty").classList.toggle("hidden",state.users.length>0);
     }
 
+    async function saveDetailClientPlanPrice(){
+      const c=state.clients.find(x=>x.id===state.selectedClientId);
+      if(!c){showToast("Cliente não localizado.","error");return;}
+      if(!hasActivePlan(c)){showToast("Ative o plano antes de ajustar o valor.","error");return;}
+      if(!can("clientsEdit")){showToast("Você não possui permissão para editar o cliente.","error");return;}
+      if(!state.connected){showToast("Realtime Database indisponível.","error");return;}
+      const input=$("detailPlanPriceInput");
+      const value=Number(String(input?.value||"").replace(",","."));
+      if(!Number.isFinite(value)||value<0){showToast("Informe um valor anual válido.","error");input?.focus();return;}
+      const previous=getPlanPrice(c);
+      const existingContract=getContractForClient(c);
+      const saveBtn=$("saveDetailPlanPrice");
+      const originalText=saveBtn?.textContent||"Salvar valor";
+      if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="Salvando...";}
+      try{
+        const update={planPrice:value,planPriceCustom:true,updatedAt:state.serviceApi.serverTimestamp()};
+        await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",c.id),update);
+        c.planPrice=value;c.planPriceCustom=true;
+        if(existingContract?.status!=="accepted")await refreshPendingContractForClient(c.id,c);
+        try{
+          await logActivity("client_edit",c.id,"Valor do plano ajustado",`${c.name} · ${money(previous)} → ${money(value)} por ano · por ${state.currentProfile?.name||state.currentProfile?.email||"operador"}`);
+        }catch(activityError){console.warn("Não foi possível registrar o ajuste de valor no histórico.",activityError);}
+        renderClientDetail();renderClients();renderContracts();
+        showToast(existingContract?.status==="accepted"
+          ? `Valor do cliente atualizado para ${money(value)} por ano. O contrato já aceito foi preservado.`
+          : `Valor do plano atualizado para ${money(value)} por ano.`);
+      }catch(err){
+        console.error("Erro ao ajustar valor do plano do cliente",err);
+        showToast("Não foi possível salvar o valor do plano: "+(err?.message||"erro desconhecido"),"error");
+      }finally{
+        if(saveBtn){saveBtn.disabled=!can("clientsEdit");saveBtn.textContent=originalText;}
+      }
+    }
+
     function renderClientDetail(){
       const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
       const p=getPlanInfo(c);
@@ -3120,6 +3180,21 @@
       $("detailMeta").textContent=[c.document,c.city,c.phone].filter(Boolean).join(" · ")||"Dados cadastrais";
       $("detailPlanLabel").textContent=hasActivePlan(c)?getPlanLabel(c):"Cliente importado · plano ainda não contratado";
       $("detailPlanPrice").textContent=hasActivePlan(c)?`${money(getPlanPrice(c))} / ano`:"Aguardando ativação";
+      const priceEditor=$("detailPlanPriceEditor"),priceInput=$("detailPlanPriceInput"),priceSave=$("saveDetailPlanPrice"),priceHint=$("detailPlanPriceHint");
+      const detailContract=getContractForClient(c);
+      if(priceEditor){
+        priceEditor.classList.toggle("hidden",!hasActivePlan(c));
+        if(priceInput){priceInput.value=hasActivePlan(c)?Number(getPlanPrice(c)).toFixed(2):"";priceInput.disabled=!can("clientsEdit");}
+        if(priceSave)priceSave.disabled=!can("clientsEdit")||!hasActivePlan(c);
+        if(priceHint){
+          priceHint.classList.toggle("custom",!!c.planPriceCustom);
+          priceHint.textContent=detailContract?.status==="accepted"
+            ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O contrato já aceito preserva o valor que foi assinado.`
+            : detailContract
+              ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}Ao salvar, o contrato pendente será atualizado automaticamente.`
+              : `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O valor será usado quando o contrato for gerado.`;
+        }
+      }
       $("detailStart").textContent=formatDate(p.start);$("detailEnd").textContent=formatDate(p.end);
       $("detailStatus").textContent=p.status==="no_plan"?"Sem plano":p.status==="expired"?"Vencido":p.status==="expiring"?"Próximo do vencimento":"Ativo";
       $("detailSeller").textContent=c.seller||"Não informado";
@@ -3303,6 +3378,7 @@
         planStart:contract.planStart||"",
         planEnd:contract.planEnd||"",
         planPrice:Number(contract.planPrice||0),
+        planPriceCustom:!!contract.planPriceCustom,
         planLabel:contract.planLabel||"",
         clientSnapshot:contract.clientSnapshot||{},
         contractHtml:normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract)
@@ -3337,6 +3413,7 @@
       const pending=contracts.filter(contract=>{
         if(contract.status==="accepted")return false;
         const client=state.clients.find(c=>c.id===contract.clientId);
+        if(client?.planPriceCustom || contract?.planPriceCustom)return false;
         const reference=client||contract.clientDocument||contract.clientSnapshot?.document||"";
         return getClientType(reference)===planType;
       });
@@ -3999,10 +4076,10 @@
       if(!hasActivePlan(c)){closeModal("renewModalBackdrop");startPlanActivation(c.id);return;}
       const newStart=$("renewStart").value;const history=[...(c.history||[])];
       const renewalReference=c.document;
-      const renewedData={...c,planActive:true,planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:getPlanPrice(renewalReference),planLabel:getPlanLabel(renewalReference),planBenefits:snapshotPlanBenefits(renewalReference),seller:$("renewSeller").value.trim()||c.seller,payment:c.payment};
+      const renewedData={...c,planActive:true,planStart:newStart,planEnd:addYear(newStart),documentType:getClientType(c),planPrice:c.planPriceCustom?getPlanPrice(c):getPlanPrice(renewalReference),planPriceCustom:!!c.planPriceCustom,planLabel:getPlanLabel(renewalReference),planBenefits:snapshotPlanBenefits(renewalReference),seller:$("renewSeller").value.trim()||c.seller,payment:c.payment};
       const contract=await createContractRecord(c.id,renewedData,"renewal");
       history.push({date:new Date().toISOString(),title:"Plano renovado",description:`${getPlanLabel(c)} no valor de ${money(getPlanPrice(c))}. Novo contrato: ${contract.number}. Período anterior: ${formatDate(c.planStart)} a ${formatDate(c.planEnd||addYear(c.planStart))}. ${$("renewNotes").value.trim()}`});
-      const update={planActive:true,planStart:newStart,planEnd:addYear(newStart),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),documentType:getClientType(c),planPrice:renewedData.planPrice,planLabel:renewedData.planLabel,planBenefits:renewedData.planBenefits,seller:renewedData.seller,services:emptyServices(),history,contract:contractSummary(contract)};
+      const update={planActive:true,planStart:newStart,planEnd:addYear(newStart),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),documentType:getClientType(c),planPrice:renewedData.planPrice,planPriceCustom:!!renewedData.planPriceCustom,planLabel:renewedData.planLabel,planBenefits:renewedData.planBenefits,seller:renewedData.seller,services:emptyServices(),history,contract:contractSummary(contract)};
       if(!state.connected) throw new Error("Realtime Database indisponível");
       const batch=state.serviceApi.writeBatch(state.db);
       batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
@@ -4445,6 +4522,8 @@
     });
     $("openAcceptanceBtn").addEventListener("click",()=>{if(state.selectedContractToken)window.open(getContractLink(state.selectedContractToken),"_blank")});
     $("printContractBtn").addEventListener("click",()=>{let contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract){const client=state.clients.find(c=>c.id===(contract.clientId||state.selectedContractClientId));contract=hydrateContractClientData(contract,client);printContract(contract);}});
+    $("saveDetailPlanPrice").addEventListener("click",saveDetailClientPlanPrice);
+    $("detailPlanPriceInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveDetailClientPlanPrice();}});
     $("publicStartFaceCamera").addEventListener("click",startPublicFaceCamera);
     $("publicCaptureFace").addEventListener("click",capturePublicFaceFromVideo);
     $("publicRetakeFace").addEventListener("click",()=>{state.publicFaceEvidence=null;startPublicFaceCamera();});
@@ -4499,7 +4578,8 @@
       if(digits.length!==11 && digits.length!==14){showToast("Informe um CPF com 11 dígitos ou um CNPJ com 14 dígitos.","error");return;}
       const existingClient=id?state.clients.find(client=>client.id===id):null;
       const preserveExistingPlan=existingClient&&getClientType(existingClient)===getClientType(document);
-      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:getLivePlanPrice(document),planLabel:getLivePlanLabel(document),planBenefits:preserveExistingPlan&&existingClient?.planBenefits?existingClient.planBenefits:snapshotPlanBenefits(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
+      const preserveCustomPrice=!!(preserveExistingPlan&&existingClient?.planPriceCustom);
+      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:preserveCustomPrice?getPlanPrice(existingClient):getLivePlanPrice(document),planPriceCustom:preserveCustomPrice,planLabel:getLivePlanLabel(document),planBenefits:preserveExistingPlan&&existingClient?.planBenefits?existingClient.planBenefits:snapshotPlanBenefits(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
       if(!id)data.services=emptyServices();
       try{const result=await saveClient(data,id);closeModal("clientModalBackdrop");showToast(id?"Ficha atualizada.":"Cliente cadastrado e contrato gerado.");if(!id&&result.contract){renderContractModal(result.contract);openModal("contractModalBackdrop");}}catch(err){showToast("Erro ao salvar cliente: "+err.message,"error");}
     });
