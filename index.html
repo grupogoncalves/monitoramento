@@ -286,6 +286,12 @@
     .customer-avatar { width:37px;height:37px;border-radius:11px;background:var(--primary-3);color:var(--primary);display:grid;place-items:center;font-weight:800; }
     .customer-cell strong { display:block;font-size:12px; }
     .customer-cell span { display:block;color:var(--muted);font-size:10px;margin-top:3px; }
+    .client-list-plan-editor { margin-top:9px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 9px;border:1px solid #d5e3a0;background:#f8fbe9;border-radius:10px;max-width:360px; }
+    .client-list-plan-editor .client-list-plan-label { display:block;color:#4f6500;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.45px;margin:0 4px 0 0; }
+    .client-list-plan-editor .money-prefix { color:var(--primary);font-size:11px;font-weight:800; }
+    .client-list-plan-editor input { width:92px;border:1px solid #cbd9a1;background:#fff;color:var(--ink);border-radius:8px;padding:7px 8px;outline:none;font-weight:800;font-size:12px; }
+    .client-list-plan-editor input:focus { border-color:var(--accent);box-shadow:0 0 0 3px rgba(177,201,3,.14); }
+    .client-list-plan-editor .btn { padding:7px 10px;font-size:10px; }
     .badge { display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap; }
     .badge.success { color:var(--success);background:var(--success-bg); }
     .badge.warning { color:var(--warning);background:var(--warning-bg); }
@@ -328,7 +334,7 @@
     .plan-card h3 { font-family:Manrope;margin:7px 0 10px;font-size:26px; }
     .plan-dates { display:flex;gap:22px;flex-wrap:wrap;color:rgba(255,255,255,.7);font-size:10px; }
     .plan-dates strong { color:#fff;display:block;font-size:12px;margin-top:4px; }
-    .client-plan-price-editor { margin-top:16px;max-width:430px;position:relative;z-index:2; }
+    .client-plan-price-editor { margin-top:16px;max-width:500px;position:relative;z-index:2;padding:14px;border:1px solid rgba(216,230,79,.42);background:rgba(255,255,255,.08);border-radius:12px; }
     .client-plan-price-editor > label { display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.68);margin-bottom:7px; }
     .client-plan-price-row { display:flex;gap:8px;align-items:stretch; }
     .client-plan-price-input { display:flex;align-items:center;min-width:0;flex:1;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);border-radius:10px;overflow:hidden;backdrop-filter:blur(5px); }
@@ -1440,10 +1446,10 @@
               <div id="detailPlanLabel" class="plan-name">Plano anual de monitoramento</div>
               <h3 id="detailPlanPrice">R$ 120,00 / ano</h3>
               <div id="detailPlanPriceEditor" class="client-plan-price-editor">
-                <label for="detailPlanPriceInput">Ajustar valor anual deste cliente</label>
+                <label for="detailPlanPriceInput">ALTERAR VALOR DO PLANO DESTE CLIENTE</label>
                 <div class="client-plan-price-row">
                   <div class="client-plan-price-input"><span>R$</span><input id="detailPlanPriceInput" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></div>
-                  <button id="saveDetailPlanPrice" type="button" class="btn btn-primary btn-sm" data-permission="clientsEdit">Salvar valor</button>
+                  <button id="saveDetailPlanPrice" type="button" class="btn btn-primary btn-sm" data-permission="clientsEdit">Salvar novo valor</button>
                 </div>
                 <div id="detailPlanPriceHint" class="client-plan-price-hint">O valor pode ser personalizado somente para este cliente.</div>
               </div>
@@ -2983,7 +2989,14 @@
         const planText=hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano`:`Sem plano contratado`;
         const benefitHtml=hasActivePlan(c)?`<span class="badge info">${used}/${total} utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}`:`<span class="badge gray">Plano não ativado</span>`;
         return `<tr>
-          <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${planText}</span></div></div></td>
+          <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${planText}</span>
+            <div class="client-list-plan-editor">
+              <span class="client-list-plan-label">Valor do plano</span>
+              <span class="money-prefix">R$</span>
+              <input id="clientPlanPrice_${c.id}" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(getPlanPrice(c)||0).toFixed(2)}" ${can("clientsEdit")?"":"disabled"} aria-label="Valor anual do plano de ${safe(c.name)}">
+              <button type="button" class="btn btn-primary btn-sm" onclick="saveClientPlanPriceFromList('${c.id}',this)" ${can("clientsEdit")?"":"disabled"}>Salvar valor</button>
+            </div>
+          </div></div></td>
           <td><strong>${safe(c.phone||"—")}</strong><div class="small muted" style="margin-top:3px">${safe(c.city||"—")}</div></td>
           <td class="mono">${formatDate(p.start)}</td>
           <td class="mono">${formatDate(p.end)}</td>
@@ -3139,10 +3152,41 @@
       $("usersEmpty").classList.toggle("hidden",state.users.length>0);
     }
 
+    window.saveClientPlanPriceFromList=async(id,button)=>{
+      const c=state.clients.find(x=>x.id===id);
+      if(!c){showToast("Cliente não localizado.","error");return;}
+      if(!can("clientsEdit")){showToast("Você não possui permissão para editar o cliente.","error");return;}
+      if(!state.connected){showToast("Realtime Database indisponível.","error");return;}
+      const input=document.getElementById(`clientPlanPrice_${id}`);
+      const value=Number(String(input?.value||"").replace(",","."));
+      if(!Number.isFinite(value)||value<0){showToast("Informe um valor anual válido.","error");input?.focus();return;}
+      const previous=getPlanPrice(c);
+      const existingContract=getContractForClient(c);
+      const originalText=button?.textContent||"Salvar valor";
+      if(button){button.disabled=true;button.textContent="Salvando...";}
+      try{
+        await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",c.id),{planPrice:value,planPriceCustom:true,updatedAt:state.serviceApi.serverTimestamp()});
+        c.planPrice=value;c.planPriceCustom=true;
+        if(existingContract?.status!=="accepted")await refreshPendingContractForClient(c.id,c);
+        try{
+          await logActivity("client_edit",c.id,"Valor do plano ajustado",`${c.name} · ${money(previous)} → ${money(value)} por ano · por ${state.currentProfile?.name||state.currentProfile?.email||"operador"}`);
+        }catch(activityError){console.warn("Não foi possível registrar o ajuste de valor no histórico.",activityError);}
+        renderClients();renderContracts();
+        if(state.selectedClientId===c.id)renderClientDetail();
+        showToast(existingContract?.status==="accepted"
+          ? `Valor do cliente atualizado para ${money(value)} por ano. O contrato já aceito foi preservado.`
+          : `Valor do plano de ${c.name} atualizado para ${money(value)} por ano.`);
+      }catch(err){
+        console.error("Erro ao ajustar valor do plano do cliente",err);
+        showToast("Não foi possível salvar o valor do plano: "+(err?.message||"erro desconhecido"),"error");
+      }finally{
+        if(button && document.body.contains(button)){button.disabled=!can("clientsEdit");button.textContent=originalText;}
+      }
+    };
+
     async function saveDetailClientPlanPrice(){
       const c=state.clients.find(x=>x.id===state.selectedClientId);
       if(!c){showToast("Cliente não localizado.","error");return;}
-      if(!hasActivePlan(c)){showToast("Ative o plano antes de ajustar o valor.","error");return;}
       if(!can("clientsEdit")){showToast("Você não possui permissão para editar o cliente.","error");return;}
       if(!state.connected){showToast("Realtime Database indisponível.","error");return;}
       const input=$("detailPlanPriceInput");
@@ -3162,9 +3206,11 @@
           await logActivity("client_edit",c.id,"Valor do plano ajustado",`${c.name} · ${money(previous)} → ${money(value)} por ano · por ${state.currentProfile?.name||state.currentProfile?.email||"operador"}`);
         }catch(activityError){console.warn("Não foi possível registrar o ajuste de valor no histórico.",activityError);}
         renderClientDetail();renderClients();renderContracts();
-        showToast(existingContract?.status==="accepted"
-          ? `Valor do cliente atualizado para ${money(value)} por ano. O contrato já aceito foi preservado.`
-          : `Valor do plano atualizado para ${money(value)} por ano.`);
+        showToast(!hasActivePlan(c)
+          ? `Valor do plano definido em ${money(value)} por ano. Ele será usado quando o plano for ativado.`
+          : existingContract?.status==="accepted"
+            ? `Valor do cliente atualizado para ${money(value)} por ano. O contrato já aceito foi preservado.`
+            : `Valor do plano atualizado para ${money(value)} por ano.`);
       }catch(err){
         console.error("Erro ao ajustar valor do plano do cliente",err);
         showToast("Não foi possível salvar o valor do plano: "+(err?.message||"erro desconhecido"),"error");
@@ -3178,21 +3224,23 @@
       const p=getPlanInfo(c);
       $("detailAvatar").textContent=initials(c.name);$("detailName").textContent=c.name;
       $("detailMeta").textContent=[c.document,c.city,c.phone].filter(Boolean).join(" · ")||"Dados cadastrais";
-      $("detailPlanLabel").textContent=hasActivePlan(c)?getPlanLabel(c):"Cliente importado · plano ainda não contratado";
-      $("detailPlanPrice").textContent=hasActivePlan(c)?`${money(getPlanPrice(c))} / ano`:"Aguardando ativação";
+      $("detailPlanLabel").textContent=hasActivePlan(c)?getPlanLabel(c):"Plano de monitoramento · aguardando ativação";
+      $("detailPlanPrice").textContent=`${money(getPlanPrice(c))} / ano`;
       const priceEditor=$("detailPlanPriceEditor"),priceInput=$("detailPlanPriceInput"),priceSave=$("saveDetailPlanPrice"),priceHint=$("detailPlanPriceHint");
       const detailContract=getContractForClient(c);
       if(priceEditor){
-        priceEditor.classList.toggle("hidden",!hasActivePlan(c));
-        if(priceInput){priceInput.value=hasActivePlan(c)?Number(getPlanPrice(c)).toFixed(2):"";priceInput.disabled=!can("clientsEdit");}
-        if(priceSave)priceSave.disabled=!can("clientsEdit")||!hasActivePlan(c);
+        priceEditor.classList.remove("hidden");
+        if(priceInput){priceInput.value=Number(getPlanPrice(c)).toFixed(2);priceInput.disabled=!can("clientsEdit");}
+        if(priceSave)priceSave.disabled=!can("clientsEdit");
         if(priceHint){
           priceHint.classList.toggle("custom",!!c.planPriceCustom);
-          priceHint.textContent=detailContract?.status==="accepted"
-            ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O contrato já aceito preserva o valor que foi assinado.`
-            : detailContract
-              ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}Ao salvar, o contrato pendente será atualizado automaticamente.`
-              : `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O valor será usado quando o contrato for gerado.`;
+          priceHint.textContent=!hasActivePlan(c)
+            ? `${c.planPriceCustom?"Valor personalizado salvo. ":""}Você pode definir o valor agora; ele será usado quando o plano for ativado.`
+            : detailContract?.status==="accepted"
+              ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O contrato já aceito preserva o valor que foi assinado.`
+              : detailContract
+                ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}Ao salvar, o contrato pendente será atualizado automaticamente.`
+                : `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O valor será usado quando o contrato for gerado.`;
         }
       }
       $("detailStart").textContent=formatDate(p.start);$("detailEnd").textContent=formatDate(p.end);
@@ -4040,7 +4088,7 @@
       const start=$("activateStart").value;
       const completeData={
         ...c,
-        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:getPlanPrice(document),planLabel:getPlanLabel(document),planBenefits:snapshotPlanBenefits(document),
+        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:c.planPriceCustom?getPlanPrice(c):getPlanPrice(document),planPriceCustom:!!c.planPriceCustom,planLabel:getPlanLabel(document),planBenefits:snapshotPlanBenefits(document),
         phone,email:$("activateEmail").value.trim(),city:$("activateCity").value.trim(),address:$("activateAddress").value.trim(),
         planActive:true,planStart:start,planEnd:addYear(start),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),seller:$("activateSeller").value.trim()||state.currentProfile?.name||c.seller||"",
         payment:$("activatePayment").value,paymentStatus:$("activatePaymentStatus").value,notes:$("activateNotes").value.trim()
@@ -4049,7 +4097,7 @@
       const contract=await createContractRecord(c.id,completeData,"activation");
       history.push({date:new Date().toISOString(),title:"Plano ativado",description:`${getPlanLabel(completeData)} no valor de ${money(getPlanPrice(completeData))}. Contrato: ${contract.number}.`});
       const update={
-        name:completeData.name,document:completeData.document,documentType:completeData.documentType,planPrice:completeData.planPrice,planLabel:completeData.planLabel,planBenefits:completeData.planBenefits,
+        name:completeData.name,document:completeData.document,documentType:completeData.documentType,planPrice:completeData.planPrice,planPriceCustom:!!completeData.planPriceCustom,planLabel:completeData.planLabel,planBenefits:completeData.planBenefits,
         phone:completeData.phone,email:completeData.email,city:completeData.city,address:completeData.address,
         planActive:true,planStart:completeData.planStart,planEnd:completeData.planEnd,
         planActivationSource:"manual",planActivatedAt:completeData.planActivatedAt,seller:completeData.seller,
