@@ -2208,10 +2208,10 @@
         documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data),
         planStart:data.planStart, planEnd:data.planEnd||addYear(data.planStart), city:data.city||"", address:data.address||"",
         clientPhone:data.phone||"", clientEmail:data.email||"", clientSeller:data.seller||"", payment:data.payment||"", paymentStatus:data.paymentStatus||"", clientNotes:data.notes||"",
-        clientSnapshot:contractClientSnapshot(data), status:"pending", generatedAt, acceptedAt:null, acceptedBy:"",
+        clientSnapshot:contractClientSnapshot(data), status:"pending", generatedAt,
         automaticRenewalEnabled:!!(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).automaticRenewalEnabled,
         renewalClause:(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).renewalClause||"",
-        acceptedDocument:"", acceptedDocumentMasked:"", contractHtml:buildContractHtml(data,number)
+        contractHtml:buildContractHtml(data,number)
       };
     }
     const addYear = (dateStr) => {
@@ -2368,11 +2368,13 @@
                 updates[basePath]=null;
                 continue;
               }
-              const cleaned=cleanForRtdb(op.data)||{};
+              const cleaned=cleanForRtdb(op.data);
               if(op.type==="set"){
-                updates[basePath]=cleaned;
+                // Preserva valores válidos falsy (false, 0 e string vazia) em gravações por caminho.
+                updates[basePath]=cleaned===undefined?null:cleaned;
               }else{
-                Object.entries(cleaned).forEach(([key,value])=>{updates[[basePath,key].filter(Boolean).join("/")]=value;});
+                const mergeValue=(cleaned && typeof cleaned==="object" && !Array.isArray(cleaned))?cleaned:{};
+                Object.entries(mergeValue).forEach(([key,value])=>{updates[[basePath,key].filter(Boolean).join("/")]=value;});
               }
             }
             return dbApi.update(dbApi.ref(db),updates);
@@ -4473,9 +4475,9 @@
         // respeitando as regras públicas específicas do Realtime Database.
         const acceptancePayload={...accepted,acceptedAt:state.serviceApi.serverTimestamp()};
         const batch=state.serviceApi.writeBatch(state.db);
-        Object.entries(acceptancePayload).forEach(([field,value])=>{
-          batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token,field),value);
-        });
+        // Atualiza os campos do aceite no nó do contrato. O adaptador converte esta operação
+        // em atualização atômica por campo no Realtime Database, mantendo false/strings vazias corretamente.
+        batch.update(state.serviceApi.doc(state.db,"publicContracts",contract.token),acceptancePayload);
         await batch.commit();
         const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",contract.token));
         state.publicContract={token:snap.id,...snap.data(),generatedAt:timestampISO(snap.data().generatedAt),acceptedAt:timestampISO(snap.data().acceptedAt)};
@@ -4483,7 +4485,10 @@
       }catch(err){
         console.error("Erro ao registrar aceite público:",err);
         const code=String(err?.code||"").replace(/^database\//i,"").replace(/_/g," ");
-        showToast(`Não foi possível registrar o aceite.${code?` (${code})`:""} Tente novamente.`,"error");
+        const permissionDenied=/permission[ -]?denied/i.test(code);
+        showToast(permissionDenied
+          ? "O Realtime Database bloqueou a gravação do aceite. Publique as regras atualizadas do publicContracts e tente novamente."
+          : `Não foi possível registrar o aceite.${code?` (${code})`:""} Tente novamente.`,"error");
       }
     });
     $("clientForm").addEventListener("submit",async e=>{
