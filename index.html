@@ -930,10 +930,18 @@
                 <input id="publicAcceptanceCheck" type="checkbox" required>
                 <span>Declaro que li o contrato, compreendi as condições do plano e concordo com o registro eletrônico deste aceite, incluindo data, hora e identificação do dispositivo.</span>
               </label>
-              <label id="publicRenewalAcceptanceRow" class="acceptance-check field full hidden">
-                <input id="publicRenewalAcceptanceCheck" type="checkbox">
-                <span>Autorizo expressamente a renovação automática do plano por novos períodos anuais e estou ciente de que, para impedir a próxima renovação, devo solicitar a não renovação ou o encerramento com antecedência mínima de 30 dias.</span>
-              </label>
+              <div id="publicRenewalAcceptanceRow" class="field full hidden">
+                <label>Renovação automática *</label>
+                <label class="acceptance-check">
+                  <input id="publicRenewalAcceptanceCheck" type="radio" name="publicRenewalPreference" value="authorize">
+                  <span><strong>Quero autorizar a renovação automática.</strong><br>Autorizo expressamente a renovação do plano por novos períodos anuais e estou ciente das condições de renovação e encerramento previstas no contrato.</span>
+                </label>
+                <label class="acceptance-check" style="margin-top:8px">
+                  <input id="publicNoRenewalAcceptanceCheck" type="radio" name="publicRenewalPreference" value="decline">
+                  <span><strong>Não quero renovação automática.</strong><br>Não autorizo a renovação automática ao final da vigência atual. Uma nova renovação somente poderá ocorrer mediante nova manifestação de vontade.</span>
+                </label>
+                <span class="muted small" style="line-height:1.5">Escolha uma das opções acima para registrar sua preferência junto ao aceite eletrônico.</span>
+              </div>
               <div class="face-capture-card field full">
                 <div class="face-capture-head">
                   <div>
@@ -2205,7 +2213,10 @@
       const faceData=typeof contract.faceEvidenceDataUrl==="string" && /^data:image\/jpeg;base64,/i.test(contract.faceEvidenceDataUrl)?contract.faceEvidenceDataUrl:"";
       const faceInfo=contract.faceEvidenceCapturedAt?`Selfie registrada em ${formatDateTime(timestampISO(contract.faceEvidenceCapturedAt))}.`:"Selfie vinculada ao aceite.";
       const faceHtml=faceData?`<div class="contract-signature-face"><img src="${safe(faceData)}" alt="Registro facial do responsável"><div><strong>REGISTRO FACIAL ANEXADO</strong><br>${safe(faceInfo)}<br>Método: câmera frontal do dispositivo (captura ao vivo).</div></div>`:"";
-      return `<div class="contract-signature-evidence"><strong>ACEITE ELETRÔNICO REGISTRADO</strong><br>Responsável: ${safe(contract.acceptedBy||"—")}<br>Documento confirmado: ${safe(acceptedDocument)}<br>Data e hora: ${formatDateTime(timestampISO(contract.acceptedAt))}<br>Registro: aceite expresso por meio do link individual deste contrato.${faceHtml}</div>`;
+      const renewalHtml=typeof contract.renewalAuthorization==="boolean"
+        ? `<br>Renovação automática: <strong>${contract.renewalAuthorization?"AUTORIZADA":"NÃO AUTORIZADA"}</strong>.`
+        : "";
+      return `<div class="contract-signature-evidence"><strong>ACEITE ELETRÔNICO REGISTRADO</strong><br>Responsável: ${safe(contract.acceptedBy||"—")}<br>Documento confirmado: ${safe(acceptedDocument)}<br>Data e hora: ${formatDateTime(timestampISO(contract.acceptedAt))}<br>Registro: aceite expresso por meio do link individual deste contrato.${renewalHtml}${faceHtml}</div>`;
     }
     function buildContractHtml(data, number){
       const price=money(getPlanPrice(data));
@@ -3346,7 +3357,10 @@
       $("contractPreview").innerHTML=normalizedContractHtml+contractEvidenceHtml(contract);
       const accepted=contract.status==="accepted";
       $("contractModalAccepted").classList.toggle("hidden",!accepted);
-      if(accepted)$("contractModalAccepted").innerHTML=`<strong>Contrato aceito.</strong><br>${safe(contract.acceptedBy||"Responsável")} confirmou o aceite em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;
+      if(accepted){
+        const renewalStatus=typeof contract.renewalAuthorization==="boolean"?`<br>Renovação automática: <strong>${contract.renewalAuthorization?"autorizada":"não autorizada"}</strong>.`:"";
+        $("contractModalAccepted").innerHTML=`<strong>Contrato aceito.</strong><br>${safe(contract.acceptedBy||"Responsável")} confirmou o aceite em ${formatDateTime(timestampISO(contract.acceptedAt))}.${renewalStatus}`;
+      }
       $("openAcceptanceBtn").textContent=accepted?"Abrir contrato aceito":"Abrir página de aceite";
       const client=state.clients.find(c=>c.id===contract.clientId);
       const phone=documentDigits(contract.clientPhone||client?.phone||"");
@@ -3694,14 +3708,22 @@
       const renewalEnabled=!!contract.automaticRenewalEnabled || /Renovação automática e encerramento/i.test(contract.contractHtml||"");
       $("publicRenewalAcceptanceRow").classList.toggle("hidden",!renewalEnabled);
       $("publicRenewalAcceptanceCheck").required=renewalEnabled;
+      $("publicNoRenewalAcceptanceCheck").required=false;
       $("publicAcceptedBanner").classList.toggle("hidden",!accepted);$("publicAcceptanceForm").classList.toggle("hidden",accepted);
-      if(accepted){stopPublicFaceCamera();$("publicAcceptedText").textContent=`Aceite registrado por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}.`;}
+      if(accepted){
+        stopPublicFaceCamera();
+        const renewalResult=typeof contract.renewalAuthorization==="boolean"
+          ? ` Renovação automática: ${contract.renewalAuthorization?"autorizada":"não autorizada"}.`
+          : "";
+        $("publicAcceptedText").textContent=`Aceite registrado por ${contract.acceptedBy||"responsável"} em ${formatDateTime(timestampISO(contract.acceptedAt))}.${renewalResult}`;
+      }
       else{
         $("publicSignerName").value=contract.clientName||acceptanceSnapshot.name||"";
         $("publicSignerDocument").value=contract.clientDocument||acceptanceSnapshot.document||"";
         $("publicAcceptanceWord").value="";
         $("publicAcceptanceCheck").checked=false;
         $("publicRenewalAcceptanceCheck").checked=false;
+        $("publicNoRenewalAcceptanceCheck").checked=false;
         resetPublicFaceCapture();
       }
     }
@@ -4584,7 +4606,9 @@
       if(!state.publicFaceEvidence?.dataUrl || state.publicFaceEvidence?.method!=="camera"){showToast("Capture uma selfie ao vivo pela câmera frontal para registrar o aceite.","error");return;}
       if(!$("publicFaceConsent").checked){showToast("Confirme a autorização para o registro da selfie.","error");return;}
       const renewalEnabled=!!contract.automaticRenewalEnabled || /Renovação automática e encerramento/i.test(contract.contractHtml||"");
-      if(renewalEnabled&&!$("publicRenewalAcceptanceCheck").checked){showToast("Confirme a autorização expressa da renovação automática.","error");return;}
+      const renewalAuthorized=renewalEnabled && $("publicRenewalAcceptanceCheck").checked;
+      const renewalDeclined=renewalEnabled && $("publicNoRenewalAcceptanceCheck").checked;
+      if(renewalEnabled&&!renewalAuthorized&&!renewalDeclined){showToast("Escolha se deseja ou não autorizar a renovação automática.","error");return;}
       const enteredDocument=documentDigits(document);
       const hash=await hashText(enteredDocument);
       const storedDocument=documentDigits(contract.clientDocument||contract.clientSnapshot?.document||"");
@@ -4594,7 +4618,7 @@
         showToast("O CPF/CNPJ informado não corresponde ao contrato.","error");return;
       }
       const faceEvidence=state.publicFaceEvidence;
-      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled,renewalAuthorizationText:renewalEnabled?"Autorização expressa para renovação automática confirmada.":"",userAgent:navigator.userAgent,faceEvidenceDataUrl:faceEvidence.dataUrl,faceEvidenceCapturedAt:faceEvidence.capturedAt,faceEvidenceMethod:faceEvidence.method,faceEvidenceConsent:true,faceEvidenceHash:await hashText(faceEvidence.dataUrl)};
+      const accepted={status:"accepted",acceptedAt:new Date().toISOString(),acceptedBy:name,acceptedDocument:document,acceptedDocumentMasked:maskDocument(document),acceptanceText:"Li e aceito integralmente o contrato.",renewalAuthorization:renewalEnabled?renewalAuthorized:false,renewalAuthorizationText:renewalEnabled?(renewalAuthorized?"Autorização expressa para renovação automática confirmada.":"Renovação automática não autorizada pelo contratante."):"",userAgent:navigator.userAgent,faceEvidenceDataUrl:faceEvidence.dataUrl,faceEvidenceCapturedAt:faceEvidence.capturedAt,faceEvidenceMethod:faceEvidence.method,faceEvidenceConsent:true,faceEvidenceHash:await hashText(faceEvidence.dataUrl)};
       try{
         if(!state.connected) throw new Error("Realtime Database indisponível");
         // O aceite público não atualiza o contrato inteiro. Cada campo de evidência
