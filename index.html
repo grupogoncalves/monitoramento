@@ -842,6 +842,25 @@
     .benefit-editor-summary input[type="number"] { width:100%;border:1px solid var(--line);border-radius:9px;padding:9px;background:#fff; }
     .benefit-editor-fields { border-top:1px solid #edf2e9;padding:12px 13px;display:grid;grid-template-columns:1fr;gap:10px; }
     .benefit-editor.inactive .benefit-editor-fields { display:none; }
+
+    /* Seleção de itens inclusos na venda */
+    .sale-benefits-box { border:1px solid #dbe6d6; background:#f9fbf6; border-radius:14px; padding:14px; }
+    .sale-benefits-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:11px; }
+    .sale-benefits-head strong { display:block; color:var(--primary); font-size:13px; }
+    .sale-benefits-head span { display:block; color:var(--muted); font-size:10px; line-height:1.45; margin-top:3px; }
+    .sale-benefits-list { display:flex; flex-direction:column; gap:8px; }
+    .sale-benefit-item { display:grid; grid-template-columns:auto minmax(0,1fr) 92px; gap:10px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:11px; padding:10px 11px; }
+    .sale-benefit-item.active { border-color:#b7ca5b; background:#fcfdef; }
+    .sale-benefit-check { width:18px; height:18px; accent-color:var(--primary); }
+    .sale-benefit-copy strong { display:block; font-size:11px; color:var(--ink); }
+    .sale-benefit-copy span { display:block; font-size:9px; color:var(--muted); margin-top:3px; line-height:1.35; }
+    .sale-benefit-qty { display:flex; flex-direction:column; gap:3px; }
+    .sale-benefit-qty-label { font-size:8px; text-transform:uppercase; letter-spacing:.45px; color:var(--muted); font-weight:800; }
+    .sale-benefit-qty input { width:100%; border:1px solid var(--line); border-radius:9px; padding:8px 9px; font-weight:800; text-align:center; }
+    .sale-benefit-item:not(.active) .sale-benefit-qty { opacity:.45; }
+    .sale-benefits-summary { margin-top:10px; padding-top:10px; border-top:1px dashed #d8e1d3; font-size:10px; color:var(--muted); line-height:1.5; }
+    .sale-benefits-summary strong { color:var(--primary); }
+    @media (max-width:650px) { .sale-benefit-item { grid-template-columns:auto minmax(0,1fr) 78px; } }
     .plan-settings-footer { display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:18px;padding-top:17px;border-top:1px solid var(--line); }
     .plan-settings-actions { display:flex;gap:9px;flex-wrap:wrap; }
     .plan-save-status { font-size:10px;color:var(--muted);line-height:1.55;max-width:620px; }
@@ -1545,20 +1564,6 @@
             </div>
           </div>
 
-          <div id="generationReportSendCard" class="generation-send-card">
-            <div class="generation-send-copy">
-              <div class="generation-send-icon">▥</div>
-              <div>
-                <div class="generation-send-title">Relatório de geração</div>
-                <div id="generationReportSendStatus" class="generation-send-status">Nenhum envio registrado</div>
-                <div id="generationReportSendMeta" class="generation-send-meta">Quando o técnico enviar o relatório ao cliente, registre aqui.</div>
-              </div>
-            </div>
-            <div class="generation-send-actions">
-              <button id="generationReportSendBtn" type="button" class="btn btn-primary" data-permission="servicesRegister">✓ Registrar envio do relatório</button>
-            </div>
-          </div>
-
           <div id="detailContractCard" class="contract-summary-card">
             <div class="contract-summary-copy">
               <strong>Contrato do plano</strong>
@@ -1580,14 +1585,14 @@
               <div class="service-footer"><span id="serviceCount-technicalCall" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="technicalCall" data-permission="servicesRegister">Registrar uso</button></div>
             </div>
             <div id="serviceCard-appCheck" class="service-card">
-              <div class="service-icon">▣</div><h4 id="serviceTitle-appCheck">Verificação do aplicativo</h4>
+              <div class="service-icon">▣</div><h4 id="serviceTitle-appCheck">Análise do aplicativo</h4>
               <p id="serviceDescription-appCheck">Conferência remota do aplicativo e da geração do sistema.</p>
-              <div class="service-footer"><span id="serviceCount-appCheck" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="appCheck" data-permission="servicesRegister">Registrar uso</button></div>
+              <div class="service-footer"><span id="serviceCount-appCheck" class="service-count">0/3</span><button class="btn btn-soft btn-sm register-service" data-service="appCheck" data-permission="servicesRegister">Registrar análise</button></div>
             </div>
             <div id="serviceCard-invoiceAnalysis" class="service-card">
               <div class="service-icon">▤</div><h4 id="serviceTitle-invoiceAnalysis">Análise remota de fatura</h4>
               <p id="serviceDescription-invoiceAnalysis">Análise da fatura para validar créditos, consumo e compensação.</p>
-              <div class="service-footer"><span id="serviceCount-invoiceAnalysis" class="service-count">0/1</span><button class="btn btn-soft btn-sm register-service" data-service="invoiceAnalysis" data-permission="servicesRegister">Registrar uso</button></div>
+              <div class="service-footer"><span id="serviceCount-invoiceAnalysis" class="service-count">0/3</span><button class="btn btn-soft btn-sm register-service" data-service="invoiceAnalysis" data-permission="servicesRegister">Registrar análise</button></div>
             </div>
             <div id="serviceCard-technicalVisit" class="service-card">
               <div class="service-icon">⌂</div><h4 id="serviceTitle-technicalVisit">Visita técnica anual</h4>
@@ -1597,7 +1602,7 @@
             <div id="serviceCard-quarterlyReport" class="service-card hidden">
               <div class="service-icon">▥</div><h4 id="serviceTitle-quarterlyReport">Relatório trimestral de geração</h4>
               <p id="serviceDescription-quarterlyReport">Relatório de desempenho enviado ao cliente pelo WhatsApp.</p>
-              <div class="service-footer"><span id="serviceCount-quarterlyReport" class="service-count">0/4</span><button class="btn btn-soft btn-sm register-service" data-service="quarterlyReport" data-permission="servicesRegister">Registrar envio</button></div>
+              <div class="service-footer"><span id="serviceCount-quarterlyReport" class="service-count">0/4</span><span class="badge info">Registro na aba Envio de relatórios</span></div>
             </div>
           </div>
 
@@ -1690,6 +1695,13 @@
             <div class="field full"><label>Nome completo / Razão social *</label><input id="clientName" required></div>
             <div class="field"><label>CPF / CNPJ *</label><input id="clientDocument" placeholder="Digite o CPF ou CNPJ" required><span id="clientPlanPreview" class="small muted">Informe o documento para definir o plano.</span></div>
             <div class="field"><label>Telefone / WhatsApp</label><input id="clientPhone" placeholder="(47) 99999-9999"></div>
+            <div class="field full">
+              <div class="sale-benefits-box">
+                <div class="sale-benefits-head"><div><strong>Itens inclusos nesta venda</strong><span>A operadora pode marcar ou desmarcar os serviços e definir a quantidade anual contratada para este cliente. Análise de fatura e análise do aplicativo podem ter 2, 3, 4 ou mais utilizações.</span></div><button id="clientResetSaleBenefits" type="button" class="btn btn-ghost btn-sm">Usar padrão do plano</button></div>
+                <div id="clientSaleBenefits" class="sale-benefits-list"></div>
+                <div id="clientSaleBenefitsSummary" class="sale-benefits-summary">Informe o CPF/CNPJ para carregar os itens.</div>
+              </div>
+            </div>
             <div class="field"><label>E-mail</label><input id="clientEmail" type="email"></div>
             <div class="field"><label>Cidade</label><input id="clientCity"></div>
             <div class="field full"><label>Endereço</label><input id="clientAddress"></div>
@@ -1795,6 +1807,13 @@
             <div class="field full"><label>Nome completo / Razão social *</label><input id="activateName" required></div>
             <div class="field"><label>CPF / CNPJ *</label><input id="activateDocument" placeholder="Digite o CPF ou CNPJ" required><span id="activatePlanPreview" class="small muted">Informe o documento para definir o plano.</span></div>
             <div class="field"><label>Telefone / WhatsApp *</label><input id="activatePhone" placeholder="(47) 99999-9999" required></div>
+            <div class="field full">
+              <div class="sale-benefits-box">
+                <div class="sale-benefits-head"><div><strong>Itens inclusos nesta venda</strong><span>Selecione os benefícios que constarão no contrato deste cliente e informe a quantidade anual de cada um. Análise de fatura e análise do aplicativo aceitam múltiplas utilizações.</span></div><button id="activateResetSaleBenefits" type="button" class="btn btn-ghost btn-sm">Usar padrão do plano</button></div>
+                <div id="activateSaleBenefits" class="sale-benefits-list"></div>
+                <div id="activateSaleBenefitsSummary" class="sale-benefits-summary">Informe o CPF/CNPJ para carregar os itens.</div>
+              </div>
+            </div>
             <div class="field"><label>E-mail *</label><input id="activateEmail" type="email" placeholder="cliente@email.com" required></div>
             <div class="field"><label>Cidade *</label><input id="activateCity" required></div>
             <div class="field full"><label>Endereço completo *</label><input id="activateAddress" placeholder="Rua, número, bairro e complemento" required></div>
@@ -1890,7 +1909,7 @@
     const ACCEPT_TOKEN = new URLSearchParams(window.location.search).get("accept");
     const SERVICES = {
       technicalCall: { label: "Chamado técnico", icon: "☎" },
-      appCheck: { label: "Atendimento remoto do aplicativo", icon: "▣" },
+      appCheck: { label: "Análise do aplicativo", icon: "▣" },
       invoiceAnalysis: { label: "Análise de fatura", icon: "▤" },
       technicalVisit: { label: "Visita técnica", icon: "⌂" },
       quarterlyReport: { label: "Relatório trimestral de geração via WhatsApp", icon: "▥" }
@@ -1907,8 +1926,8 @@
         price: 120,
         benefits: {
           technicalCall: { enabled:false, label:"Chamado técnico", description:"Atendimento técnico incluído durante a vigência do plano.", limit:0, contractText:"1 chamado técnico" },
-          appCheck: { enabled:true, label:"Verificação remota do aplicativo", description:"Conferência remota do aplicativo e da geração do sistema.", limit:1, contractText:"1 verificação remota do aplicativo de monitoramento" },
-          invoiceAnalysis: { enabled:true, label:"Análise remota de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:1, contractText:"1 análise remota de fatura de energia" },
+          appCheck: { enabled:true, label:"Análise do aplicativo", description:"Conferência remota do aplicativo e da geração do sistema.", limit:3, contractText:"3 análises remotas do aplicativo de monitoramento" },
+          invoiceAnalysis: { enabled:true, label:"Análise de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:3, contractText:"3 análises de fatura de energia" },
           technicalVisit: { enabled:true, label:"Visita técnica anual", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial durante a vigência anual" },
           quarterlyReport: { enabled:false, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório de desempenho e geração enviado pelo WhatsApp.", limit:0, contractText:"relatório trimestral de geração enviado via WhatsApp" }
         }
@@ -1918,7 +1937,7 @@
         price: 350,
         benefits: {
           technicalCall: { enabled:true, label:"Chamado técnico", description:"Um chamado técnico incluído durante a vigência do plano empresarial.", limit:1, contractText:"1 chamado técnico" },
-          appCheck: { enabled:true, label:"Configuração remota do aplicativo", description:"Configuração ou ajuste remoto do aplicativo de monitoramento.", limit:3, contractText:"3 configurações remotas do aplicativo de monitoramento" },
+          appCheck: { enabled:true, label:"Análise do aplicativo", description:"Conferência, configuração ou ajuste remoto do aplicativo de monitoramento.", limit:3, contractText:"3 análises remotas do aplicativo de monitoramento" },
           invoiceAnalysis: { enabled:true, label:"Análise de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:3, contractText:"3 análises de fatura de energia" },
           technicalVisit: { enabled:true, label:"Visita técnica", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial" },
           quarterlyReport: { enabled:true, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório trimestral de desempenho e geração enviado pelo WhatsApp.", limit:4, contractText:"relatório trimestral de geração enviado via WhatsApp, totalizando 4 envios durante a vigência anual" }
@@ -3105,7 +3124,7 @@
       return `<div class="generation-report-status">
         <span class="badge ${info.count?"success":"warning"}">${info.count?"Enviado":"Pendente"}</span>
         <span class="generation-report-meta">${meta}</span>
-        <button type="button" class="btn btn-primary btn-sm generation-report-action" onclick="markGenerationReportSent('${c.id}',this)" ${can("servicesRegister")?"":"disabled"}>✓ Registrar envio</button>
+        <span class="generation-report-meta"><strong>Registro disponível na aba Envio de relatórios.</strong></span>
       </div>`;
     }
     window.markGenerationReportSent=async(id,button)=>{
@@ -3487,8 +3506,10 @@
         $(`serviceDescription-${type}`).textContent=benefit.description;
         $(`serviceCount-${type}`).textContent=`${Math.min(used,limit)}/${limit}`;
         const btn=card.querySelector(".register-service");
-        btn.disabled=complete||p.status==="expired"||p.status==="no_plan"||!can("servicesRegister");
-        btn.textContent=complete?"Limite atingido":p.status==="no_plan"?"Ative o plano":p.status==="expired"?"Plano vencido":type==="quarterlyReport"?"Registrar envio":used>0?"Registrar novo uso":"Registrar uso";
+        if(btn){
+          btn.disabled=complete||p.status==="expired"||p.status==="no_plan"||!can("servicesRegister");
+          btn.textContent=complete?"Limite atingido":p.status==="no_plan"?"Ative o plano":p.status==="expired"?"Plano vencido":type==="quarterlyReport"?"Registrar envio":(type==="appCheck"||type==="invoiceAnalysis")?(used>0?"Registrar nova análise":"Registrar análise"):(used>0?"Registrar novo uso":"Registrar uso");
+        }
       });
       const histories=[];
       Object.keys(SERVICES).forEach(type=>{
@@ -3958,6 +3979,7 @@
       $("clientPlanStart").value=c.planStart||"";$("clientSeller").value=c.seller||"";
       $("clientPayment").value=c.payment||"PIX";$("clientPaymentStatus").value=c.paymentStatus||"paid";$("clientNotes").value=c.notes||"";
       $("clientContractNote").classList.add("hidden");updateClientPlanPreview();
+      renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",c.document||"",c.planBenefits&&Object.keys(c.planBenefits).length?c.planBenefits:null,true);
       openModal("clientModalBackdrop");
     };
     window.deleteClient=(id)=>{
@@ -4188,6 +4210,68 @@
       $("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open");
       window.scrollTo({top:0,behavior:"smooth"});
     }
+    function saleBenefitContractText(base,limit,type){
+      const label=String(base?.label||SERVICES[type]?.label||type);
+      let text=String(base?.contractText||label).trim();
+      if(/\d+/.test(text)) text=text.replace(/\d+/,String(limit));
+      else text=`${limit} ${text}`;
+      return text;
+    }
+    function saleBenefitsSource(document,selectedBenefits=null){
+      const config=getConfiguredPlan(document);
+      const configured=config?.benefits||{};
+      const selected=selectedBenefits?normalizeBenefitSnapshot(selectedBenefits):null;
+      return Object.keys(SERVICES).map(type=>{
+        const base=configured[type]||DEFAULT_PLAN_SETTINGS[getClientType(document)]?.benefits?.[type]||{label:SERVICES[type].label,description:"",limit:1,contractText:SERVICES[type].label};
+        const chosen=selected?.[type]||null;
+        const active=selected ? !!chosen : (base.enabled!==false && Number(base.limit)>0);
+        const limit=Math.max(1,Math.floor(Number(chosen?.limit ?? base.limit ?? 1)||1));
+        return {type,base,active,limit};
+      });
+    }
+    function renderSaleBenefits(containerId,summaryId,document,selectedBenefits=null,force=false){
+      const container=$(containerId),summary=$(summaryId);if(!container||!summary)return;
+      const type=getClientType(document||"");
+      if(!force && container.dataset.planType===type && container.children.length)return;
+      container.dataset.planType=type;
+      const rows=saleBenefitsSource(document,selectedBenefits);
+      container.innerHTML=rows.map(({type,base,active,limit})=>`<div class="sale-benefit-item ${active?"active":""}" data-sale-benefit-row="${type}">
+        <input class="sale-benefit-check" type="checkbox" data-sale-benefit-check="${type}" ${active?"checked":""} aria-label="Incluir ${safe(base.label||SERVICES[type].label)}">
+        <span class="sale-benefit-copy"><strong>${safe(base.label||SERVICES[type].label)}</strong><span>${safe(base.description||"Selecione para incluir no contrato deste cliente.")}</span></span>
+        <span class="sale-benefit-qty"><span class="sale-benefit-qty-label">Qtd./ano</span><input type="number" min="1" step="1" value="${limit}" data-sale-benefit-qty="${type}" ${active?"":"disabled"}></span>
+      </div>`).join("");
+      const updateSummary=()=>{
+        let items=0,total=0;
+        container.querySelectorAll("[data-sale-benefit-check]").forEach(check=>{
+          const t=check.dataset.saleBenefitCheck;
+          const row=check.closest(".sale-benefit-item");
+          const qty=container.querySelector(`[data-sale-benefit-qty="${t}"]`);
+          row?.classList.toggle("active",check.checked);
+          if(qty)qty.disabled=!check.checked;
+          if(check.checked){items++;total+=Math.max(1,Math.floor(Number(qty?.value)||1));}
+        });
+        summary.innerHTML=items?`<strong>${items} item(ns) selecionado(s)</strong> · ${total} utilização(ões)/entrega(s) previstas no período anual.`:`<strong>Nenhum item selecionado.</strong> Marque pelo menos um serviço para gerar o contrato.`;
+      };
+      container.querySelectorAll("[data-sale-benefit-check]").forEach(el=>el.addEventListener("change",updateSummary));
+      container.querySelectorAll("[data-sale-benefit-qty]").forEach(el=>el.addEventListener("input",updateSummary));
+      updateSummary();
+    }
+    function readSaleBenefits(containerId,document){
+      const container=$(containerId);if(!container)return snapshotPlanBenefits(document);
+      const config=getConfiguredPlan(document)?.benefits||{};
+      const result={};
+      container.querySelectorAll("[data-sale-benefit-check]").forEach(check=>{
+        if(!check.checked)return;
+        const type=check.dataset.saleBenefitCheck;
+        const qty=container.querySelector(`[data-sale-benefit-qty="${type}"]`);
+        const limit=Math.max(1,Math.floor(Number(qty?.value)||1));
+        const base=config[type]||{label:SERVICES[type]?.label||type,description:"",contractText:SERVICES[type]?.label||type};
+        result[type]={label:String(base.label||SERVICES[type]?.label||type),description:String(base.description||""),limit,contractText:saleBenefitContractText(base,limit,type)};
+      });
+      if(!Object.keys(result).length)throw new Error("Marque pelo menos um item incluso no plano antes de salvar a venda.");
+      return normalizeBenefitSnapshot(result);
+    }
+
     function updateClientPlanPreview(){
       const document = $("clientDocument").value.trim();
       const digits = documentDigits(document);
@@ -4197,6 +4281,7 @@
       }
       const type = getClientType(document);
       const complete = digits.length === 11 || digits.length === 14;
+      renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",document,null,false);
       const benefitCount=totalPlanBenefits(document);
       const renewalInfo=state.planSettings.contract?.automaticRenewalEnabled?" · renovação automática":"";
       $("clientPlanPreview").innerHTML = `<strong>${type.toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano · ${benefitCount} utilizações/entregas previstas${renewalInfo}${complete?"":" · documento incompleto"}`;
@@ -4209,6 +4294,7 @@
         return;
       }
       const complete=digits.length===11||digits.length===14;
+      renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",document,null,false);
       const renewalInfo=state.planSettings.contract?.automaticRenewalEnabled?" · renovação automática":"";
       $("activatePlanPreview").innerHTML=`<strong>${getClientType(document).toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano · ${totalPlanBenefits(document)} utilizações/entregas previstas${renewalInfo}${complete?"":" · documento incompleto"}`;
     }
@@ -4231,10 +4317,12 @@
       $("activatePaymentStatus").value=c.paymentStatus||"pending";
       $("activateNotes").value=c.notes||"";
       updateActivationPlanPreview();
+      renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",c.document||"",c.planBenefits&&Object.keys(c.planBenefits).length?c.planBenefits:null,true);
       openModal("activatePlanModalBackdrop");
     };
     function resetClientForm(){
       $("clientForm").reset();$("clientId").value="";$("clientPlanStart").value=todayISO();$("clientModalTitle").textContent="Cadastrar cliente";$("clientContractNote").classList.remove("hidden");updateClientPlanPreview();
+      renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",$("clientDocument").value||"",null,true);
     }
     function openNewClient(){if(!can("clientsCreate"))return;resetClientForm();openModal("clientModalBackdrop");}
     function resetUserModalControls(){
@@ -4321,9 +4409,11 @@
       const phone=$("activatePhone").value.trim();
       if(documentDigits(phone).length<10){showToast("Informe um telefone ou WhatsApp válido para o envio do contrato.","error");return;}
       const start=$("activateStart").value;
+      let selectedActivationBenefits;
+      try{selectedActivationBenefits=readSaleBenefits("activateSaleBenefits",document);}catch(err){showToast(err.message,"error");return;}
       const completeData={
         ...c,
-        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:c.planPriceCustom?getPlanPrice(c):getPlanPrice(document),planPriceCustom:!!c.planPriceCustom,planLabel:getPlanLabel(document),planBenefits:snapshotPlanBenefits(document),
+        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:c.planPriceCustom?getPlanPrice(c):getPlanPrice(document),planPriceCustom:!!c.planPriceCustom,planLabel:getPlanLabel(document),planBenefits:selectedActivationBenefits,
         phone,email:$("activateEmail").value.trim(),city:$("activateCity").value.trim(),address:$("activateAddress").value.trim(),
         planActive:true,planStart:start,planEnd:addYear(start),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),seller:$("activateSeller").value.trim()||state.currentProfile?.name||c.seller||"",
         payment:$("activatePayment").value,paymentStatus:$("activatePaymentStatus").value,notes:$("activateNotes").value.trim()
@@ -4774,10 +4864,6 @@
     $$("[data-close]").forEach(btn=>btn.addEventListener("click",()=>closeModal(btn.dataset.close)));
     $$(".modal-backdrop").forEach(back=>back.addEventListener("click",e=>{if(e.target===back)closeModal(back.id)}));
     $("quickAddClient").addEventListener("click",openNewClient);$("addClientBtn").addEventListener("click",openNewClient);
-    $("generationReportSendBtn")?.addEventListener("click",e=>{
-      if(!state.selectedClientId){showToast("Abra a ficha de um cliente para registrar o relatório.","error");return;}
-      markGenerationReportSent(state.selectedClientId,e.currentTarget);
-    });
 
     $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
     $("contractSearch").addEventListener("input",renderContracts);$("contractStatusFilter").addEventListener("change",renderContracts);
@@ -4792,6 +4878,8 @@
     $("printServiceOrderBtn").addEventListener("click",printServiceOrder);
     $("clientDocument").addEventListener("input",updateClientPlanPreview);
     $("activateDocument").addEventListener("input",updateActivationPlanPreview);
+    $("clientResetSaleBenefits")?.addEventListener("click",()=>renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",$("clientDocument").value||"",null,true));
+    $("activateResetSaleBenefits")?.addEventListener("click",()=>renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",$("activateDocument").value||"",null,true));
     $("importClientsCsvBtn").addEventListener("click",()=>$("clientsCsvInput").click());
     $("clientsCsvInput").addEventListener("change",async event=>{const file=event.target.files?.[0];event.target.value="";if(file)await importClientsCsvFile(file);});
     $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
@@ -4872,7 +4960,9 @@
       const existingClient=id?state.clients.find(client=>client.id===id):null;
       const preserveExistingPlan=existingClient&&getClientType(existingClient)===getClientType(document);
       const preserveCustomPrice=!!(preserveExistingPlan&&existingClient?.planPriceCustom);
-      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:preserveCustomPrice?getPlanPrice(existingClient):getLivePlanPrice(document),planPriceCustom:preserveCustomPrice,planLabel:getLivePlanLabel(document),planBenefits:preserveExistingPlan&&existingClient?.planBenefits?existingClient.planBenefits:snapshotPlanBenefits(document),phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
+      let selectedPlanBenefits;
+      try{selectedPlanBenefits=readSaleBenefits("clientSaleBenefits",document);}catch(err){showToast(err.message,"error");return;}
+      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:preserveCustomPrice?getPlanPrice(existingClient):getLivePlanPrice(document),planPriceCustom:preserveCustomPrice,planLabel:getLivePlanLabel(document),planBenefits:selectedPlanBenefits,phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
       if(!id)data.services=emptyServices();
       try{const result=await saveClient(data,id);closeModal("clientModalBackdrop");showToast(id?"Ficha atualizada.":"Cliente cadastrado e contrato gerado.");if(!id&&result.contract){renderContractModal(result.contract);openModal("contractModalBackdrop");}}catch(err){showToast("Erro ao salvar cliente: "+err.message,"error");}
     });
@@ -4942,6 +5032,8 @@
     $("activateStart").value=todayISO();
     updateClientPlanPreview();
     updateActivationPlanPreview();
+    renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",$("clientDocument")?.value||"",null,true);
+    renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",$("activateDocument")?.value||"",null,true);
     $("serviceDate").value=todayISO();
     $("renewStart").value=todayISO();
     renderPermissionGrid([]);
