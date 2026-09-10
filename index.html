@@ -304,6 +304,23 @@
     .progress-line > span { display:block;height:100%;background:linear-gradient(90deg,var(--primary),#3b91dc);border-radius:999px; }
     .progress-meta { display:flex;justify-content:space-between;color:var(--muted);font-size:9px;margin-top:5px; }
     .actions { display:flex;gap:6px;justify-content:flex-end; }
+    .generation-report-cell { min-width:220px; }
+    .generation-report-status { display:flex;flex-direction:column;align-items:flex-start;gap:7px; }
+    .generation-report-meta { color:var(--muted);font-size:10px;line-height:1.45; }
+    .generation-report-action { margin-top:1px; }
+    .generation-send-card {
+      display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+      background:linear-gradient(135deg,#f7fae8,#eef6df);border:2px solid #b1c903;border-left:7px solid #043c09;
+      border-radius:10px;padding:18px 20px;margin-bottom:18px;box-shadow:var(--shadow-sm);
+    }
+    .generation-send-copy { display:flex;align-items:flex-start;gap:14px;min-width:0;flex:1; }
+    .generation-send-icon { width:46px;height:46px;border-radius:50%;background:#043c09;color:#d8e64f;display:grid;place-items:center;font-size:21px;flex:0 0 auto; }
+    .generation-send-title { font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;font-size:21px;font-weight:800;color:#043c09;letter-spacing:.3px; }
+    .generation-send-status { margin-top:5px;font-size:12px;font-weight:800;color:#203820; }
+    .generation-send-meta { margin-top:4px;color:var(--muted);font-size:10px;line-height:1.45; }
+    .generation-send-actions { display:flex;align-items:center;gap:10px;flex-wrap:wrap; }
+    .generation-send-actions .btn { min-height:42px;padding-inline:18px; }
+    @media (max-width:650px){ .generation-send-actions,.generation-send-actions .btn{width:100%;} }
 
     .activity-list { display:flex;flex-direction:column; }
     .activity-item { display:grid;grid-template-columns:34px 1fr auto;gap:11px;padding:13px 0;border-bottom:1px solid #edf2f7;align-items:start; }
@@ -1058,6 +1075,7 @@
         <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span> Visão geral</button>
         <button class="nav-item" data-page="clients" data-permission="clientsView"><span class="nav-icon">♙</span> Clientes</button>
         <button class="nav-item" data-page="contracts" data-permission="clientsView"><span class="nav-icon">▤</span> Contratos</button>
+        <button class="nav-item" data-page="report-sends" data-permission="clientsView"><span class="nav-icon">▥</span> Envio de relatórios</button>
         <button class="nav-item" data-page="maintenance" data-permission="maintenanceView"><span class="nav-icon">✦</span> Preventivas e limpeza</button>
         <button class="nav-item" data-page="expirations" data-permission="clientsView"><span class="nav-icon">◷</span> Vencimentos</button>
         <button class="nav-item" data-page="users" data-permission="usersManage"><span class="nav-icon">⚙</span> Usuários e permissões</button>
@@ -1206,7 +1224,7 @@
           <div class="card">
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Cliente</th><th>Contato</th><th>Início do plano</th><th>Vencimento</th><th>Prazo</th><th>Contrato</th><th>Benefícios</th><th></th></tr></thead>
+                <thead><tr><th>Cliente</th><th>Contato</th><th>Início do plano</th><th>Vencimento</th><th>Prazo</th><th>Contrato</th><th>Benefícios</th><th>Relatório de geração</th><th></th></tr></thead>
                 <tbody id="clientsTable"></tbody>
               </table>
             </div>
@@ -1243,6 +1261,60 @@
           </div>
         </section>
 
+        <!-- Envio de relatórios de geração -->
+        <section id="page-report-sends" class="page">
+          <div class="toolbar">
+            <div>
+              <div class="card-title" style="font-size:21px">Envio de relatórios de geração</div>
+              <div class="muted small" style="margin-top:5px">Área exclusiva para registrar os relatórios enviados aos clientes que já possuem contrato gerado.</div>
+            </div>
+          </div>
+
+          <div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+            <div class="stat-card">
+              <div class="stat-top"><div class="stat-icon">▤</div><span class="stat-trend">Contratos</span></div>
+              <div id="reportSendContractedCount" class="stat-value mono">0</div><div class="stat-label">Clientes com contrato gerado</div>
+            </div>
+            <div class="stat-card accent">
+              <div class="stat-top"><div class="stat-icon">◷</div><span class="stat-trend" style="background:var(--warning-bg);color:var(--warning)">Pendente</span></div>
+              <div id="reportSendPendingCount" class="stat-value mono">0</div><div class="stat-label">Sem nenhum envio registrado</div>
+            </div>
+            <div class="stat-card success">
+              <div class="stat-top"><div class="stat-icon">✓</div><span class="stat-trend">Enviados</span></div>
+              <div id="reportSendDoneCount" class="stat-value mono">0</div><div class="stat-label">Clientes com envio registrado</div>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <div class="search-box"><span>⌕</span><input id="reportSendSearch" placeholder="Buscar cliente, contrato, CPF/CNPJ, telefone ou cidade..."></div>
+              <select id="reportSendStatusFilter" class="filter-select">
+                <option value="">Todos os envios</option>
+                <option value="pending">Pendentes</option>
+                <option value="sent">Já enviados</option>
+              </select>
+              <select id="reportSendContractFilter" class="filter-select">
+                <option value="">Todos os contratos</option>
+                <option value="accepted">Contratos aceitos</option>
+                <option value="pending">Aguardando aceite</option>
+              </select>
+            </div>
+            <div class="toolbar-right"><span id="reportSendListCount" class="badge info">0 clientes</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">Controle de envio</div><div class="card-subtitle">O registro salva automaticamente a data, a hora e o usuário/técnico responsável pelo envio.</div></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Cliente</th><th>Contrato</th><th>WhatsApp</th><th>Situação</th><th>Último envio</th><th>Técnico</th><th>Total</th><th></th></tr></thead>
+                <tbody id="reportSendsTable"></tbody>
+              </table>
+            </div>
+            <div id="reportSendsEmpty" class="empty hidden"><div class="empty-icon">▥</div><strong>Nenhum cliente encontrado</strong><span>Somente clientes com contrato gerado aparecem nesta aba.</span></div>
+          </div>
+        </section>
 
 
         <!-- Preventivas e limpeza -->
@@ -1470,6 +1542,20 @@
             </div>
             <div id="detailDaysRing" class="days-ring" style="--ring:0%">
               <div class="days-ring-content"><strong id="detailDays">0</strong><span>dias restantes</span></div>
+            </div>
+          </div>
+
+          <div id="generationReportSendCard" class="generation-send-card">
+            <div class="generation-send-copy">
+              <div class="generation-send-icon">▥</div>
+              <div>
+                <div class="generation-send-title">Relatório de geração</div>
+                <div id="generationReportSendStatus" class="generation-send-status">Nenhum envio registrado</div>
+                <div id="generationReportSendMeta" class="generation-send-meta">Quando o técnico enviar o relatório ao cliente, registre aqui.</div>
+              </div>
+            </div>
+            <div class="generation-send-actions">
+              <button id="generationReportSendBtn" type="button" class="btn btn-primary" data-permission="servicesRegister">✓ Registrar envio do relatório</button>
             </div>
           </div>
 
@@ -2928,7 +3014,7 @@
       }));
       state.unsubscribers.push(onSnapshot(collection(state.db,"publicContracts"),snap=>{
         state.contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
-        renderClients();renderContracts();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();
+        renderClients();renderContracts();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();
       }));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"maintenanceJobs"),orderBy("createdAt","desc")),snap=>{
         state.maintenanceJobs=snap.docs.map(d=>{const raw=d.data();return {id:d.id,...raw,createdAt:timestampISO(raw.createdAt)||raw.createdAt||null,updatedAt:timestampISO(raw.updatedAt)||raw.updatedAt||null,approvedAt:timestampISO(raw.approvedAt)||raw.approvedAt||null,paidAt:timestampISO(raw.paidAt)||raw.paidAt||null,osGeneratedAt:timestampISO(raw.osGeneratedAt)||raw.osGeneratedAt||null,startedAt:timestampISO(raw.startedAt)||raw.startedAt||null,completedAt:timestampISO(raw.completedAt)||raw.completedAt||null};});
@@ -2939,7 +3025,7 @@
     }
 
     function renderAll(){
-      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderMaintenanceJobs();renderExpirations();renderUsers();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderReportSends();renderMaintenanceJobs();renderExpirations();renderUsers();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -2993,6 +3079,61 @@
         return (!term||hay.includes(term))&&(!filter||info.status===filter);
       });
     }
+    function generationReportEntries(c){
+      const direct=Array.isArray(c?.generationReportSends)?c.generationReportSends.filter(Boolean):[];
+      if(direct.length)return direct;
+      // Compatibilidade: aproveita registros antigos do benefício trimestral somente para exibição inicial.
+      return serviceEntries(c,"quarterlyReport").map(entry=>({
+        date:entry.date||todayISO(),
+        sentAt:entry.sentAt||entry.date||null,
+        operator:entry.operator||"Técnico",
+        description:entry.description||"Relatório de geração enviado ao cliente."
+      }));
+    }
+    function generationReportInfo(c){
+      const entries=generationReportEntries(c);
+      const last=entries.length?entries[entries.length-1]:null;
+      return {entries,last,count:entries.length};
+    }
+    function generationReportCell(c){
+      const info=generationReportInfo(c);
+      const lastDate=info.last?(info.last.sentAt||info.last.date):null;
+      const lastOperator=info.last?.operator||"";
+      const meta=info.last
+        ? `Último envio: ${safe(lastDate&&String(lastDate).includes("T")?formatDateTime(lastDate):formatDate(lastDate))}${lastOperator?` · ${safe(lastOperator)}`:""}`
+        : "Nenhum envio registrado.";
+      return `<div class="generation-report-status">
+        <span class="badge ${info.count?"success":"warning"}">${info.count?"Enviado":"Pendente"}</span>
+        <span class="generation-report-meta">${meta}</span>
+        <button type="button" class="btn btn-primary btn-sm generation-report-action" onclick="markGenerationReportSent('${c.id}',this)" ${can("servicesRegister")?"":"disabled"}>✓ Registrar envio</button>
+      </div>`;
+    }
+    window.markGenerationReportSent=async(id,button)=>{
+      const c=state.clients.find(x=>x.id===id);
+      if(!c){showToast("Cliente não localizado.","error");return;}
+      if(!can("servicesRegister")){showToast("Você não possui permissão para registrar o envio do relatório.","error");return;}
+      if(!state.connected){showToast("Banco de dados indisponível.","error");return;}
+      const operator=state.currentProfile?.name||state.currentProfile?.email||"Técnico";
+      const sentAt=new Date().toISOString();
+      const current=Array.isArray(c.generationReportSends)?c.generationReportSends.filter(Boolean):[];
+      const entry={date:todayISO(),sentAt,operator,description:"Relatório de geração enviado ao cliente pelo técnico."};
+      const generationReportSends=[...current,entry];
+      const originalText=button?.textContent||"Registrar envio";
+      if(button){button.disabled=true;button.textContent="Salvando...";}
+      try{
+        await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",c.id),{generationReportSends,updatedAt:state.serviceApi.serverTimestamp()});
+        c.generationReportSends=generationReportSends;
+        await logActivity("service",c.id,"Relatório de geração enviado",`${c.name} · enviado por ${operator}`);
+        renderClients();renderDashboard();renderReportSends();
+        if(state.selectedClientId===c.id)renderClientDetail();
+        showToast(`Envio do relatório de geração de ${c.name} registrado com sucesso.`);
+      }catch(err){
+        console.error("Erro ao registrar envio do relatório de geração",err);
+        showToast("Não foi possível registrar o envio: "+(err?.message||"erro desconhecido"),"error");
+        if(button&&document.body.contains(button)){button.disabled=false;button.textContent=originalText;}
+      }
+    };
+
     function renderClients(){
       const list=filteredClients();
       $("clientsTable").innerHTML=list.map(c=>{
@@ -3014,6 +3155,7 @@
           <td>${statusBadge(p.status,p.days)}</td>
           <td>${hasActivePlan(c)?contractBadge(contract):'<span class="badge gray">Aguardando ativação</span>'}${contract?.number?`<div class="small muted" style="margin-top:5px">${safe(contract.number)}</div>`:""}</td>
           <td>${benefitHtml}</td>
+          <td class="generation-report-cell">${generationReportCell(c)}</td>
           <td><div class="actions"><button class="btn btn-soft btn-sm" onclick="${hasActivePlan(c)?`openClient('${c.id}')`:`startPlanActivation('${c.id}')`}">${hasActivePlan(c)?"Ver ficha":"Ativar plano"}</button>
           ${contract?`<button class="btn btn-ghost btn-sm" onclick="openContractByToken('${contract.token}')" title="Visualizar contrato">▤ Ver contrato</button>`:""}
           <button class="btn btn-ghost btn-sm" onclick="editClient('${c.id}')" ${can("clientsEdit")?"":"disabled"}>✎</button>
@@ -3022,6 +3164,62 @@
       }).join("");
       $("clientsEmpty").classList.toggle("hidden",list.length>0);
     }
+    function reportContractClients(){
+      return state.clients.map(client=>({client,contract:getContractForClient(client)})).filter(item=>!!item.contract);
+    }
+    function renderReportSends(){
+      if(!$('reportSendsTable'))return;
+      const all=reportContractClients();
+      const term=($('reportSendSearch')?.value||'').trim().toLowerCase();
+      const sendFilter=$('reportSendStatusFilter')?.value||'';
+      const contractFilter=$('reportSendContractFilter')?.value||'';
+      const pendingTotal=all.filter(({client})=>generationReportInfo(client).count===0).length;
+      const sentTotal=all.length-pendingTotal;
+      $('reportSendContractedCount').textContent=all.length;
+      $('reportSendPendingCount').textContent=pendingTotal;
+      $('reportSendDoneCount').textContent=sentTotal;
+
+      const list=all.filter(({client,contract})=>{
+        const report=generationReportInfo(client);
+        const sendStatus=report.count>0?'sent':'pending';
+        const cStatus=contract.status==='accepted'?'accepted':'pending';
+        if(sendFilter&&sendFilter!==sendStatus)return false;
+        if(contractFilter&&contractFilter!==cStatus)return false;
+        const hay=[client.name,client.document,client.phone,client.city,client.email,contract.number].filter(Boolean).join(' ').toLowerCase();
+        return !term||hay.includes(term);
+      }).sort((a,b)=>{
+        const ra=generationReportInfo(a.client), rb=generationReportInfo(b.client);
+        if((ra.count===0)!=(rb.count===0))return ra.count===0?-1:1;
+        return String(a.client.name||'').localeCompare(String(b.client.name||''),'pt-BR');
+      });
+
+      $('reportSendListCount').textContent=`${list.length} ${list.length===1?'cliente':'clientes'}`;
+      $('reportSendsTable').innerHTML=list.map(({client,contract})=>{
+        const info=generationReportInfo(client);
+        const last=info.last;
+        const lastDate=last?(last.sentAt||last.date):null;
+        const lastDateText=lastDate?(String(lastDate).includes('T')?formatDateTime(lastDate):formatDate(lastDate)):'—';
+        const operator=last?.operator||'—';
+        const reportBadge=info.count
+          ? '<span class="badge success"><span class="status-dot"></span>Enviado</span>'
+          : '<span class="badge warning"><span class="status-dot"></span>Pendente</span>';
+        return `<tr>
+          <td><div class="customer-cell"><div class="customer-avatar">${initials(client.name)}</div><div><strong>${safe(client.name)}</strong><span>${safe(client.document||client.city||'Dados não informados')}</span></div></div></td>
+          <td><strong>${safe(contract.number||'—')}</strong><div style="margin-top:5px">${contractBadge(contract)}</div></td>
+          <td><strong>${safe(client.phone||'—')}</strong>${client.city?`<div class="small muted" style="margin-top:4px">${safe(client.city)}</div>`:''}</td>
+          <td>${reportBadge}</td>
+          <td class="mono">${safe(lastDateText)}</td>
+          <td>${safe(operator)}</td>
+          <td><span class="badge info">${info.count} ${info.count===1?'envio':'envios'}</span></td>
+          <td class="text-right"><div class="actions">
+            <button type="button" class="btn btn-primary btn-sm" onclick="markGenerationReportSent('${client.id}',this)" ${can('servicesRegister')?'':'disabled'}>${info.count?'✓ Registrar novo envio':'✓ Registrar envio'}</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="openClient('${client.id}')">Ver ficha</button>
+          </div></td>
+        </tr>`;
+      }).join('');
+      $('reportSendsEmpty').classList.toggle('hidden',list.length>0);
+    }
+
     function renderContracts(){
       if(!$("contractsTable")) return;
       const queryText=($("contractSearch")?.value||"").trim().toLowerCase();
@@ -3257,6 +3455,20 @@
       $("detailStart").textContent=formatDate(p.start);$("detailEnd").textContent=formatDate(p.end);
       $("detailStatus").textContent=p.status==="no_plan"?"Sem plano":p.status==="expired"?"Vencido":p.status==="expiring"?"Próximo do vencimento":"Ativo";
       $("detailSeller").textContent=c.seller||"Não informado";
+      const reportInfo=generationReportInfo(c);
+      const reportLast=reportInfo.last;
+      const reportLastDate=reportLast?(reportLast.sentAt||reportLast.date):null;
+      const reportStatusEl=$("generationReportSendStatus");
+      const reportMetaEl=$("generationReportSendMeta");
+      const reportBtn=$("generationReportSendBtn");
+      if(reportStatusEl)reportStatusEl.textContent=reportLast?"✓ Relatório enviado":"● Envio pendente";
+      if(reportMetaEl)reportMetaEl.textContent=reportLast
+        ? `Último envio em ${reportLastDate&&String(reportLastDate).includes("T")?formatDateTime(reportLastDate):formatDate(reportLastDate)} por ${reportLast.operator||"Técnico"}. Total registrado: ${reportInfo.count}.`
+        : "Quando o técnico enviar o relatório de geração ao cliente, clique no botão para registrar data, hora e responsável.";
+      if(reportBtn){
+        reportBtn.disabled=!can("servicesRegister");
+        reportBtn.textContent=reportLast?"✓ Registrar novo envio":"✓ Registrar envio do relatório";
+      }
       $("detailDays").textContent=p.status==="no_plan"?"—":Math.max(0,p.days);$("detailDaysRing").style.setProperty("--ring",p.status==="no_plan"?"0%":`${Math.max(0,100-p.progress)}%`);
       $("detailDaysRing").querySelector("span").textContent=p.status==="no_plan"?"plano não ativado":p.days<0?`vencido há ${Math.abs(p.days)} dias`:"dias restantes";
       $("renewClientBtn").textContent=hasActivePlan(c)?"↻ Renovar plano":"＋ Ativar plano";
@@ -3281,7 +3493,7 @@
       const histories=[];
       Object.keys(SERVICES).forEach(type=>{
         const benefit=getBenefit(c,type);
-        serviceEntries(c,type).forEach(entry=>histories.push({date:entry.date||c.createdAt,title:benefit?.label||SERVICES[type]?.label||type,description:`Realizado por ${entry.operator||"operador"}${entry.description?" · "+entry.description:""}`}));
+        serviceEntries(c,type).forEach(entry=>histories.push({date:entry.sentAt||entry.date||c.createdAt,title:benefit?.label||SERVICES[type]?.label||type,description:`Realizado por ${entry.operator||"operador"}${entry.description?" · "+entry.description:""}`}));
       });
       (c.history||[]).forEach(h=>histories.push(h));
       const contract=getContractForClient(c);
@@ -3296,6 +3508,7 @@
         ${infoLine("Telefone",c.phone)}${infoLine("E-mail",c.email)}${infoLine("Documento",c.document)}
         ${infoLine("Tipo de plano",hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))} por ano`:"Sem plano contratado")}
         ${infoLine("Contrato",contract?`${contract.number} · ${contract.status==="accepted"?"Aceito":"Aguardando aceite"}`:"Não gerado")}
+        ${(()=>{const r=generationReportInfo(c),last=r.last,lastDate=last?(last.sentAt||last.date):null;return infoLine("Relatório de geração",last?`Enviado · último em ${lastDate&&String(lastDate).includes("T")?formatDateTime(lastDate):formatDate(lastDate)} · ${last.operator||"Técnico não informado"}`:"Pendente · nenhum envio registrado");})()}
         ${infoLine("Cidade",c.city)}${infoLine("Endereço",c.address)}${infoLine("Pagamento",`${c.payment||"—"} · ${c.paymentStatus==="paid"?"Pago":"Pendente"}`)}
         ${infoLine("Observações",c.notes||"Nenhuma observação")}`;
     }
@@ -3970,7 +4183,7 @@
       $$(".page").forEach(p=>p.classList.remove("active"));
       $(`page-${page}`).classList.add("active");
       $$(".nav-item[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===page));
-      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos",maintenance:"Preventivas e limpeza",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
+      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos","report-sends":"Envio de relatórios",maintenance:"Preventivas e limpeza",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
       $("topPageTitle").textContent=titles[page]||"CRM";
       $("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open");
       window.scrollTo({top:0,behavior:"smooth"});
@@ -4561,8 +4774,16 @@
     $$("[data-close]").forEach(btn=>btn.addEventListener("click",()=>closeModal(btn.dataset.close)));
     $$(".modal-backdrop").forEach(back=>back.addEventListener("click",e=>{if(e.target===back)closeModal(back.id)}));
     $("quickAddClient").addEventListener("click",openNewClient);$("addClientBtn").addEventListener("click",openNewClient);
+    $("generationReportSendBtn")?.addEventListener("click",e=>{
+      if(!state.selectedClientId){showToast("Abra a ficha de um cliente para registrar o relatório.","error");return;}
+      markGenerationReportSent(state.selectedClientId,e.currentTarget);
+    });
+
     $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
     $("contractSearch").addEventListener("input",renderContracts);$("contractStatusFilter").addEventListener("change",renderContracts);
+    $("reportSendSearch")?.addEventListener("input",renderReportSends);
+    $("reportSendStatusFilter")?.addEventListener("change",renderReportSends);
+    $("reportSendContractFilter")?.addEventListener("change",renderReportSends);
     $("maintenanceSearch").addEventListener("input",renderMaintenanceJobs);$("maintenanceStatusFilter").addEventListener("change",renderMaintenanceJobs);
     $("addMaintenanceBtn").addEventListener("click",openNewMaintenance);
     $("maintenanceClientId").addEventListener("change",updateMaintenanceClientPreview);
