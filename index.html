@@ -819,6 +819,27 @@
     }
 
 
+    /* Central de contratos de serviços */
+    .service-contract-launch { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:18px; padding:22px; background:linear-gradient(120deg,#043c09,#075914); color:#fff; border-radius:8px; border-bottom:6px solid var(--accent); box-shadow:var(--shadow); }
+    .service-contract-launch strong { display:block; font-family:"Barlow Condensed",sans-serif; text-transform:uppercase; font-size:25px; color:var(--accent); letter-spacing:.35px; }
+    .service-contract-launch span { display:block; max-width:720px; margin-top:5px; color:rgba(255,255,255,.72); font-size:11px; line-height:1.55; }
+    .service-contract-launch-actions { display:flex; gap:9px; flex-wrap:wrap; }
+    .service-contract-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:0 0 18px; }
+    .service-contract-mini { padding:14px 16px; border:1px solid var(--line); border-radius:7px; background:#fff; box-shadow:var(--shadow-sm); border-top:3px solid var(--accent); }
+    .service-contract-mini span { display:block; color:var(--muted); font-size:9px; text-transform:uppercase; letter-spacing:.65px; font-weight:800; }
+    .service-contract-mini strong { display:block; margin-top:5px; font-family:"Barlow Condensed",sans-serif; font-size:23px; color:var(--primary); }
+    .service-contract-section { margin-bottom:22px; }
+    .service-contract-form-note { background:#f7faeb; border:1px solid #d4e3aa; border-left:5px solid var(--accent); padding:12px 14px; border-radius:8px; color:#40520e; font-size:11px; line-height:1.55; }
+    .service-contract-type-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 9px; border-radius:999px; font-size:10px; font-weight:800; background:#eef4df; color:var(--primary); }
+    .service-contract-preview-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:15px; }
+    .service-contract-editor-section { margin-top:18px; padding-top:18px; border-top:1px solid var(--line); }
+    .service-contract-editor-section-title { font-family:"Barlow Condensed",sans-serif; color:var(--primary); text-transform:uppercase; font-size:17px; font-weight:800; margin-bottom:12px; }
+    @media (max-width:650px){
+      .service-contract-stats { grid-template-columns:1fr; }
+      .service-contract-launch-actions,.service-contract-launch-actions .btn { width:100%; }
+    }
+
+
     /* Editor de planos */
     .plan-settings-card { overflow:hidden; }
     .plan-settings-intro { display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px; }
@@ -1254,22 +1275,51 @@
 
         <!-- Contratos -->
         <section id="page-contracts" class="page">
+          <div class="service-contract-launch">
+            <div>
+              <strong>Central de contratos</strong>
+              <span>Gere e preencha contratos de manutenção preventiva e limpeza de módulos fotovoltaicos. Selecione um cliente cadastrado para preencher os dados automaticamente ou crie o contrato manualmente.</span>
+            </div>
+            <div class="service-contract-launch-actions">
+              <button id="newPreventiveContractBtn" class="btn btn-primary" type="button" data-permission="clientsEdit">＋ Contrato de preventiva</button>
+              <button id="newCleaningContractBtn" class="btn btn-ghost" type="button" data-permission="clientsEdit" style="background:#fff">＋ Contrato de limpeza</button>
+            </div>
+          </div>
+
+          <div class="service-contract-stats">
+            <div class="service-contract-mini"><span>Contratos de serviços</span><strong id="serviceContractsTotal">0</strong></div>
+            <div class="service-contract-mini"><span>Preventivas</span><strong id="serviceContractsPreventive">0</strong></div>
+            <div class="service-contract-mini"><span>Limpezas</span><strong id="serviceContractsCleaning">0</strong></div>
+          </div>
+
+          <div class="card service-contract-section">
+            <div class="card-header">
+              <div><div class="card-title">Contratos de preventiva e limpeza</div><div class="card-subtitle">Contratos gerados pelo preenchimento da central de contratos</div></div>
+              <div class="search-box" style="min-width:240px"><span>⌕</span><input id="serviceContractSearch" placeholder="Buscar cliente ou contrato..."></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Contrato</th><th>Serviço</th><th>Cliente</th><th>Local da instalação</th><th>Valor</th><th>Gerado em</th><th></th></tr></thead>
+                <tbody id="serviceContractsTable"></tbody>
+              </table>
+            </div>
+            <div id="serviceContractsEmpty" class="empty hidden"><div class="empty-icon">✦</div><strong>Nenhum contrato de serviço gerado</strong><span>Use os botões acima para criar o primeiro contrato de preventiva ou limpeza.</span></div>
+          </div>
+
           <div class="toolbar">
             <div class="toolbar-left">
-              <div class="search-box"><span>⌕</span><input id="contractSearch" placeholder="Buscar contrato, cliente, CPF/CNPJ ou telefone..."></div>
+              <div class="search-box"><span>⌕</span><input id="contractSearch" placeholder="Buscar contrato de monitoramento, cliente, CPF/CNPJ ou telefone..."></div>
               <select id="contractStatusFilter" class="filter-select">
                 <option value="">Todos os contratos</option>
                 <option value="accepted">Aceitos</option>
                 <option value="pending">Aguardando aceite</option>
               </select>
             </div>
-            <div class="toolbar-right">
-              <span id="contractsCount" class="badge info">0 contratos</span>
-            </div>
+            <div class="toolbar-right"><span id="contractsCount" class="badge info">0 contratos</span></div>
           </div>
           <div class="card">
             <div class="card-header">
-              <div><div class="card-title">Arquivo de contratos</div><div class="card-subtitle">Todos os contratos gerados permanecem disponíveis para consulta, inclusive após aceite e renovação</div></div>
+              <div><div class="card-title">Contratos do plano de monitoramento</div><div class="card-subtitle">Arquivo preservado dos contratos de monitoramento, aceite digital e renovações</div></div>
             </div>
             <div class="table-wrap">
               <table>
@@ -1277,7 +1327,7 @@
                 <tbody id="contractsTable"></tbody>
               </table>
             </div>
-            <div id="contractsEmpty" class="empty hidden"><div class="empty-icon">▤</div><strong>Nenhum contrato encontrado</strong><span>Os contratos gerados aparecerão aqui e continuarão disponíveis para consulta.</span></div>
+            <div id="contractsEmpty" class="empty hidden"><div class="empty-icon">▤</div><strong>Nenhum contrato encontrado</strong><span>Os contratos do plano gerados aparecerão aqui e continuarão disponíveis para consulta.</span></div>
           </div>
         </section>
 
@@ -1851,6 +1901,81 @@
   </div>
 
 
+  <!-- MODAL GERADOR DE CONTRATO DE SERVIÇO -->
+  <div id="serviceContractEditorBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3 id="serviceContractEditorTitle">Novo contrato de serviço</h3><button class="close-btn" data-close="serviceContractEditorBackdrop">×</button></div>
+      <form id="serviceContractForm">
+        <div class="modal-body">
+          <input id="serviceContractId" type="hidden">
+          <div class="service-contract-form-note"><strong>Preenchimento automático:</strong> escolha um cliente já cadastrado para importar nome, CPF/CNPJ, telefone, e-mail, cidade e endereço. Todos os campos permanecem editáveis antes da geração.</div>
+
+          <div class="service-contract-editor-section">
+            <div class="service-contract-editor-section-title">Tipo e cliente</div>
+            <div class="form-grid">
+              <div class="field"><label>Tipo de contrato *</label><select id="serviceContractType" required><option value="preventive">Manutenção preventiva</option><option value="cleaning">Limpeza de módulos</option></select></div>
+              <div class="field"><label>Cliente cadastrado</label><select id="serviceContractClientId"><option value="">Preenchimento manual</option></select></div>
+              <div class="field full"><label>Nome / Razão social *</label><input id="serviceContractClientName" required></div>
+              <div class="field"><label>CPF / CNPJ *</label><input id="serviceContractDocument" required></div>
+              <div class="field"><label>Telefone / WhatsApp</label><input id="serviceContractPhone"></div>
+              <div class="field"><label>E-mail</label><input id="serviceContractEmail" type="email"></div>
+              <div class="field"><label>Cidade</label><input id="serviceContractCity"></div>
+              <div class="field full"><label>Endereço do contratante</label><input id="serviceContractClientAddress"></div>
+            </div>
+          </div>
+
+          <div class="service-contract-editor-section">
+            <div class="service-contract-editor-section-title">Sistema fotovoltaico</div>
+            <div class="form-grid">
+              <div class="field full"><label>Local da instalação *</label><input id="serviceContractSiteAddress" required placeholder="Endereço onde o serviço será executado"></div>
+              <div class="field"><label>Quantidade de módulos *</label><input id="serviceContractModules" type="number" min="1" step="1" required></div>
+              <div class="field"><label>Potência instalada (kWp)</label><input id="serviceContractPower" type="number" min="0" step="0.01"></div>
+              <div class="field"><label>Tipo de instalação</label><select id="serviceContractInstallationType"><option>Telhado</option><option>Solo</option><option>Carport</option><option>Fachada</option><option>Outro</option></select></div>
+              <div class="field"><label>Periodicidade</label><select id="serviceContractFrequency"><option>Serviço único</option><option>Semestral</option><option>Anual</option><option>Trimestral</option><option>Outra</option></select></div>
+              <div id="serviceContractWaterField" class="field full hidden"><label>Fornecimento de água</label><select id="serviceContractWaterSupply"><option value="client">Disponibilizada pelo contratante</option><option value="contractor">Fornecida pela contratada</option><option value="other">Conforme combinado entre as partes</option></select></div>
+            </div>
+          </div>
+
+          <div class="service-contract-editor-section">
+            <div class="service-contract-editor-section-title">Condições comerciais</div>
+            <div class="form-grid">
+              <div class="field"><label>Data do contrato *</label><input id="serviceContractDate" type="date" required></div>
+              <div class="field"><label>Vigência (meses)</label><input id="serviceContractValidity" type="number" min="0" step="1" value="12"></div>
+              <div class="field"><label>Valor total (R$) *</label><input id="serviceContractValue" type="number" min="0" step="0.01" required></div>
+              <div class="field"><label>Forma / condição de pagamento</label><input id="serviceContractPayment" placeholder="Ex.: PIX à vista, boleto 10 dias..."></div>
+              <div class="field"><label>Empresa contratada</label><input id="serviceContractContractorName" value="Group Holding Service"></div>
+              <div class="field"><label>CNPJ da contratada</label><input id="serviceContractContractorDocument" value="50.533.476/0001-66"></div>
+              <div class="field"><label>Foro</label><input id="serviceContractForum" value="Jaraguá do Sul/SC"></div>
+              <div class="field"><label>Responsável pela emissão</label><input id="serviceContractSeller"></div>
+              <div class="field full"><label>Observações / condições adicionais</label><textarea id="serviceContractNotes" placeholder="Inclua particularidades do acesso, materiais, datas ou condições adicionais..."></textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="serviceContractEditorBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Gerar e salvar contrato</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL VISUALIZAÇÃO CONTRATO DE SERVIÇO -->
+  <div id="serviceContractPreviewBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3>Contrato de serviço</h3><button class="close-btn" data-close="serviceContractPreviewBackdrop">×</button></div>
+      <div class="modal-body">
+        <div class="service-contract-preview-head">
+          <div><div class="small muted">Número do contrato</div><strong id="serviceContractPreviewNumber">—</strong></div>
+          <div id="serviceContractPreviewType" class="service-contract-type-badge">Preventiva</div>
+        </div>
+        <div id="serviceContractPreview" class="contract-document"></div>
+      </div>
+      <div class="modal-footer" style="flex-wrap:wrap">
+        <button id="editServiceContractBtn" type="button" class="btn btn-ghost">Editar preenchimento</button>
+        <button id="printServiceContractBtn" type="button" class="btn btn-soft">Imprimir / salvar PDF</button>
+        <button id="deleteServiceContractBtn" type="button" class="btn btn-danger">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- MODAL CONTRATO -->
   <div id="contractModalBackdrop" class="modal-backdrop">
     <div class="modal">
@@ -1988,6 +2113,8 @@
       users: [],
       activities: [],
       contracts: [],
+      serviceContracts: [],
+      selectedServiceContractId: null,
       maintenanceJobs: [],
       selectedMaintenanceId: null,
       selectedServiceOrderId: null,
@@ -3033,9 +3160,16 @@
         state.activities=snap.docs.map(d=>({id:d.id,...d.data(),createdAt:d.data().createdAt?.toDate?.().toISOString?.()||d.data().createdAt}));renderDashboard();
       }));
       state.unsubscribers.push(onSnapshot(collection(state.db,"publicContracts"),snap=>{
-        state.contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
-        renderClients();renderContracts();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();
-      }));
+        const allContracts=snap.docs.map(d=>{
+          const raw=d.data();
+          return {token:d.id,id:d.id,...raw,generatedAt:timestampISO(raw.generatedAt),acceptedAt:timestampISO(raw.acceptedAt),createdAt:timestampISO(raw.createdAt)||raw.createdAt||null,updatedAt:timestampISO(raw.updatedAt)||raw.updatedAt||null};
+        });
+        // Contratos de serviços usam a mesma rota já autorizada pelo CRM, mas ficam
+        // separados logicamente para não aparecerem na lista de monitoramento.
+        state.serviceContracts=allContracts.filter(c=>c.contractKind==="service").sort((a,b)=>new Date(b.createdAt||b.updatedAt||0)-new Date(a.createdAt||a.updatedAt||0));
+        state.contracts=allContracts.filter(c=>c.contractKind!=="service");
+        renderClients();renderContracts();renderServiceContracts();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();
+      },err=>showToast("Erro ao carregar contratos: "+err.message,"error")));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"maintenanceJobs"),orderBy("createdAt","desc")),snap=>{
         state.maintenanceJobs=snap.docs.map(d=>{const raw=d.data();return {id:d.id,...raw,createdAt:timestampISO(raw.createdAt)||raw.createdAt||null,updatedAt:timestampISO(raw.updatedAt)||raw.updatedAt||null,approvedAt:timestampISO(raw.approvedAt)||raw.approvedAt||null,paidAt:timestampISO(raw.paidAt)||raw.paidAt||null,osGeneratedAt:timestampISO(raw.osGeneratedAt)||raw.osGeneratedAt||null,startedAt:timestampISO(raw.startedAt)||raw.startedAt||null,completedAt:timestampISO(raw.completedAt)||raw.completedAt||null};});
         renderMaintenanceJobs();
@@ -3045,7 +3179,7 @@
     }
 
     function renderAll(){
-      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderReportSends();renderMaintenanceJobs();renderExpirations();renderUsers();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderServiceContracts();renderReportSends();renderMaintenanceJobs();renderExpirations();renderUsers();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -3343,6 +3477,208 @@
         </tr>`;
       }).join("");
       $("contractsEmpty").classList.toggle("hidden",list.length>0);
+    }
+
+
+    const serviceContractTypeLabel = type => type==="cleaning"?"Limpeza de módulos":"Manutenção preventiva";
+    const serviceContractNumberPrefix = type => type==="cleaning"?"IGL":"IGP";
+    function serviceContractClientOptions(){
+      const select=$("serviceContractClientId");
+      if(!select)return;
+      const current=select.value;
+      select.innerHTML='<option value="">Preenchimento manual</option>'+state.clients.slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"pt-BR")).map(c=>`<option value="${safe(c.id)}">${safe(c.name||"Cliente")} · ${safe(c.document||c.phone||"sem documento")}</option>`).join("");
+      if([...select.options].some(o=>o.value===current))select.value=current;
+    }
+    function updateServiceContractTypeUI(){
+      const cleaning=$("serviceContractType")?.value==="cleaning";
+      $("serviceContractWaterField")?.classList.toggle("hidden",!cleaning);
+      if($("serviceContractEditorTitle"))$("serviceContractEditorTitle").textContent=cleaning?"Contrato de limpeza de módulos":"Contrato de manutenção preventiva";
+    }
+    function fillServiceContractFromClient(clientId){
+      const c=state.clients.find(x=>x.id===clientId);
+      if(!c)return;
+      $("serviceContractClientName").value=c.name||"";
+      $("serviceContractDocument").value=c.document||"";
+      $("serviceContractPhone").value=c.phone||"";
+      $("serviceContractEmail").value=c.email||"";
+      $("serviceContractCity").value=c.city||"";
+      $("serviceContractClientAddress").value=c.address||"";
+      $("serviceContractSiteAddress").value=c.address||"";
+      $("serviceContractSeller").value=c.seller||state.currentProfile?.name||"";
+    }
+    function openNewServiceContract(type="preventive"){
+      if(!can("clientsEdit")){showToast("Você não possui permissão para gerar contratos.","error");return;}
+      $("serviceContractForm").reset();
+      $("serviceContractId").value="";
+      serviceContractClientOptions();
+      $("serviceContractType").value=type;
+      $("serviceContractDate").value=todayISO();
+      $("serviceContractValidity").value="12";
+      $("serviceContractContractorName").value="Group Holding Service";
+      $("serviceContractContractorDocument").value="50.533.476/0001-66";
+      $("serviceContractForum").value="Jaraguá do Sul/SC";
+      $("serviceContractSeller").value=state.currentProfile?.name||"";
+      updateServiceContractTypeUI();
+      openModal("serviceContractEditorBackdrop");
+    }
+    window.openNewServiceContract=openNewServiceContract;
+    function serviceContractFormData(){
+      return {
+        serviceType:$("serviceContractType").value,
+        clientId:$("serviceContractClientId").value||"",
+        clientName:$("serviceContractClientName").value.trim(),
+        clientDocument:$("serviceContractDocument").value.trim(),
+        clientPhone:$("serviceContractPhone").value.trim(),
+        clientEmail:$("serviceContractEmail").value.trim(),
+        city:$("serviceContractCity").value.trim(),
+        clientAddress:$("serviceContractClientAddress").value.trim(),
+        siteAddress:$("serviceContractSiteAddress").value.trim(),
+        moduleCount:Math.max(1,Math.floor(Number($("serviceContractModules").value)||0)),
+        powerKwp:Number($("serviceContractPower").value)||0,
+        installationType:$("serviceContractInstallationType").value,
+        frequency:$("serviceContractFrequency").value,
+        waterSupply:$("serviceContractWaterSupply").value,
+        contractDate:$("serviceContractDate").value,
+        validityMonths:Math.max(0,Math.floor(Number($("serviceContractValidity").value)||0)),
+        amount:Number($("serviceContractValue").value)||0,
+        payment:$("serviceContractPayment").value.trim(),
+        contractorName:$("serviceContractContractorName").value.trim()||"Group Holding Service",
+        contractorDocument:$("serviceContractContractorDocument").value.trim()||"50.533.476/0001-66",
+        forum:$("serviceContractForum").value.trim()||"Jaraguá do Sul/SC",
+        seller:$("serviceContractSeller").value.trim(),
+        notes:$("serviceContractNotes").value.trim()
+      };
+    }
+    function serviceContractPartiesHtml(data){
+      return `<div class="contract-parties">
+        <strong>CONTRATADA:</strong> ${safe(contractValue(data.contractorName))}, inscrita no CNPJ nº ${safe(contractValue(data.contractorDocument))}.<br>
+        <strong>CONTRATANTE:</strong> ${safe(contractValue(data.clientName))}, inscrito(a) no CPF/CNPJ nº ${safe(contractValue(data.clientDocument))}.
+        <div class="contract-client-grid">
+          <div class="contract-client-field"><span>Nome / Razão social</span><strong>${safe(contractValue(data.clientName))}</strong></div>
+          <div class="contract-client-field"><span>CPF / CNPJ</span><strong>${safe(contractValue(data.clientDocument))}</strong></div>
+          <div class="contract-client-field"><span>Telefone / WhatsApp</span><strong>${safe(contractValue(data.clientPhone))}</strong></div>
+          <div class="contract-client-field"><span>E-mail</span><strong>${safe(contractValue(data.clientEmail))}</strong></div>
+          <div class="contract-client-field"><span>Cidade</span><strong>${safe(contractValue(data.city))}</strong></div>
+          <div class="contract-client-field full"><span>Endereço do contratante</span><strong>${safe(contractValue(data.clientAddress))}</strong></div>
+        </div>
+      </div>`;
+    }
+    function buildServiceContractHtml(data,number){
+      const isCleaning=data.serviceType==="cleaning";
+      const serviceTitle=isCleaning?"Limpeza de Módulos Fotovoltaicos":"Manutenção Preventiva em Sistema Fotovoltaico";
+      const systemInfo=`<div class="contract-parties" style="margin-top:14px"><strong>DADOS DO SISTEMA / LOCAL DO SERVIÇO</strong><div class="contract-client-grid">
+        <div class="contract-client-field full"><span>Local da instalação</span><strong>${safe(contractValue(data.siteAddress))}</strong></div>
+        <div class="contract-client-field"><span>Quantidade de módulos</span><strong>${safe(data.moduleCount)} módulos</strong></div>
+        <div class="contract-client-field"><span>Potência instalada</span><strong>${data.powerKwp?safe(String(data.powerKwp).replace('.',','))+" kWp":"Não informada"}</strong></div>
+        <div class="contract-client-field"><span>Tipo de instalação</span><strong>${safe(contractValue(data.installationType))}</strong></div>
+        <div class="contract-client-field"><span>Periodicidade</span><strong>${safe(contractValue(data.frequency))}</strong></div>
+      </div></div>`;
+      const scope=isCleaning?`
+        <h2>2. Escopo da limpeza</h2><p>A CONTRATADA realizará a limpeza técnica de <strong>${safe(data.moduleCount)} módulos fotovoltaicos</strong>, utilizando procedimentos e utensílios compatíveis com os equipamentos, visando remover sujidades superficiais que possam comprometer o desempenho e a conservação do sistema.</p>
+        <p>O serviço poderá utilizar água, escovas e utensílios adequados, respeitando as recomendações aplicáveis aos módulos. Não serão utilizados procedimentos deliberadamente abrasivos ou incompatíveis com a superfície dos equipamentos.</p>
+        <h2>3. Inspeção visual durante a execução</h2><p>Durante a limpeza, a equipe poderá registrar visualmente módulos trincados, cabos aparentes, conectores soltos, estruturas com sinais de corrosão, sombreamentos relevantes ou outras irregularidades visíveis. Essa observação não substitui uma manutenção preventiva ou inspeção elétrica completa.</p>
+        <h2>4. Água e condições de acesso</h2><p>Fornecimento de água: <strong>${safe(data.waterSupply==="contractor"?"pela CONTRATADA":data.waterSupply==="client"?"pela CONTRATANTE":"conforme combinado entre as partes")}</strong>. A CONTRATANTE deverá garantir acesso ao local. Caso sejam necessários andaimes, plataformas, linhas de vida, pontos de ancoragem ou equipamentos especiais não previstos, os custos poderão ser apresentados separadamente.</p>`:`
+        <h2>2. Escopo da manutenção preventiva</h2><p>A CONTRATADA realizará inspeção preventiva do sistema fotovoltaico, incluindo, conforme aplicável e acessível: inspeção visual dos módulos; estrutura de fixação; cabos, conectores e eletrodutos; quadros elétricos; dispositivos de proteção; inversores; alarmes e códigos de falha; comunicação com a plataforma de monitoramento; e condições gerais do sistema.</p>
+        <p>Quando previsto no escopo comercial, poderão ser executadas medições e verificações complementares. Ensaios especiais, termografia, testes de isolação, reapertos com torque controlado, substituição de peças e manutenção corretiva somente serão realizados quando expressamente contratados.</p>
+        <h2>3. Relatório técnico</h2><p>Após a execução, a CONTRATADA poderá emitir relatório com identificação da unidade, data, itens verificados, registros fotográficos, irregularidades identificadas e recomendações. O relatório representa as condições verificadas na data da inspeção e não constitui garantia contra falhas futuras.</p>
+        <h2>4. Serviços não inclusos</h2><p>Não estão inclusos, salvo contratação expressa: manutenção corretiva, substituição de módulos, inversores, cabos, conectores ou dispositivos de proteção; reparos estruturais ou civis; adequações elétricas; serviços da concessionária; limpeza dos módulos; ou materiais e peças.</p>`;
+      const notes=data.notes?`<h2>11. Condições adicionais</h2><p>${safe(data.notes).replace(/\n/g,"<br>")}</p>`:"";
+      return `<h1>Contrato de Prestação de Serviços de ${serviceTitle}</h1>
+        <div class="contract-number">Contrato nº ${safe(number)} · Emitido em ${safe(formatDate(data.contractDate))}</div>
+        ${serviceContractPartiesHtml(data)}${systemInfo}
+        <h2>1. Objeto</h2><p>O presente contrato tem por objeto a prestação de serviços de <strong>${safe(serviceTitle.toLowerCase())}</strong> no sistema fotovoltaico identificado neste instrumento.</p>
+        ${scope}
+        <h2>5. Condições de segurança e reagendamento</h2><p>A CONTRATADA poderá interromper, suspender ou reagendar o serviço quando houver chuva intensa, descargas atmosféricas, ventos fortes, temperatura excessiva, condições inadequadas do telhado, impossibilidade de acesso seguro ou qualquer situação que represente risco à equipe, terceiros, equipamentos ou patrimônio. Quando aplicáveis, deverão ser observados os requisitos de segurança para serviços em eletricidade e trabalho em altura.</p>
+        <h2>6. Obrigações das partes</h2><p>A CONTRATADA deverá executar os serviços com equipe capacitada, ferramentas adequadas e cuidado com as instalações. A CONTRATANTE deverá garantir acesso, informar riscos conhecidos, permitir desligamentos temporários quando tecnicamente necessários e manter terceiros afastados da área de trabalho quando solicitado.</p>
+        <h2>7. Valor e pagamento</h2><p>Pelos serviços contratados, a CONTRATANTE pagará à CONTRATADA o valor total de <strong>${money(data.amount)}</strong>. Condição de pagamento: <strong>${safe(contractValue(data.payment,"Conforme acordado entre as partes"))}</strong>. Serviços adicionais, materiais ou peças dependerão de prévia aprovação.</p>
+        <h2>8. Geração de energia e limitações</h2><p>A CONTRATADA não garante percentual específico de aumento de geração ou quantidade determinada de energia após o serviço. O desempenho depende de fatores como irradiação solar, temperatura, sombreamento, condições climáticas, disponibilidade da rede, equipamentos e condições gerais da instalação.</p>
+        <h2>9. Vigência e rescisão</h2><p>Este contrato entra em vigor na data de sua assinatura e terá vigência de <strong>${safe(String(data.validityMonths||0))} mês(es)</strong>${data.frequency&&data.frequency!=="Serviço único"?`, observada a periodicidade de ${safe(data.frequency.toLowerCase())}`:""}. Para serviço único, será considerado cumprido após a execução do objeto e a quitação dos valores. Serviços recorrentes poderão ser encerrados mediante comunicação prévia, permanecendo devidos os valores relativos aos serviços já executados.</p>
+        <h2>10. Responsabilidade e condições preexistentes</h2><p>A CONTRATADA responde pelos danos diretamente causados por comprovada falha na execução do serviço, não se responsabilizando por defeitos de fabricação, vícios ocultos, falhas preexistentes, problemas de projeto ou instalação executados por terceiros, telhas ou estruturas previamente danificadas, surtos elétricos, descargas atmosféricas ou eventos de força maior.</p>
+        ${notes}
+        <h2>${data.notes?12:11}. Foro e disposições gerais</h2><p>Fica eleito o foro de <strong>${safe(contractValue(data.forum))}</strong>, ressalvadas as hipóteses em que a legislação aplicável determine foro diverso. Alterações de escopo deverão ser formalizadas entre as partes.</p>
+        <div style="margin-top:44px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;text-align:center">
+          <div><div style="border-top:1px solid #475569;padding-top:8px"><strong>CONTRATANTE</strong><br>${safe(data.clientName)}<br>${safe(data.clientDocument)}</div></div>
+          <div><div style="border-top:1px solid #475569;padding-top:8px"><strong>CONTRATADA</strong><br>${safe(data.contractorName)}<br>${safe(data.contractorDocument)}</div></div>
+        </div>`;
+    }
+    async function saveServiceContract(event){
+      event.preventDefault();
+      if(!state.connected){showToast("Banco de dados indisponível.","error");return;}
+      const data=serviceContractFormData();
+      if(!data.clientName||!data.clientDocument||!data.siteAddress||!data.moduleCount){showToast("Preencha os campos obrigatórios do contrato.","error");return;}
+      if(data.amount<0){showToast("Informe um valor válido.","error");return;}
+      const id=$("serviceContractId").value;
+      const existing=id?state.serviceContracts.find(c=>c.id===id):null;
+      const number=existing?.number||`${serviceContractNumberPrefix(data.serviceType)}-${new Date().getFullYear()}-${uid().replace(/-/g,"").slice(0,6).toUpperCase()}`;
+      const payload={...data,contractKind:"service",number,contractHtml:buildServiceContractHtml(data,number),updatedAt:state.serviceApi.serverTimestamp()};
+      try{
+        // Reutiliza publicContracts, que já faz parte das regras atuais do CRM.
+        // O campo contractKind separa estes contratos dos contratos de monitoramento.
+        let ref;
+        if(id){ref=state.serviceApi.doc(state.db,"publicContracts",id);await state.serviceApi.setDoc(ref,payload,{merge:true});}
+        else{ref=state.serviceApi.doc(state.serviceApi.collection(state.db,"publicContracts"));await state.serviceApi.setDoc(ref,{...payload,createdAt:state.serviceApi.serverTimestamp()});}
+        closeModal("serviceContractEditorBackdrop");
+        showToast(id?"Contrato atualizado.":"Contrato gerado e salvo com sucesso.");
+        const localRecord={id:ref.id,...existing,...data,number,contractHtml:payload.contractHtml,createdAt:existing?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+        const localIndex=state.serviceContracts.findIndex(c=>c.id===ref.id);
+        if(localIndex>=0)state.serviceContracts[localIndex]=localRecord;else state.serviceContracts.unshift(localRecord);
+        renderServiceContracts();
+        renderServiceContractPreview(localRecord);
+        openModal("serviceContractPreviewBackdrop");
+        try{await logActivity("service-contract",data.clientId||ref.id,id?"Contrato de serviço atualizado":"Contrato de serviço gerado",`${data.clientName} · ${number} · ${serviceContractTypeLabel(data.serviceType)}`);}catch(_){ }
+      }catch(err){console.error(err);showToast("Não foi possível salvar o contrato: "+err.message,"error");}
+    }
+    function renderServiceContracts(){
+      if(!$("serviceContractsTable"))return;
+      serviceContractClientOptions();
+      const q=($("serviceContractSearch")?.value||"").trim().toLowerCase();
+      const list=state.serviceContracts.filter(c=>!q||[c.number,c.clientName,c.clientDocument,c.siteAddress,serviceContractTypeLabel(c.serviceType)].filter(Boolean).join(" ").toLowerCase().includes(q));
+      $("serviceContractsTotal").textContent=state.serviceContracts.length;
+      $("serviceContractsPreventive").textContent=state.serviceContracts.filter(c=>c.serviceType!=="cleaning").length;
+      $("serviceContractsCleaning").textContent=state.serviceContracts.filter(c=>c.serviceType==="cleaning").length;
+      $("serviceContractsTable").innerHTML=list.map(c=>`<tr>
+        <td><strong>${safe(c.number||"—")}</strong><div class="small muted" style="margin-top:4px">${safe(c.seller||"Emitido pelo CRM")}</div></td>
+        <td><span class="service-contract-type-badge">${c.serviceType==="cleaning"?"✦ Limpeza":"✓ Preventiva"}</span></td>
+        <td><div class="customer-cell"><div class="customer-avatar">${initials(c.clientName)}</div><div><strong>${safe(c.clientName||"Cliente")}</strong><span>${safe(c.clientDocument||c.clientPhone||"")}</span></div></div></td>
+        <td>${safe(c.siteAddress||"—")}<div class="small muted" style="margin-top:4px">${safe(String(c.moduleCount||0))} módulos${c.powerKwp?` · ${safe(String(c.powerKwp))} kWp`:""}</div></td>
+        <td><strong>${money(Number(c.amount)||0)}</strong><div class="small muted" style="margin-top:4px">${safe(c.frequency||"")}</div></td>
+        <td class="mono">${c.createdAt?formatDateTime(c.createdAt):"—"}</td>
+        <td class="text-right"><div class="actions"><button class="btn btn-soft btn-sm" onclick="openServiceContract('${c.id}')">Ver contrato</button></div></td>
+      </tr>`).join("");
+      $("serviceContractsEmpty").classList.toggle("hidden",list.length>0);
+    }
+    function renderServiceContractPreview(contract){
+      state.selectedServiceContractId=contract.id;
+      $("serviceContractPreviewNumber").textContent=contract.number||"—";
+      $("serviceContractPreviewType").textContent=contract.serviceType==="cleaning"?"✦ Limpeza de módulos":"✓ Manutenção preventiva";
+      $("serviceContractPreview").innerHTML=contract.contractHtml||buildServiceContractHtml(contract,contract.number||"—");
+    }
+    function openServiceContract(id){
+      const contract=state.serviceContracts.find(c=>c.id===id);
+      if(!contract){showToast("Contrato de serviço não localizado.","error");return;}
+      renderServiceContractPreview(contract);openModal("serviceContractPreviewBackdrop");
+    }
+    window.openServiceContract=openServiceContract;
+    function editSelectedServiceContract(){
+      if(!can("clientsEdit")){showToast("Você não possui permissão para editar contratos.","error");return;}
+      const c=state.serviceContracts.find(x=>x.id===state.selectedServiceContractId);if(!c)return;
+      closeModal("serviceContractPreviewBackdrop");serviceContractClientOptions();
+      $("serviceContractId").value=c.id||"";$("serviceContractType").value=c.serviceType||"preventive";$("serviceContractClientId").value=c.clientId||"";
+      $("serviceContractClientName").value=c.clientName||"";$("serviceContractDocument").value=c.clientDocument||"";$("serviceContractPhone").value=c.clientPhone||"";$("serviceContractEmail").value=c.clientEmail||"";$("serviceContractCity").value=c.city||"";$("serviceContractClientAddress").value=c.clientAddress||"";
+      $("serviceContractSiteAddress").value=c.siteAddress||"";$("serviceContractModules").value=c.moduleCount||"";$("serviceContractPower").value=c.powerKwp||"";$("serviceContractInstallationType").value=c.installationType||"Telhado";$("serviceContractFrequency").value=c.frequency||"Serviço único";$("serviceContractWaterSupply").value=c.waterSupply||"client";
+      $("serviceContractDate").value=c.contractDate||todayISO();$("serviceContractValidity").value=c.validityMonths??12;$("serviceContractValue").value=c.amount??0;$("serviceContractPayment").value=c.payment||"";$("serviceContractContractorName").value=c.contractorName||"Group Holding Service";$("serviceContractContractorDocument").value=c.contractorDocument||"50.533.476/0001-66";$("serviceContractForum").value=c.forum||"Jaraguá do Sul/SC";$("serviceContractSeller").value=c.seller||"";$("serviceContractNotes").value=c.notes||"";
+      updateServiceContractTypeUI();openModal("serviceContractEditorBackdrop");
+    }
+    function printSelectedServiceContract(){
+      const c=state.serviceContracts.find(x=>x.id===state.selectedServiceContractId);if(!c)return;
+      const win=window.open("","_blank","width=900,height=800");if(!win){showToast("O navegador bloqueou a janela de impressão.","error");return;}
+      win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${safe(c.number||"Contrato")}</title><style>body{font-family:Arial,sans-serif;color:#202b22;padding:34px;line-height:1.65;font-size:13px}h1{text-align:center;color:#043c09;text-transform:uppercase;font-size:20px}.contract-number{text-align:center;color:#667266;font-size:11px;margin-bottom:26px}h2{color:#043c09;font-size:13px;text-transform:uppercase;margin:22px 0 8px}.contract-parties{background:#f6f9ef;border-left:4px solid #b1c903;padding:14px 16px;border-radius:8px}.contract-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin-top:12px}.contract-client-field.full{grid-column:1/-1}.contract-client-field span{display:block;color:#687568;font-size:10px;text-transform:uppercase;font-weight:700}.contract-client-field strong{display:block;font-size:12px;overflow-wrap:anywhere}p{text-align:justify}@media print{body{padding:0}}</style></head><body>${c.contractHtml||buildServiceContractHtml(c,c.number||"—")}</body></html>`);
+      win.document.close();win.focus();setTimeout(()=>win.print(),250);
+    }
+    function deleteSelectedServiceContract(){
+      if(!can("clientsDelete")){showToast("Você não possui permissão para excluir contratos.","error");return;}
+      const c=state.serviceContracts.find(x=>x.id===state.selectedServiceContractId);if(!c)return;
+      askConfirm("Excluir contrato",`Deseja excluir o contrato ${c.number}? Esta ação remove o contrato de serviço da central.`,async()=>{await state.serviceApi.deleteDoc(state.serviceApi.doc(state.db,"publicContracts",c.id));closeModal("serviceContractPreviewBackdrop");showToast("Contrato de serviço excluído.");});
     }
 
     function renderExpirations(){
@@ -3703,7 +4039,7 @@
       // Busca diretamente no Realtime Database para não depender de um snapshot ainda desatualizado na tela.
       try{
         const snap=await state.serviceApi.getDocs(state.serviceApi.collection(state.db,"publicContracts"));
-        contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)}));
+        contracts=snap.docs.map(d=>({token:d.id,...d.data(),generatedAt:timestampISO(d.data().generatedAt),acceptedAt:timestampISO(d.data().acceptedAt)})).filter(contract=>contract.contractKind!=="service");
       }catch(err){
         console.warn("Não foi possível reler todos os contratos; usando os contratos carregados no CRM.",err);
       }
@@ -4939,6 +5275,15 @@
 
     $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
     $("contractSearch").addEventListener("input",renderContracts);$("contractStatusFilter").addEventListener("change",renderContracts);
+    $("serviceContractSearch")?.addEventListener("input",renderServiceContracts);
+    $("newPreventiveContractBtn")?.addEventListener("click",()=>openNewServiceContract("preventive"));
+    $("newCleaningContractBtn")?.addEventListener("click",()=>openNewServiceContract("cleaning"));
+    $("serviceContractType")?.addEventListener("change",updateServiceContractTypeUI);
+    $("serviceContractClientId")?.addEventListener("change",e=>{if(e.target.value)fillServiceContractFromClient(e.target.value);});
+    $("serviceContractForm")?.addEventListener("submit",saveServiceContract);
+    $("editServiceContractBtn")?.addEventListener("click",editSelectedServiceContract);
+    $("printServiceContractBtn")?.addEventListener("click",printSelectedServiceContract);
+    $("deleteServiceContractBtn")?.addEventListener("click",deleteSelectedServiceContract);
     $("reportSendSearch")?.addEventListener("input",renderReportSends);
     $("reportSendStatusFilter")?.addEventListener("change",renderReportSends);
     $("reportSendContractFilter")?.addEventListener("change",renderReportSends);
@@ -5112,6 +5457,8 @@
     renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",$("activateDocument")?.value||"",null,true);
     $("serviceDate").value=todayISO();
     $("renewStart").value=todayISO();
+    if($("serviceContractDate"))$("serviceContractDate").value=todayISO();
+    updateServiceContractTypeUI();
     renderPermissionGrid([]);
     loadLocalPlanSettings();
     renderPlanSettings(true);
