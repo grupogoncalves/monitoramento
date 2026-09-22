@@ -2031,7 +2031,7 @@
 
     const SDK_VERSION = "12.16.0";
     const PLAN_DAYS = 365;
-    const CONTRACT_VERSION = "2.3";
+    const CONTRACT_VERSION = "2.4";
     const ACCEPT_TOKEN = new URLSearchParams(window.location.search).get("accept");
     const SERVICES = {
       technicalCall: { label: "Chamado técnico", icon: "☎" },
@@ -2458,9 +2458,9 @@
       const contractConfig=state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract;
       const renewalText=safe(contractConfig.renewalClause||DEFAULT_PLAN_SETTINGS.contract.renewalClause).replace(/\n/g,"<br>");
       const renewalClause=contractConfig.automaticRenewalEnabled
-        ? `<h2>5. Renovação automática e encerramento</h2><p>${renewalText}</p>`
+        ? `<h2>6. Renovação automática e encerramento</h2><p>${renewalText}</p>`
         : "";
-      const nextSection=contractConfig.automaticRenewalEnabled?6:5;
+      const nextSection=contractConfig.automaticRenewalEnabled?7:6;
       return `<h1>Contrato de adesão ao plano de monitoramento</h1>
         <div class="contract-number">Contrato nº ${safe(number)} · Versão ${CONTRACT_VERSION}</div>
         ${contractPartiesHtml(data)}
@@ -2468,6 +2468,7 @@
         <h2>2. Serviços incluídos</h2><p>Durante a vigência, o plano concede os benefícios abaixo, respeitando os limites anuais indicados:</p><ul>${benefits}</ul>
         <h2>3. Valor e pagamento</h2><p>O valor anual deste contrato é de <strong>${price}</strong>, definido conforme o documento do CONTRATANTE. A forma de pagamento cadastrada é ${safe(data.payment||"a combinar")}.</p>
         <h2>4. Vigência</h2><p>O plano terá vigência de 12 meses, iniciando em <strong>${formatDate(data.planStart)}</strong> e encerrando em <strong>${formatDate(data.planEnd||addYear(data.planStart))}</strong>. Os benefícios não utilizados não são cumulativos para o período seguinte.</p>
+        <h2>5. Carência para atendimento presencial</h2><p>O CONTRATANTE estará sujeito à carência de 30 (trinta) dias corridos, contados a partir da data de início da vigência do plano indicada na cláusula 4, para utilizar os atendimentos técnicos presenciais incluídos no plano contratado. Durante esse período, permanecem disponíveis os serviços de monitoramento e suporte remoto previstos no plano. Se o CONTRATANTE solicitar atendimento presencial antes do término da carência, a CONTRATADA poderá realizá-lo mediante orçamento e aprovação prévia do CONTRATANTE, com cobrança à parte, sem consumo do benefício presencial anual incluído no plano. Após o término da carência, os atendimentos presenciais incluídos poderão ser solicitados, respeitados os limites, o agendamento e as demais condições deste contrato.</p>
         ${renewalClause}
         <h2>${nextSection}. Condições de atendimento</h2><p>Os atendimentos dependem de solicitação e agendamento. O CONTRATANTE deverá disponibilizar acesso ao aplicativo, faturas e demais informações necessárias. Peças, materiais, deslocamentos extraordinários, reparos corretivos e serviços não descritos na cláusula 2 não estão incluídos, podendo ser orçados separadamente.</p>
         <h2>${nextSection+1}. Aceite eletrônico</h2><p>O CONTRATANTE declara que teve acesso ao conteúdo integral deste instrumento e concorda que o aceite eletrônico seja utilizado como manifestação de vontade. O sistema registrará a data, a hora, a identificação informada e dados técnicos do dispositivo utilizado.</p>
