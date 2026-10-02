@@ -1278,11 +1278,12 @@
           <div class="service-contract-launch">
             <div>
               <strong>Central de contratos</strong>
-              <span>Gere e preencha contratos de manutenção preventiva e limpeza de módulos fotovoltaicos. Selecione um cliente cadastrado para preencher os dados automaticamente ou crie o contrato manualmente.</span>
+              <span>Gere contratos de manutenção preventiva, limpeza de módulos ou os dois serviços juntos. Selecione um cliente já cadastrado para preencher os dados automaticamente ou faça o preenchimento manual.</span>
             </div>
             <div class="service-contract-launch-actions">
               <button id="newPreventiveContractBtn" class="btn btn-primary" type="button" data-permission="clientsEdit">＋ Contrato de preventiva</button>
               <button id="newCleaningContractBtn" class="btn btn-ghost" type="button" data-permission="clientsEdit" style="background:#fff">＋ Contrato de limpeza</button>
+              <button id="newBothContractBtn" class="btn btn-ghost" type="button" data-permission="clientsEdit" style="background:#fff">＋ Preventiva + limpeza</button>
             </div>
           </div>
 
@@ -1294,7 +1295,7 @@
 
           <div class="card service-contract-section">
             <div class="card-header">
-              <div><div class="card-title">Contratos de preventiva e limpeza</div><div class="card-subtitle">Contratos gerados pelo preenchimento da central de contratos</div></div>
+              <div><div class="card-title">Contratos de preventiva e limpeza</div><div class="card-subtitle">Contratos individuais ou combinados gerados pela central de contratos</div></div>
               <div class="search-box" style="min-width:240px"><span>⌕</span><input id="serviceContractSearch" placeholder="Buscar cliente ou contrato..."></div>
             </div>
             <div class="table-wrap">
@@ -1303,7 +1304,7 @@
                 <tbody id="serviceContractsTable"></tbody>
               </table>
             </div>
-            <div id="serviceContractsEmpty" class="empty hidden"><div class="empty-icon">✦</div><strong>Nenhum contrato de serviço gerado</strong><span>Use os botões acima para criar o primeiro contrato de preventiva ou limpeza.</span></div>
+            <div id="serviceContractsEmpty" class="empty hidden"><div class="empty-icon">✦</div><strong>Nenhum contrato de serviço gerado</strong><span>Use os botões acima para criar o primeiro contrato de preventiva, limpeza ou serviço combinado.</span></div>
           </div>
 
           <div class="toolbar">
@@ -1428,7 +1429,7 @@
                 <tbody id="maintenanceTable"></tbody>
               </table>
             </div>
-            <div id="maintenanceEmpty" class="empty hidden"><div class="empty-icon">✦</div><strong>Nenhum serviço cadastrado</strong><span>Cadastre uma preventiva ou limpeza para iniciar o fluxo comercial.</span></div>
+            <div id="maintenanceEmpty" class="empty hidden"><div class="empty-icon">✦</div><strong>Nenhum serviço cadastrado</strong><span>Cadastre uma preventiva, uma limpeza ou os dois serviços juntos para iniciar o fluxo comercial.</span></div>
           </div>
         </section>
 
@@ -1682,7 +1683,7 @@
         <div class="modal-body">
           <input id="maintenanceId" type="hidden">
           <div class="form-grid">
-            <div class="field full"><label>Cliente *</label><select id="maintenanceClientId" required><option value="">Selecione um cliente</option></select><span id="maintenanceClientPreview" class="small muted">Os dados da ficha do cliente serão usados na ordem de serviço.</span></div>
+            <div class="field full"><label>Cliente já cadastrado *</label><input id="maintenanceClientSearch" type="search" placeholder="Buscar por nome, CPF/CNPJ, telefone ou cidade"><select id="maintenanceClientId" required><option value="">Selecione um cliente</option></select><span id="maintenanceClientPreview" class="small muted">Busque e selecione um cliente do CRM. Os dados da ficha serão usados automaticamente na ordem de serviço.</span></div>
             <div class="field"><label>Tipo de serviço *</label><select id="maintenanceServiceType" required><option value="preventive">Manutenção preventiva</option><option value="cleaning">Limpeza de módulos</option><option value="both">Preventiva + limpeza</option></select></div>
             <div class="field"><label>Quantidade de módulos *</label><input id="maintenanceModuleCount" type="number" min="1" step="1" required placeholder="Ex.: 32"></div>
             <div class="field"><label>Valor total do serviço (R$) *</label><input id="maintenanceAmount" type="number" min="0" step="0.01" required placeholder="0,00"></div>
@@ -1913,8 +1914,8 @@
           <div class="service-contract-editor-section">
             <div class="service-contract-editor-section-title">Tipo e cliente</div>
             <div class="form-grid">
-              <div class="field"><label>Tipo de contrato *</label><select id="serviceContractType" required><option value="preventive">Manutenção preventiva</option><option value="cleaning">Limpeza de módulos</option></select></div>
-              <div class="field"><label>Cliente cadastrado</label><select id="serviceContractClientId"><option value="">Preenchimento manual</option></select></div>
+              <div class="field"><label>Tipo de contrato *</label><select id="serviceContractType" required><option value="preventive">Manutenção preventiva</option><option value="cleaning">Limpeza de módulos</option><option value="both">Preventiva + limpeza</option></select></div>
+              <div class="field"><label>Buscar cliente cadastrado</label><input id="serviceContractClientSearch" type="search" placeholder="Nome, CPF/CNPJ, telefone ou cidade"><select id="serviceContractClientId" style="margin-top:7px"><option value="">Preenchimento manual</option></select></div>
               <div class="field full"><label>Nome / Razão social *</label><input id="serviceContractClientName" required></div>
               <div class="field"><label>CPF / CNPJ *</label><input id="serviceContractDocument" required></div>
               <div class="field"><label>Telefone / WhatsApp</label><input id="serviceContractPhone"></div>
@@ -3481,19 +3482,26 @@
     }
 
 
-    const serviceContractTypeLabel = type => type==="cleaning"?"Limpeza de módulos":"Manutenção preventiva";
-    const serviceContractNumberPrefix = type => type==="cleaning"?"IGL":"IGP";
-    function serviceContractClientOptions(){
+    const serviceContractTypeLabel = type => type==="cleaning"?"Limpeza de módulos":type==="both"?"Preventiva + limpeza":"Manutenção preventiva";
+    const serviceContractNumberPrefix = type => type==="cleaning"?"IGL":type==="both"?"IGC":"IGP";
+    function serviceContractClientOptions(filterText=""){
       const select=$("serviceContractClientId");
       if(!select)return;
       const current=select.value;
-      select.innerHTML='<option value="">Preenchimento manual</option>'+state.clients.slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"pt-BR")).map(c=>`<option value="${safe(c.id)}">${safe(c.name||"Cliente")} · ${safe(c.document||c.phone||"sem documento")}</option>`).join("");
+      const term=String(filterText||$("serviceContractClientSearch")?.value||"").trim().toLowerCase();
+      const clients=state.clients.slice().filter(c=>{
+        if(!term)return true;
+        return [c.name,c.document,c.phone,c.email,c.city,c.address].filter(Boolean).join(" ").toLowerCase().includes(term);
+      }).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"pt-BR"));
+      select.innerHTML='<option value="">Preenchimento manual</option>'+clients.map(c=>`<option value="${safe(c.id)}">${safe(c.name||"Cliente")} · ${safe(c.document||c.phone||"sem documento")}</option>`).join("");
       if([...select.options].some(o=>o.value===current))select.value=current;
+      else if(clients.length===1 && term){select.value=clients[0].id;fillServiceContractFromClient(clients[0].id);}
     }
     function updateServiceContractTypeUI(){
-      const cleaning=$("serviceContractType")?.value==="cleaning";
-      $("serviceContractWaterField")?.classList.toggle("hidden",!cleaning);
-      if($("serviceContractEditorTitle"))$("serviceContractEditorTitle").textContent=cleaning?"Contrato de limpeza de módulos":"Contrato de manutenção preventiva";
+      const type=$("serviceContractType")?.value||"preventive";
+      const includesCleaning=type==="cleaning"||type==="both";
+      $("serviceContractWaterField")?.classList.toggle("hidden",!includesCleaning);
+      if($("serviceContractEditorTitle"))$("serviceContractEditorTitle").textContent=type==="cleaning"?"Contrato de limpeza de módulos":type==="both"?"Contrato de preventiva + limpeza":"Contrato de manutenção preventiva";
     }
     function fillServiceContractFromClient(clientId){
       const c=state.clients.find(x=>x.id===clientId);
@@ -3511,6 +3519,7 @@
       if(!can("clientsEdit")){showToast("Você não possui permissão para gerar contratos.","error");return;}
       $("serviceContractForm").reset();
       $("serviceContractId").value="";
+      if($("serviceContractClientSearch"))$("serviceContractClientSearch").value="";
       serviceContractClientOptions();
       $("serviceContractType").value=type;
       $("serviceContractDate").value=todayISO();
@@ -3566,7 +3575,8 @@
     }
     function buildServiceContractHtml(data,number){
       const isCleaning=data.serviceType==="cleaning";
-      const serviceTitle=isCleaning?"Limpeza de Módulos Fotovoltaicos":"Manutenção Preventiva em Sistema Fotovoltaico";
+      const isBoth=data.serviceType==="both";
+      const serviceTitle=isCleaning?"Limpeza de Módulos Fotovoltaicos":isBoth?"Manutenção Preventiva e Limpeza de Módulos Fotovoltaicos":"Manutenção Preventiva em Sistema Fotovoltaico";
       const systemInfo=`<div class="contract-parties" style="margin-top:14px"><strong>DADOS DO SISTEMA / LOCAL DO SERVIÇO</strong><div class="contract-client-grid">
         <div class="contract-client-field full"><span>Local da instalação</span><strong>${safe(contractValue(data.siteAddress))}</strong></div>
         <div class="contract-client-field"><span>Quantidade de módulos</span><strong>${safe(data.moduleCount)} módulos</strong></div>
@@ -3574,29 +3584,38 @@
         <div class="contract-client-field"><span>Tipo de instalação</span><strong>${safe(contractValue(data.installationType))}</strong></div>
         <div class="contract-client-field"><span>Periodicidade</span><strong>${safe(contractValue(data.frequency))}</strong></div>
       </div></div>`;
-      const scope=isCleaning?`
-        <h2>2. Escopo da limpeza</h2><p>A CONTRATADA realizará a limpeza técnica de <strong>${safe(data.moduleCount)} módulos fotovoltaicos</strong>, utilizando procedimentos e utensílios compatíveis com os equipamentos, visando remover sujidades superficiais que possam comprometer o desempenho e a conservação do sistema.</p>
+      const cleaningScope=`
+        <h2>Escopo da limpeza</h2><p>A CONTRATADA realizará a limpeza técnica de <strong>${safe(data.moduleCount)} módulos fotovoltaicos</strong>, utilizando procedimentos e utensílios compatíveis com os equipamentos, visando remover sujidades superficiais que possam comprometer o desempenho e a conservação do sistema.</p>
         <p>O serviço poderá utilizar água, escovas e utensílios adequados, respeitando as recomendações aplicáveis aos módulos. Não serão utilizados procedimentos deliberadamente abrasivos ou incompatíveis com a superfície dos equipamentos.</p>
-        <h2>3. Inspeção visual durante a execução</h2><p>Durante a limpeza, a equipe poderá registrar visualmente módulos trincados, cabos aparentes, conectores soltos, estruturas com sinais de corrosão, sombreamentos relevantes ou outras irregularidades visíveis. Essa observação não substitui uma manutenção preventiva ou inspeção elétrica completa.</p>
-        <h2>4. Água e condições de acesso</h2><p>Fornecimento de água: <strong>${safe(data.waterSupply==="contractor"?"pela CONTRATADA":data.waterSupply==="client"?"pela CONTRATANTE":"conforme combinado entre as partes")}</strong>. A CONTRATANTE deverá garantir acesso ao local. Caso sejam necessários andaimes, plataformas, linhas de vida, pontos de ancoragem ou equipamentos especiais não previstos, os custos poderão ser apresentados separadamente.</p>`:`
-        <h2>2. Escopo da manutenção preventiva</h2><p>A CONTRATADA realizará inspeção preventiva do sistema fotovoltaico, incluindo, conforme aplicável e acessível: inspeção visual dos módulos; estrutura de fixação; cabos, conectores e eletrodutos; quadros elétricos; dispositivos de proteção; inversores; alarmes e códigos de falha; comunicação com a plataforma de monitoramento; e condições gerais do sistema.</p>
+        <p>Fornecimento de água: <strong>${safe(data.waterSupply==="contractor"?"pela CONTRATADA":data.waterSupply==="client"?"pela CONTRATANTE":"conforme combinado entre as partes")}</strong>. A CONTRATANTE deverá garantir acesso ao local. Caso sejam necessários andaimes, plataformas, linhas de vida, pontos de ancoragem ou equipamentos especiais não previstos, os custos poderão ser apresentados separadamente.</p>`;
+      const preventiveScope=`
+        <h2>Escopo da manutenção preventiva</h2><p>A CONTRATADA realizará inspeção preventiva do sistema fotovoltaico, incluindo, conforme aplicável e acessível: inspeção visual dos módulos; estrutura de fixação; cabos, conectores e eletrodutos; quadros elétricos; dispositivos de proteção; inversores; alarmes e códigos de falha; comunicação com a plataforma de monitoramento; e condições gerais do sistema.</p>
         <p>Quando previsto no escopo comercial, poderão ser executadas medições e verificações complementares. Ensaios especiais, termografia, testes de isolação, reapertos com torque controlado, substituição de peças e manutenção corretiva somente serão realizados quando expressamente contratados.</p>
-        <h2>3. Relatório técnico</h2><p>Após a execução, a CONTRATADA poderá emitir relatório com identificação da unidade, data, itens verificados, registros fotográficos, irregularidades identificadas e recomendações. O relatório representa as condições verificadas na data da inspeção e não constitui garantia contra falhas futuras.</p>
-        <h2>4. Serviços não inclusos</h2><p>Não estão inclusos, salvo contratação expressa: manutenção corretiva, substituição de módulos, inversores, cabos, conectores ou dispositivos de proteção; reparos estruturais ou civis; adequações elétricas; serviços da concessionária; limpeza dos módulos; ou materiais e peças.</p>`;
+        <p>Após a execução, a CONTRATADA poderá emitir relatório com identificação da unidade, data, itens verificados, registros fotográficos, irregularidades identificadas e recomendações. O relatório representa as condições verificadas na data da inspeção e não constitui garantia contra falhas futuras.</p>`;
+      const scope=isBoth?`
+        <h2>2. Escopo dos serviços combinados</h2><p>O presente contrato contempla, no mesmo atendimento, <strong>manutenção preventiva do sistema fotovoltaico e limpeza técnica dos módulos</strong>.</p>
+        <h2>3. Manutenção preventiva</h2>${preventiveScope.replace('<h2>Escopo da manutenção preventiva</h2>','')}
+        <h2>4. Limpeza dos módulos</h2>${cleaningScope.replace('<h2>Escopo da limpeza</h2>','')}
+        <h2>5. Itens não inclusos</h2><p>Não estão inclusos, salvo contratação expressa: manutenção corretiva, substituição de módulos, inversores, cabos, conectores ou dispositivos de proteção; reparos estruturais ou civis; adequações elétricas; serviços da concessionária; materiais, peças ou equipamentos especiais de acesso não previstos.</p>`:isCleaning?`
+        <h2>2. Escopo da limpeza</h2>${cleaningScope.replace('<h2>Escopo da limpeza</h2>','')}
+        <h2>3. Inspeção visual durante a execução</h2><p>Durante a limpeza, a equipe poderá registrar visualmente módulos trincados, cabos aparentes, conectores soltos, estruturas com sinais de corrosão, sombreamentos relevantes ou outras irregularidades visíveis. Essa observação não substitui uma manutenção preventiva ou inspeção elétrica completa.</p>
+        <h2>4. Limitações do escopo</h2><p>Não estão inclusas manutenção preventiva completa, manutenção corretiva, substituição de peças, reparos elétricos ou estruturais, salvo contratação expressa.</p>`:`
+        <h2>2. Escopo da manutenção preventiva</h2>${preventiveScope.replace('<h2>Escopo da manutenção preventiva</h2>','')}
+        <h2>3. Serviços não inclusos</h2><p>Não estão inclusos, salvo contratação expressa: manutenção corretiva, substituição de módulos, inversores, cabos, conectores ou dispositivos de proteção; reparos estruturais ou civis; adequações elétricas; serviços da concessionária; limpeza dos módulos; ou materiais e peças.</p>`;
       const notes=data.notes?`<h2>11. Condições adicionais</h2><p>${safe(data.notes).replace(/\n/g,"<br>")}</p>`:"";
       return `<h1>Contrato de Prestação de Serviços de ${serviceTitle}</h1>
         <div class="contract-number">Contrato nº ${safe(number)} · Emitido em ${safe(formatDate(data.contractDate))}</div>
         ${serviceContractPartiesHtml(data)}${systemInfo}
         <h2>1. Objeto</h2><p>O presente contrato tem por objeto a prestação de serviços de <strong>${safe(serviceTitle.toLowerCase())}</strong> no sistema fotovoltaico identificado neste instrumento.</p>
         ${scope}
-        <h2>5. Condições de segurança e reagendamento</h2><p>A CONTRATADA poderá interromper, suspender ou reagendar o serviço quando houver chuva intensa, descargas atmosféricas, ventos fortes, temperatura excessiva, condições inadequadas do telhado, impossibilidade de acesso seguro ou qualquer situação que represente risco à equipe, terceiros, equipamentos ou patrimônio. Quando aplicáveis, deverão ser observados os requisitos de segurança para serviços em eletricidade e trabalho em altura.</p>
-        <h2>6. Obrigações das partes</h2><p>A CONTRATADA deverá executar os serviços com equipe capacitada, ferramentas adequadas e cuidado com as instalações. A CONTRATANTE deverá garantir acesso, informar riscos conhecidos, permitir desligamentos temporários quando tecnicamente necessários e manter terceiros afastados da área de trabalho quando solicitado.</p>
-        <h2>7. Valor e pagamento</h2><p>Pelos serviços contratados, a CONTRATANTE pagará à CONTRATADA o valor total de <strong>${money(data.amount)}</strong>. Condição de pagamento: <strong>${safe(contractValue(data.payment,"Conforme acordado entre as partes"))}</strong>. Serviços adicionais, materiais ou peças dependerão de prévia aprovação.</p>
-        <h2>8. Geração de energia e limitações</h2><p>A CONTRATADA não garante percentual específico de aumento de geração ou quantidade determinada de energia após o serviço. O desempenho depende de fatores como irradiação solar, temperatura, sombreamento, condições climáticas, disponibilidade da rede, equipamentos e condições gerais da instalação.</p>
-        <h2>9. Vigência e rescisão</h2><p>Este contrato entra em vigor na data de sua assinatura e terá vigência de <strong>${safe(String(data.validityMonths||0))} mês(es)</strong>${data.frequency&&data.frequency!=="Serviço único"?`, observada a periodicidade de ${safe(data.frequency.toLowerCase())}`:""}. Para serviço único, será considerado cumprido após a execução do objeto e a quitação dos valores. Serviços recorrentes poderão ser encerrados mediante comunicação prévia, permanecendo devidos os valores relativos aos serviços já executados.</p>
-        <h2>10. Responsabilidade e condições preexistentes</h2><p>A CONTRATADA responde pelos danos diretamente causados por comprovada falha na execução do serviço, não se responsabilizando por defeitos de fabricação, vícios ocultos, falhas preexistentes, problemas de projeto ou instalação executados por terceiros, telhas ou estruturas previamente danificadas, surtos elétricos, descargas atmosféricas ou eventos de força maior.</p>
+        <h2>Condições de segurança e reagendamento</h2><p>A CONTRATADA poderá interromper, suspender ou reagendar o serviço quando houver chuva intensa, descargas atmosféricas, ventos fortes, temperatura excessiva, condições inadequadas do telhado, impossibilidade de acesso seguro ou qualquer situação que represente risco à equipe, terceiros, equipamentos ou patrimônio. Quando aplicáveis, deverão ser observados os requisitos de segurança para serviços em eletricidade e trabalho em altura.</p>
+        <h2>Obrigações das partes</h2><p>A CONTRATADA deverá executar os serviços com equipe capacitada, ferramentas adequadas e cuidado com as instalações. A CONTRATANTE deverá garantir acesso, informar riscos conhecidos, permitir desligamentos temporários quando tecnicamente necessários e manter terceiros afastados da área de trabalho quando solicitado.</p>
+        <h2>Valor e pagamento</h2><p>Pelos serviços contratados, a CONTRATANTE pagará à CONTRATADA o valor total de <strong>${money(data.amount)}</strong>. Condição de pagamento: <strong>${safe(contractValue(data.payment,"Conforme acordado entre as partes"))}</strong>. Serviços adicionais, materiais ou peças dependerão de prévia aprovação.</p>
+        <h2>Geração de energia e limitações</h2><p>A CONTRATADA não garante percentual específico de aumento de geração ou quantidade determinada de energia após o serviço. O desempenho depende de fatores como irradiação solar, temperatura, sombreamento, condições climáticas, disponibilidade da rede, equipamentos e condições gerais da instalação.</p>
+        <h2>Vigência e rescisão</h2><p>Este contrato entra em vigor na data de sua assinatura e terá vigência de <strong>${safe(String(data.validityMonths||0))} mês(es)</strong>${data.frequency&&data.frequency!=="Serviço único"?`, observada a periodicidade de ${safe(data.frequency.toLowerCase())}`:""}. Para serviço único, será considerado cumprido após a execução do objeto e a quitação dos valores. Serviços recorrentes poderão ser encerrados mediante comunicação prévia, permanecendo devidos os valores relativos aos serviços já executados.</p>
+        <h2>Responsabilidade e condições preexistentes</h2><p>A CONTRATADA responde pelos danos diretamente causados por comprovada falha na execução do serviço, não se responsabilizando por defeitos de fabricação, vícios ocultos, falhas preexistentes, problemas de projeto ou instalação executados por terceiros, telhas ou estruturas previamente danificadas, surtos elétricos, descargas atmosféricas ou eventos de força maior.</p>
         ${notes}
-        <h2>${data.notes?12:11}. Foro e disposições gerais</h2><p>Fica eleito o foro de <strong>${safe(contractValue(data.forum))}</strong>, ressalvadas as hipóteses em que a legislação aplicável determine foro diverso. Alterações de escopo deverão ser formalizadas entre as partes.</p>
+        <h2>Foro e disposições gerais</h2><p>Fica eleito o foro de <strong>${safe(contractValue(data.forum))}</strong>, ressalvadas as hipóteses em que a legislação aplicável determine foro diverso. Alterações de escopo deverão ser formalizadas entre as partes.</p>
         <div style="margin-top:44px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px;text-align:center">
           <div><div style="border-top:1px solid #475569;padding-top:8px"><strong>CONTRATANTE</strong><br>${safe(data.clientName)}<br>${safe(data.clientDocument)}</div></div>
           <div><div style="border-top:1px solid #475569;padding-top:8px"><strong>CONTRATADA</strong><br>${safe(data.contractorName)}<br>${safe(data.contractorDocument)}</div></div>
@@ -3635,11 +3654,11 @@
       const q=($("serviceContractSearch")?.value||"").trim().toLowerCase();
       const list=state.serviceContracts.filter(c=>!q||[c.number,c.clientName,c.clientDocument,c.siteAddress,serviceContractTypeLabel(c.serviceType)].filter(Boolean).join(" ").toLowerCase().includes(q));
       $("serviceContractsTotal").textContent=state.serviceContracts.length;
-      $("serviceContractsPreventive").textContent=state.serviceContracts.filter(c=>c.serviceType!=="cleaning").length;
-      $("serviceContractsCleaning").textContent=state.serviceContracts.filter(c=>c.serviceType==="cleaning").length;
+      $("serviceContractsPreventive").textContent=state.serviceContracts.filter(c=>c.serviceType==="preventive"||c.serviceType==="both").length;
+      $("serviceContractsCleaning").textContent=state.serviceContracts.filter(c=>c.serviceType==="cleaning"||c.serviceType==="both").length;
       $("serviceContractsTable").innerHTML=list.map(c=>`<tr>
         <td><strong>${safe(c.number||"—")}</strong><div class="small muted" style="margin-top:4px">${safe(c.seller||"Emitido pelo CRM")}</div></td>
-        <td><span class="service-contract-type-badge">${c.serviceType==="cleaning"?"✦ Limpeza":"✓ Preventiva"}</span></td>
+        <td><span class="service-contract-type-badge">${c.serviceType==="cleaning"?"✦ Limpeza":c.serviceType==="both"?"✓ Preventiva + limpeza":"✓ Preventiva"}</span></td>
         <td><div class="customer-cell"><div class="customer-avatar">${initials(c.clientName)}</div><div><strong>${safe(c.clientName||"Cliente")}</strong><span>${safe(c.clientDocument||c.clientPhone||"")}</span></div></div></td>
         <td>${safe(c.siteAddress||"—")}<div class="small muted" style="margin-top:4px">${safe(String(c.moduleCount||0))} módulos${c.powerKwp?` · ${safe(String(c.powerKwp))} kWp`:""}</div></td>
         <td><strong>${money(Number(c.amount)||0)}</strong><div class="small muted" style="margin-top:4px">${safe(c.frequency||"")}</div></td>
@@ -3651,7 +3670,7 @@
     function renderServiceContractPreview(contract){
       state.selectedServiceContractId=contract.id;
       $("serviceContractPreviewNumber").textContent=contract.number||"—";
-      $("serviceContractPreviewType").textContent=contract.serviceType==="cleaning"?"✦ Limpeza de módulos":"✓ Manutenção preventiva";
+      $("serviceContractPreviewType").textContent=contract.serviceType==="cleaning"?"✦ Limpeza de módulos":contract.serviceType==="both"?"✓ Preventiva + limpeza":"✓ Manutenção preventiva";
       $("serviceContractPreview").innerHTML=contract.contractHtml||buildServiceContractHtml(contract,contract.number||"—");
     }
     function openServiceContract(id){
@@ -3663,7 +3682,7 @@
     function editSelectedServiceContract(){
       if(!can("clientsEdit")){showToast("Você não possui permissão para editar contratos.","error");return;}
       const c=state.serviceContracts.find(x=>x.id===state.selectedServiceContractId);if(!c)return;
-      closeModal("serviceContractPreviewBackdrop");serviceContractClientOptions();
+      closeModal("serviceContractPreviewBackdrop");if($("serviceContractClientSearch"))$("serviceContractClientSearch").value="";serviceContractClientOptions();
       $("serviceContractId").value=c.id||"";$("serviceContractType").value=c.serviceType||"preventive";$("serviceContractClientId").value=c.clientId||"";
       $("serviceContractClientName").value=c.clientName||"";$("serviceContractDocument").value=c.clientDocument||"";$("serviceContractPhone").value=c.clientPhone||"";$("serviceContractEmail").value=c.clientEmail||"";$("serviceContractCity").value=c.city||"";$("serviceContractClientAddress").value=c.clientAddress||"";
       $("serviceContractSiteAddress").value=c.siteAddress||"";$("serviceContractModules").value=c.moduleCount||"";$("serviceContractPower").value=c.powerKwp||"";$("serviceContractInstallationType").value=c.installationType||"Telhado";$("serviceContractFrequency").value=c.frequency||"Serviço único";$("serviceContractWaterSupply").value=c.waterSupply||"client";
@@ -4475,10 +4494,16 @@
     function newServiceOrderNumber(){return `OS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;}
     function maintenanceUnitValue(job){const q=Number(job.moduleCount)||0,a=Number(job.amount)||0;return q?money(a/q):"—";}
     function maintenanceSnapshot(client={}){return {name:client.name||"",document:client.document||"",phone:client.phone||"",email:client.email||"",city:client.city||"",address:client.address||""};}
-    function refreshMaintenanceClientOptions(selectedId=""){
+    function refreshMaintenanceClientOptions(selectedId="",filterText=""){
       const select=$("maintenanceClientId");if(!select)return;
       const current=selectedId||select.value;
-      select.innerHTML='<option value="">Selecione um cliente</option>'+state.clients.slice().sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"pt-BR")).map(c=>`<option value="${safe(c.id)}" ${c.id===current?"selected":""}>${safe(c.name||"Sem nome")} · ${safe(c.document||c.city||"sem documento")}</option>`).join("");
+      const term=String(filterText||$("maintenanceClientSearch")?.value||"").trim().toLowerCase();
+      const clients=state.clients.slice().filter(c=>{
+        if(!term)return true;
+        return [c.name,c.document,c.phone,c.email,c.city,c.address].filter(Boolean).join(" ").toLowerCase().includes(term);
+      }).sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"pt-BR"));
+      select.innerHTML='<option value="">Selecione um cliente</option>'+clients.map(c=>`<option value="${safe(c.id)}" ${c.id===current?"selected":""}>${safe(c.name||"Sem nome")} · ${safe(c.document||c.city||"sem documento")}</option>`).join("");
+      if(!select.value && clients.length===1 && term)select.value=clients[0].id;
       updateMaintenanceClientPreview();
     }
     function updateMaintenanceClientPreview(){
@@ -4517,7 +4542,7 @@
     }
     function resetMaintenanceForm(){
       $("maintenanceForm").reset();$("maintenanceId").value="";$("maintenanceModalTitle").textContent="Novo serviço";
-      $("maintenanceOperator").value=state.currentProfile?.name||state.currentProfile?.email||"";$("maintenanceRequestedDate").value=todayISO();refreshMaintenanceClientOptions();
+      $("maintenanceOperator").value=state.currentProfile?.name||state.currentProfile?.email||"";$("maintenanceRequestedDate").value=todayISO();if($("maintenanceClientSearch"))$("maintenanceClientSearch").value="";refreshMaintenanceClientOptions();
     }
     function openNewMaintenance(){if(!can("maintenanceCreate"))return;resetMaintenanceForm();openModal("maintenanceModalBackdrop");}
     function openMaintenanceForClient(clientId){if(!can("maintenanceCreate"))return;resetMaintenanceForm();refreshMaintenanceClientOptions(clientId);openModal("maintenanceModalBackdrop");}
@@ -5279,7 +5304,9 @@
     $("serviceContractSearch")?.addEventListener("input",renderServiceContracts);
     $("newPreventiveContractBtn")?.addEventListener("click",()=>openNewServiceContract("preventive"));
     $("newCleaningContractBtn")?.addEventListener("click",()=>openNewServiceContract("cleaning"));
+    $("newBothContractBtn")?.addEventListener("click",()=>openNewServiceContract("both"));
     $("serviceContractType")?.addEventListener("change",updateServiceContractTypeUI);
+    $("serviceContractClientSearch")?.addEventListener("input",e=>serviceContractClientOptions(e.target.value));
     $("serviceContractClientId")?.addEventListener("change",e=>{if(e.target.value)fillServiceContractFromClient(e.target.value);});
     $("serviceContractForm")?.addEventListener("submit",saveServiceContract);
     $("editServiceContractBtn")?.addEventListener("click",editSelectedServiceContract);
@@ -5290,6 +5317,7 @@
     $("reportSendContractFilter")?.addEventListener("change",renderReportSends);
     $("maintenanceSearch").addEventListener("input",renderMaintenanceJobs);$("maintenanceStatusFilter").addEventListener("change",renderMaintenanceJobs);
     $("addMaintenanceBtn").addEventListener("click",openNewMaintenance);
+    $("maintenanceClientSearch")?.addEventListener("input",e=>refreshMaintenanceClientOptions("",e.target.value));
     $("maintenanceClientId").addEventListener("change",updateMaintenanceClientPreview);
     $("maintenanceForm").addEventListener("submit",saveMaintenanceJob);
     $("maintenanceScheduleForm").addEventListener("submit",saveMaintenanceSchedule);
