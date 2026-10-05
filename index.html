@@ -1425,7 +1425,7 @@
           <div class="card">
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Solicitação</th><th>Cliente</th><th>Serviço</th><th>Módulos</th><th>Valor</th><th>Status</th><th>Ordem de serviço</th><th></th></tr></thead>
+                <thead><tr><th>Solicitação</th><th>Cliente</th><th>Serviço</th><th>Módulos</th><th>Valor</th><th>Status</th><th>Nova oferta</th><th>Ordem de serviço</th><th></th></tr></thead>
                 <tbody id="maintenanceTable"></tbody>
               </table>
             </div>
@@ -1941,7 +1941,7 @@
             <div class="service-contract-editor-section-title">Condições comerciais</div>
             <div class="form-grid">
               <div class="field"><label>Data do contrato *</label><input id="serviceContractDate" type="date" required></div>
-              <div class="field"><label>Vigência (meses)</label><input id="serviceContractValidity" type="number" min="0" step="1" value="12"></div>
+              <div class="field"><label>Lembrete comercial</label><input value="Ofertar novamente 12 meses após a conclusão" readonly></div>
               <div class="field"><label>Valor total (R$) *</label><input id="serviceContractValue" type="number" min="0" step="0.01" required></div>
               <div class="field"><label>Forma / condição de pagamento</label><input id="serviceContractPayment" placeholder="Ex.: PIX à vista, boleto 10 dias..."></div>
               <div class="field"><label>Empresa contratada</label><input id="serviceContractContractorName" value="Group Holding Service"></div>
@@ -3523,7 +3523,6 @@
       serviceContractClientOptions();
       $("serviceContractType").value=type;
       $("serviceContractDate").value=todayISO();
-      $("serviceContractValidity").value="12";
       $("serviceContractContractorName").value="Group Holding Service";
       $("serviceContractContractorDocument").value="50.533.476/0001-66";
       $("serviceContractForum").value="Jaraguá do Sul/SC";
@@ -3549,7 +3548,6 @@
         frequency:$("serviceContractFrequency").value,
         waterSupply:$("serviceContractWaterSupply").value,
         contractDate:$("serviceContractDate").value,
-        validityMonths:Math.max(0,Math.floor(Number($("serviceContractValidity").value)||0)),
         amount:Number($("serviceContractValue").value)||0,
         payment:$("serviceContractPayment").value.trim(),
         contractorName:$("serviceContractContractorName").value.trim()||"Group Holding Service",
@@ -3612,7 +3610,7 @@
         <h2>Obrigações das partes</h2><p>A CONTRATADA deverá executar os serviços com equipe capacitada, ferramentas adequadas e cuidado com as instalações. A CONTRATANTE deverá garantir acesso, informar riscos conhecidos, permitir desligamentos temporários quando tecnicamente necessários e manter terceiros afastados da área de trabalho quando solicitado.</p>
         <h2>Valor e pagamento</h2><p>Pelos serviços contratados, a CONTRATANTE pagará à CONTRATADA o valor total de <strong>${money(data.amount)}</strong>. Condição de pagamento: <strong>${safe(contractValue(data.payment,"Conforme acordado entre as partes"))}</strong>. Serviços adicionais, materiais ou peças dependerão de prévia aprovação.</p>
         <h2>Geração de energia e limitações</h2><p>A CONTRATADA não garante percentual específico de aumento de geração ou quantidade determinada de energia após o serviço. O desempenho depende de fatores como irradiação solar, temperatura, sombreamento, condições climáticas, disponibilidade da rede, equipamentos e condições gerais da instalação.</p>
-        <h2>Vigência e rescisão</h2><p>Este contrato entra em vigor na data de sua assinatura e terá vigência de <strong>${safe(String(data.validityMonths||0))} mês(es)</strong>${data.frequency&&data.frequency!=="Serviço único"?`, observada a periodicidade de ${safe(data.frequency.toLowerCase())}`:""}. Para serviço único, será considerado cumprido após a execução do objeto e a quitação dos valores. Serviços recorrentes poderão ser encerrados mediante comunicação prévia, permanecendo devidos os valores relativos aos serviços já executados.</p>
+        <h2>Conclusão do serviço e rescisão</h2><p>Para serviço único, o objeto será considerado cumprido após a execução dos serviços contratados e a quitação dos valores correspondentes. Caso haja serviços recorrentes expressamente contratados, eles poderão ser encerrados mediante comunicação prévia, permanecendo devidos os valores relativos aos serviços já executados.</p>
         <h2>Responsabilidade e condições preexistentes</h2><p>A CONTRATADA responde pelos danos diretamente causados por comprovada falha na execução do serviço, não se responsabilizando por defeitos de fabricação, vícios ocultos, falhas preexistentes, problemas de projeto ou instalação executados por terceiros, telhas ou estruturas previamente danificadas, surtos elétricos, descargas atmosféricas ou eventos de força maior.</p>
         ${notes}
         <h2>Foro e disposições gerais</h2><p>Fica eleito o foro de <strong>${safe(contractValue(data.forum))}</strong>, ressalvadas as hipóteses em que a legislação aplicável determine foro diverso. Alterações de escopo deverão ser formalizadas entre as partes.</p>
@@ -3686,7 +3684,7 @@
       $("serviceContractId").value=c.id||"";$("serviceContractType").value=c.serviceType||"preventive";$("serviceContractClientId").value=c.clientId||"";
       $("serviceContractClientName").value=c.clientName||"";$("serviceContractDocument").value=c.clientDocument||"";$("serviceContractPhone").value=c.clientPhone||"";$("serviceContractEmail").value=c.clientEmail||"";$("serviceContractCity").value=c.city||"";$("serviceContractClientAddress").value=c.clientAddress||"";
       $("serviceContractSiteAddress").value=c.siteAddress||"";$("serviceContractModules").value=c.moduleCount||"";$("serviceContractPower").value=c.powerKwp||"";$("serviceContractInstallationType").value=c.installationType||"Telhado";$("serviceContractFrequency").value=c.frequency||"Serviço único";$("serviceContractWaterSupply").value=c.waterSupply||"client";
-      $("serviceContractDate").value=c.contractDate||todayISO();$("serviceContractValidity").value=c.validityMonths??12;$("serviceContractValue").value=c.amount??0;$("serviceContractPayment").value=c.payment||"";$("serviceContractContractorName").value=c.contractorName||"Group Holding Service";$("serviceContractContractorDocument").value=c.contractorDocument||"50.533.476/0001-66";$("serviceContractForum").value=c.forum||"Jaraguá do Sul/SC";$("serviceContractSeller").value=c.seller||"";$("serviceContractNotes").value=c.notes||"";
+      $("serviceContractDate").value=c.contractDate||todayISO();$("serviceContractValue").value=c.amount??0;$("serviceContractPayment").value=c.payment||"";$("serviceContractContractorName").value=c.contractorName||"Group Holding Service";$("serviceContractContractorDocument").value=c.contractorDocument||"50.533.476/0001-66";$("serviceContractForum").value=c.forum||"Jaraguá do Sul/SC";$("serviceContractSeller").value=c.seller||"";$("serviceContractNotes").value=c.notes||"";
       updateServiceContractTypeUI();openModal("serviceContractEditorBackdrop");
     }
     function printSelectedServiceContract(){
@@ -4489,6 +4487,21 @@
       const [cls,label]=map[status]||["gray",status];
       return `<span class="badge ${cls}"><span class="status-dot"></span>${label}</span>`;
     }
+    function maintenanceRenewalInfo(job={}){
+      const completed=timestampISO(job.completedAt)||job.completedAt;
+      if(!completed)return null;
+      const base=new Date(completed);if(Number.isNaN(base.getTime()))return null;
+      const renewal=new Date(base);renewal.setFullYear(renewal.getFullYear()+1);
+      const today=new Date();today.setHours(0,0,0,0);renewal.setHours(0,0,0,0);
+      const days=Math.ceil((renewal-today)/86400000);
+      return {date:renewal.toISOString().slice(0,10),days};
+    }
+    function maintenanceRenewalBadge(job={}){
+      const r=maintenanceRenewalInfo(job);if(!r)return '<span class="badge gray">Após conclusão</span>';
+      if(r.days<0)return `<span class="badge danger">Ofertar novamente · atrasado ${Math.abs(r.days)} dia${Math.abs(r.days)===1?"":"s"}</span>`;
+      if(r.days<=30)return `<span class="badge warning">Ofertar em ${r.days} dia${r.days===1?"":"s"}</span>`;
+      return `<span class="badge gray">${formatDate(r.date)}</span>`;
+    }
     function maintenanceRequestNumber(job){return job.requestNumber||`SOL-${String(job.id||"").slice(-6).toUpperCase()}`;}
     function newMaintenanceRequestNumber(){return `SOL-${new Date().getFullYear()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;}
     function newServiceOrderNumber(){return `OS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;}
@@ -4535,6 +4548,7 @@
         <td>${safe(maintenanceServiceLabel(job.serviceType))}</td><td class="mono">${Number(job.moduleCount)||0}</td>
         <td><strong>${money(Number(job.amount)||0)}</strong><div class="small muted">${maintenanceUnitValue(job)} / módulo</div></td>
         <td>${maintenanceStatusBadge(job)}</td>
+        <td>${maintenanceRenewalBadge(job)}</td>
         <td>${job.serviceOrderNumber?`<span class="badge success">${safe(job.serviceOrderNumber)}</span>`:'<span class="badge gray">Ainda não gerada</span>'}</td>
         <td class="text-right"><div class="maintenance-actions"><button class="btn btn-soft btn-sm" onclick="openMaintenanceDetail('${job.id}')">Abrir</button>${job.serviceOrderNumber?`<button class="btn btn-ghost btn-sm" onclick="openServiceOrder('${job.id}')">OS</button>`:""}</div></td>
       </tr>`}).join("");
@@ -4613,7 +4627,7 @@
     window.openMaintenanceSchedule=(id)=>{const job=state.maintenanceJobs.find(j=>j.id===id);if(!job)return;$("maintenanceScheduleId").value=id;$("maintenanceScheduledDate").value=job.scheduledDate||job.requestedDate||todayISO();$("maintenanceScheduledTime").value=job.scheduledTime||"";$("maintenanceTeam").value=job.team||"";$("maintenanceExecutionNotes").value=job.executionNotes||"";openModal("maintenanceScheduleBackdrop");};
     async function saveMaintenanceSchedule(event){event.preventDefault();const id=$("maintenanceScheduleId").value;try{await maintenancePatch(id,{scheduledDate:$("maintenanceScheduledDate").value,scheduledTime:$("maintenanceScheduledTime").value,team:$("maintenanceTeam").value.trim(),executionNotes:$("maintenanceExecutionNotes").value.trim(),scheduledBy:state.currentProfile?.name||""},"Execução programada");closeModal("maintenanceScheduleBackdrop");showToast("Execução programada.");}catch(err){showToast(err.message,"error");}}
     window.maintenanceStart=(id)=>askConfirm("Iniciar execução","Confirma que a equipe iniciou esta ordem de serviço?",async()=>{await maintenancePatch(id,{status:"executing",startedAt:state.serviceApi.serverTimestamp(),startedBy:state.currentProfile?.name||""},"Execução iniciada");showToast("Ordem de serviço em execução.");},false);
-    window.maintenanceComplete=(id)=>askConfirm("Concluir serviço","Confirma que a preventiva/limpeza foi concluída pela equipe?",async()=>{await maintenancePatch(id,{status:"completed",completedAt:state.serviceApi.serverTimestamp(),completedBy:state.currentProfile?.name||""},"Serviço concluído");showToast("Serviço concluído.");},false);
+    window.maintenanceComplete=(id)=>askConfirm("Concluir serviço","Confirma que a preventiva/limpeza foi concluída pela equipe?",async()=>{await maintenancePatch(id,{status:"completed",completedAt:state.serviceApi.serverTimestamp(),completedBy:state.currentProfile?.name||""},"Serviço concluído");showToast("Serviço concluído. O sistema avisará o operador para nova oferta em 12 meses.");},false);
     function maintenanceChecklist(job){
       const preventive=["Inspeção visual dos módulos, estrutura e fixações","Verificar cabos, conectores e sinais de aquecimento","Verificar proteções CC/CA, disjuntores e DPS","Inspecionar inversor, ventilação, alarmes e comunicação","Verificar anomalias visuais, trincas, sombreamento e pontos críticos","Registrar fotos técnicas antes e depois da intervenção"];
       const cleaning=["Registrar condição dos módulos antes da limpeza","Inspecionar módulos trincados ou danificados antes de lavar","Executar limpeza com método e materiais adequados ao fabricante","Evitar produtos abrasivos e pressão inadequada sobre os módulos","Registrar fotos após a limpeza","Conferir organização, resíduos e condições finais da área"];
