@@ -863,7 +863,7 @@
     .benefit-editor-summary span { display:block;font-size:9px;color:var(--muted);margin-top:3px; }
     .benefit-editor-summary input[type="number"] { width:100%;border:1px solid var(--line);border-radius:9px;padding:9px;background:#fff; }
     .benefit-editor-fields { border-top:1px solid #edf2e9;padding:12px 13px;display:grid;grid-template-columns:1fr;gap:10px; }
-    .benefit-editor.inactive .benefit-editor-fields { display:none; }
+    .benefit-editor.inactive .benefit-editor-fields { display:grid; }
 
     /* Seleção de itens inclusos na venda */
     .sale-benefits-box { border:1px solid #dbe6d6; background:#f9fbf6; border-radius:14px; padding:14px; }
@@ -1161,7 +1161,7 @@
           <div class="hero">
             <div class="hero-copy">
               <h2 id="greeting">Bom dia! 👋</h2>
-              <p>Acompanhe os clientes do plano anual, serviços utilizados e renovações que precisam da atenção da equipe.</p>
+              <p>Acompanhe planos completos e serviços avulsos, utilizações contratadas, contratos e novas oportunidades de renovação ou reoferta.</p>
             </div>
             <div class="hero-price">
               <strong id="heroCpfPrice">CPF R$ 120</strong>
@@ -1172,26 +1172,26 @@
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-top"><div class="stat-icon">♙</div><span class="stat-trend">Base ativa</span></div>
-              <div id="statActive" class="stat-value mono">0</div><div class="stat-label">Clientes com plano ativo</div>
+              <div id="statActive" class="stat-value mono">0</div><div class="stat-label">Contratações ativas</div><div id="statActiveBreakdown" class="small muted" style="margin-top:6px">0 planos · 0 avulsos</div>
             </div>
             <div class="stat-card success">
-              <div class="stat-top"><div class="stat-icon">R$</div><span class="stat-trend">Receita anual</span></div>
-              <div id="statRevenue" class="stat-value mono">R$ 0</div><div class="stat-label">Valor dos planos cadastrados</div>
+              <div class="stat-top"><div class="stat-icon">R$</div><span class="stat-trend">Carteira</span></div>
+              <div id="statRevenue" class="stat-value mono">R$ 0</div><div class="stat-label">Valor contratado na carteira</div><div id="statRevenueBreakdown" class="small muted" style="margin-top:6px">Planos R$ 0 · Avulsos R$ 0</div>
             </div>
             <div class="stat-card accent">
               <div class="stat-top"><div class="stat-icon">◷</div><span class="stat-trend" style="background:var(--warning-bg);color:var(--warning)">30 dias</span></div>
-              <div id="statExpiring" class="stat-value mono">0</div><div class="stat-label">Planos próximos do vencimento</div>
+              <div id="statExpiring" class="stat-value mono">0</div><div class="stat-label">Contratações próximas do vencimento</div>
             </div>
             <div class="stat-card danger">
               <div class="stat-top"><div class="stat-icon">!</div><span class="stat-trend" style="background:var(--danger-bg);color:var(--danger)">Atenção</span></div>
-              <div id="statExpired" class="stat-value mono">0</div><div class="stat-label">Planos vencidos</div>
+              <div id="statExpired" class="stat-value mono">0</div><div class="stat-label">Contratações vencidas</div>
             </div>
           </div>
 
           <div class="grid-2">
             <div class="card">
               <div class="card-header">
-                <div><div class="card-title">Clientes que exigem atenção</div><div class="card-subtitle">Próximos vencimentos e planos vencidos</div></div>
+                <div><div class="card-title">Clientes que exigem atenção</div><div class="card-subtitle">Planos e serviços avulsos próximos do vencimento ou vencidos</div></div>
                 <button class="btn btn-soft btn-sm" data-go-page="expirations">Ver todos</button>
               </div>
               <div class="table-wrap">
@@ -1205,7 +1205,7 @@
 
             <div class="card">
               <div class="card-header">
-                <div><div class="card-title">Uso dos benefícios</div><div class="card-subtitle">Quantidade utilizada na carteira atual</div></div>
+                <div><div class="card-title">Uso dos serviços contratados</div><div class="card-subtitle">Utilizações de planos completos e serviços avulsos</div></div>
               </div>
               <div class="card-body">
                 <div class="usage-bars">
@@ -1252,7 +1252,12 @@
                 <option value="active">Ativos</option>
                 <option value="expiring">Próximos do vencimento</option>
                 <option value="expired">Vencidos</option>
-                <option value="no_plan">Sem plano contratado</option>
+                <option value="no_plan">Sem contratação ativa</option>
+              </select>
+              <select id="clientSaleModeFilter" class="filter-select">
+                <option value="">Todos os tipos</option>
+                <option value="plan">Planos completos</option>
+                <option value="single_service">Serviços avulsos</option>
               </select>
             </div>
             <div class="toolbar-right">
@@ -1265,11 +1270,11 @@
           <div class="card">
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Cliente</th><th>Contato</th><th>Início do plano</th><th>Vencimento</th><th>Prazo</th><th>Contrato</th><th>Benefícios</th><th>Relatório de geração</th><th></th></tr></thead>
+                <thead><tr><th>Cliente / contratação</th><th>Contato</th><th>Início</th><th>Vencimento</th><th>Prazo</th><th>Contrato</th><th>Serviços</th><th>Relatório de geração</th><th></th></tr></thead>
                 <tbody id="clientsTable"></tbody>
               </table>
             </div>
-            <div id="clientsEmpty" class="empty hidden"><div class="empty-icon">♙</div><strong>Nenhum cliente encontrado</strong><span>Cadastre o primeiro cliente do plano de monitoramento.</span></div>
+            <div id="clientsEmpty" class="empty hidden"><div class="empty-icon">♙</div><strong>Nenhum cliente encontrado</strong><span>Cadastre o primeiro cliente e escolha entre plano completo ou serviço avulso.</span></div>
           </div>
         </section>
 
@@ -1440,19 +1445,19 @@
             <div class="stat-card danger"><div class="stat-icon">!</div><div id="expExpiredCount" class="stat-value">0</div><div class="stat-label">Vencidos</div></div>
             <div class="stat-card accent"><div class="stat-icon">7</div><div id="exp7Count" class="stat-value">0</div><div class="stat-label">Vencem em até 7 dias</div></div>
             <div class="stat-card accent"><div class="stat-icon">30</div><div id="exp30Count" class="stat-value">0</div><div class="stat-label">Vencem em até 30 dias</div></div>
-            <div class="stat-card success"><div class="stat-icon">R$</div><div id="renewalPotential" class="stat-value">R$ 0</div><div class="stat-label">Potencial de renovação</div></div>
+            <div class="stat-card success"><div class="stat-icon">R$</div><div id="renewalPotential" class="stat-value">R$ 0</div><div class="stat-label">Potencial de renovação / reoferta</div></div>
           </div>
           <div class="card">
             <div class="card-header">
-              <div><div class="card-title">Agenda de renovações</div><div class="card-subtitle">Ordenada por urgência</div></div>
+              <div><div class="card-title">Agenda de renovação e reoferta</div><div class="card-subtitle">Planos para renovar e serviços avulsos para oferecer novamente</div></div>
             </div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Cliente</th><th>Vencimento</th><th>Dias restantes</th><th>Responsável</th><th>Telefone</th><th></th></tr></thead>
+                <thead><tr><th>Cliente</th><th>Tipo</th><th>Vencimento</th><th>Dias restantes</th><th>Responsável</th><th>Telefone</th><th></th></tr></thead>
                 <tbody id="expirationsTable"></tbody>
               </table>
             </div>
-            <div id="expirationsEmpty" class="empty hidden"><div class="empty-icon">✓</div><strong>Nenhuma renovação pendente</strong><span>Não há planos vencidos ou vencendo nos próximos 60 dias.</span></div>
+            <div id="expirationsEmpty" class="empty hidden"><div class="empty-icon">✓</div><strong>Nenhuma ação comercial pendente</strong><span>Não há planos ou serviços avulsos vencidos ou vencendo nos próximos 60 dias.</span></div>
           </div>
         </section>
 
@@ -1489,7 +1494,7 @@
             <div class="card-header">
               <div>
                 <div class="card-title">Planos e benefícios</div>
-                <div class="card-subtitle">Edite preços, nomes, limites anuais e textos apresentados ao cliente</div>
+                <div class="card-subtitle">Edite preços dos planos, preços-base avulsos, nomes, limites e textos apresentados ao cliente</div>
               </div>
               <span id="planSettingsBadge" class="badge gray"><span class="status-dot"></span>Configuração padrão</span>
             </div>
@@ -1498,7 +1503,7 @@
                 <div class="plan-settings-intro">
                   <div>
                     <strong style="font-size:13px">Configuração comercial dos planos</strong>
-                    <p class="muted small">As alterações serão usadas em novos cadastros, ativações e renovações. Alterações de preço também atualizam contratos ainda aguardando aceite. Contratos já aceitos preservam o valor registrado no momento da assinatura.</p>
+                    <p class="muted small">As alterações serão usadas em novos cadastros, ativações, serviços avulsos e renovações. Cada benefício pode ter um preço-base avulso. Alterações de preço atualizam somente contratos pendentes compatíveis; contratos já aceitos preservam o valor assinado.</p>
                   </div>
                   <div class="field" style="min-width:min(360px,100%)">
                     <label>Nome geral do produto</label>
@@ -1514,7 +1519,7 @@
                         <div class="field"><label>Nome exibido do plano</label><input id="planCpfLabel" required></div>
                         <div class="field"><label>Valor anual (R$)</label><div class="price-save-control"><input id="planCpfPrice" type="number" min="0" step="0.01" required><button id="saveCpfPriceBtn" type="button" class="btn btn-primary btn-sm" data-permission="plansManage">Salvar preço</button></div></div>
                       </div>
-                      <div class="card-subtitle" style="margin-bottom:10px">Benefícios disponíveis no plano CPF</div>
+                      <div class="card-subtitle" style="margin-bottom:10px">Serviços do plano CPF e preços para venda avulsa</div>
                       <div id="planBenefitsCpf" class="benefit-editor-list"></div>
                     </div>
                   </article>
@@ -1526,7 +1531,7 @@
                         <div class="field"><label>Nome exibido do plano</label><input id="planCnpjLabel" required></div>
                         <div class="field"><label>Valor anual (R$)</label><div class="price-save-control"><input id="planCnpjPrice" type="number" min="0" step="0.01" required><button id="saveCnpjPriceBtn" type="button" class="btn btn-primary btn-sm" data-permission="plansManage">Salvar preço</button></div></div>
                       </div>
-                      <div class="card-subtitle" style="margin-bottom:10px">Benefícios disponíveis no plano CNPJ</div>
+                      <div class="card-subtitle" style="margin-bottom:10px">Serviços do plano CNPJ e preços para venda avulsa</div>
                       <div id="planBenefitsCnpj" class="benefit-editor-list"></div>
                     </div>
                   </article>
@@ -1747,9 +1752,11 @@
             <div class="field full"><label>Nome completo / Razão social *</label><input id="clientName" required></div>
             <div class="field"><label>CPF / CNPJ *</label><input id="clientDocument" placeholder="Digite o CPF ou CNPJ" required><span id="clientPlanPreview" class="small muted">Informe o documento para definir o plano.</span></div>
             <div class="field"><label>Telefone / WhatsApp</label><input id="clientPhone" placeholder="(47) 99999-9999"></div>
+            <div class="field"><label>Tipo de venda *</label><select id="clientSaleMode"><option value="plan">Plano completo</option><option value="single_service">Serviço avulso</option></select></div>
+            <div class="field"><label>Valor desta venda (R$)</label><input id="clientSalePrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"><span id="clientSalePriceHint" class="small muted">No plano completo, será usado o valor padrão configurado.</span></div>
             <div class="field full">
               <div class="sale-benefits-box">
-                <div class="sale-benefits-head"><div><strong>Itens inclusos nesta venda</strong><span>A operadora pode marcar ou desmarcar os serviços e definir a quantidade anual contratada para este cliente. Análise de fatura e análise do aplicativo podem ter 2, 3, 4 ou mais utilizações.</span></div><button id="clientResetSaleBenefits" type="button" class="btn btn-ghost btn-sm">Usar padrão do plano</button></div>
+                <div class="sale-benefits-head"><div><strong>Itens inclusos nesta venda</strong><span>Escolha plano completo ou serviço avulso. No serviço avulso, selecione apenas um item e informe a quantidade contratada.</span></div><button id="clientResetSaleBenefits" type="button" class="btn btn-ghost btn-sm">Usar padrão do plano</button></div>
                 <div id="clientSaleBenefits" class="sale-benefits-list"></div>
                 <div id="clientSaleBenefitsSummary" class="sale-benefits-summary">Informe o CPF/CNPJ para carregar os itens.</div>
               </div>
@@ -1847,21 +1854,23 @@
   <!-- MODAL ATIVAÇÃO DO PLANO -->
   <div id="activatePlanModalBackdrop" class="modal-backdrop">
     <div class="modal">
-      <div class="modal-header"><h3>Ativar plano de monitoramento</h3><button class="close-btn" data-close="activatePlanModalBackdrop">×</button></div>
+      <div class="modal-header"><h3>Registrar venda de monitoramento</h3><button class="close-btn" data-close="activatePlanModalBackdrop">×</button></div>
       <form id="activatePlanForm">
         <div class="modal-body">
           <input id="activateClientId" type="hidden">
           <div class="demo-note" style="margin:0 0 18px">
             <strong>Confira os dados antes de gerar o contrato.</strong><br>
-            Complete as informações obrigatórias. Ao confirmar, o plano será ativado e o link individual de aceite ficará pronto para copiar ou enviar pelo WhatsApp.
+            Complete as informações obrigatórias. Ao confirmar, a venda será registrada e o link individual de aceite ficará pronto para copiar ou enviar pelo WhatsApp.
           </div>
           <div class="form-grid">
             <div class="field full"><label>Nome completo / Razão social *</label><input id="activateName" required></div>
             <div class="field"><label>CPF / CNPJ *</label><input id="activateDocument" placeholder="Digite o CPF ou CNPJ" required><span id="activatePlanPreview" class="small muted">Informe o documento para definir o plano.</span></div>
             <div class="field"><label>Telefone / WhatsApp *</label><input id="activatePhone" placeholder="(47) 99999-9999" required></div>
+            <div class="field"><label>Tipo de venda *</label><select id="activateSaleMode"><option value="plan">Plano completo</option><option value="single_service">Serviço avulso</option></select></div>
+            <div class="field"><label>Valor desta venda (R$)</label><input id="activateSalePrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"><span id="activateSalePriceHint" class="small muted">No plano completo, será usado o valor padrão configurado.</span></div>
             <div class="field full">
               <div class="sale-benefits-box">
-                <div class="sale-benefits-head"><div><strong>Itens inclusos nesta venda</strong><span>Selecione os benefícios que constarão no contrato deste cliente e informe a quantidade anual de cada um. Análise de fatura e análise do aplicativo aceitam múltiplas utilizações.</span></div><button id="activateResetSaleBenefits" type="button" class="btn btn-ghost btn-sm">Usar padrão do plano</button></div>
+                <div class="sale-benefits-head"><div><strong>Itens inclusos nesta venda</strong><span>Escolha plano completo ou serviço avulso. No serviço avulso, somente um item poderá ser contratado por venda.</span></div><button id="activateResetSaleBenefits" type="button" class="btn btn-ghost btn-sm">Usar padrão do plano</button></div>
                 <div id="activateSaleBenefits" class="sale-benefits-list"></div>
                 <div id="activateSaleBenefitsSummary" class="sale-benefits-summary">Informe o CPF/CNPJ para carregar os itens.</div>
               </div>
@@ -1880,7 +1889,7 @@
             <div class="field full"><label>Observações</label><textarea id="activateNotes" placeholder="Informações adicionais para o cadastro ou atendimento..."></textarea></div>
           </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="activatePlanModalBackdrop">Cancelar</button><button id="activatePlanSubmitBtn" type="submit" class="btn btn-primary">Ativar plano e gerar contrato</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="activatePlanModalBackdrop">Cancelar</button><button id="activatePlanSubmitBtn" type="submit" class="btn btn-primary">Registrar venda e gerar contrato</button></div>
       </form>
     </div>
   </div>
@@ -2032,7 +2041,7 @@
 
     const SDK_VERSION = "12.16.0";
     const PLAN_DAYS = 365;
-    const CONTRACT_VERSION = "2.4";
+    const CONTRACT_VERSION = "2.5";
     const ACCEPT_TOKEN = new URLSearchParams(window.location.search).get("accept");
     const SERVICES = {
       technicalCall: { label: "Chamado técnico", icon: "☎" },
@@ -2052,22 +2061,22 @@
         label: "Plano CPF · Pessoa Física",
         price: 120,
         benefits: {
-          technicalCall: { enabled:false, label:"Chamado técnico", description:"Atendimento técnico incluído durante a vigência do plano.", limit:0, contractText:"1 chamado técnico" },
-          appCheck: { enabled:true, label:"Análise do aplicativo", description:"Conferência remota do aplicativo e da geração do sistema.", limit:3, contractText:"3 análises remotas do aplicativo de monitoramento" },
-          invoiceAnalysis: { enabled:true, label:"Análise de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:3, contractText:"3 análises de fatura de energia" },
-          technicalVisit: { enabled:true, label:"Visita técnica anual", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial durante a vigência anual" },
-          quarterlyReport: { enabled:false, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório de desempenho e geração enviado pelo WhatsApp.", limit:0, contractText:"relatório trimestral de geração enviado via WhatsApp" }
+          technicalCall: { enabled:false, label:"Chamado técnico", description:"Atendimento técnico incluído durante a vigência do plano.", limit:0, contractText:"1 chamado técnico" , standalonePrice:0 },
+          appCheck: { enabled:true, label:"Análise do aplicativo", description:"Conferência remota do aplicativo e da geração do sistema.", limit:3, contractText:"3 análises remotas do aplicativo de monitoramento" , standalonePrice:0 },
+          invoiceAnalysis: { enabled:true, label:"Análise de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:3, contractText:"3 análises de fatura de energia" , standalonePrice:0 },
+          technicalVisit: { enabled:true, label:"Visita técnica anual", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial durante a vigência anual" , standalonePrice:0 },
+          quarterlyReport: { enabled:false, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório de desempenho e geração enviado pelo WhatsApp.", limit:0, contractText:"relatório trimestral de geração enviado via WhatsApp" , standalonePrice:0 }
         }
       },
       cnpj: {
         label: "Plano CNPJ · Pessoa Jurídica",
         price: 350,
         benefits: {
-          technicalCall: { enabled:true, label:"Chamado técnico", description:"Um chamado técnico incluído durante a vigência do plano empresarial.", limit:1, contractText:"1 chamado técnico" },
-          appCheck: { enabled:true, label:"Análise do aplicativo", description:"Conferência, configuração ou ajuste remoto do aplicativo de monitoramento.", limit:3, contractText:"3 análises remotas do aplicativo de monitoramento" },
-          invoiceAnalysis: { enabled:true, label:"Análise de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:3, contractText:"3 análises de fatura de energia" },
-          technicalVisit: { enabled:true, label:"Visita técnica", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial" },
-          quarterlyReport: { enabled:true, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório trimestral de desempenho e geração enviado pelo WhatsApp.", limit:4, contractText:"relatório trimestral de geração enviado via WhatsApp, totalizando 4 envios durante a vigência anual" }
+          technicalCall: { enabled:true, label:"Chamado técnico", description:"Um chamado técnico incluído durante a vigência do plano empresarial.", limit:1, contractText:"1 chamado técnico" , standalonePrice:0 },
+          appCheck: { enabled:true, label:"Análise do aplicativo", description:"Conferência, configuração ou ajuste remoto do aplicativo de monitoramento.", limit:3, contractText:"3 análises remotas do aplicativo de monitoramento" , standalonePrice:0 },
+          invoiceAnalysis: { enabled:true, label:"Análise de fatura", description:"Análise da fatura para validar créditos, consumo e compensação.", limit:3, contractText:"3 análises de fatura de energia" , standalonePrice:0 },
+          technicalVisit: { enabled:true, label:"Visita técnica", description:"Uma visita presencial incluída durante a vigência do plano.", limit:1, contractText:"1 visita técnica presencial" , standalonePrice:0 },
+          quarterlyReport: { enabled:true, label:"Relatório trimestral de geração via WhatsApp", description:"Relatório trimestral de desempenho e geração enviado pelo WhatsApp.", limit:4, contractText:"relatório trimestral de geração enviado via WhatsApp, totalizando 4 envios durante a vigência anual" , standalonePrice:0 }
         }
       }
     };
@@ -2135,6 +2144,10 @@
       syncedContractClientDataTokens: new Set(),
       contractClientDataSyncRunning: false,
       clientBaseCleanupRunning: false,
+      serviceContractsLoaded: false,
+      maintenanceJobsLoaded: false,
+      serviceContractMaintenanceSyncRunning: false,
+      serviceContractMaintenanceSynced: new Set(),
       unsubscribers: []
     };
 
@@ -2242,7 +2255,8 @@
             label:String(benefit.label||defaults.label||SERVICES[type].label).trim(),
             description:String(benefit.description||defaults.description||"").trim(),
             limit,
-            contractText:String(benefit.contractText||defaults.contractText||"").trim()
+            contractText:String(benefit.contractText||defaults.contractText||"").trim(),
+            standalonePrice:Math.max(0,Number(benefit.standalonePrice ?? defaults.standalonePrice ?? 0)||0)
           };
           if(!normalized[planType].benefits[type].enabled) normalized[planType].benefits[type].limit=0;
         });
@@ -2254,7 +2268,7 @@
       Object.entries(getConfiguredPlan(clientOrDocument).benefits||{}).filter(([,item])=>item.enabled!==false && Number(item.limit)>0)
     );
     const normalizeBenefitSnapshot = (benefits={}) => Object.fromEntries(Object.entries(benefits).filter(([,item])=>Number(item?.limit)>0).map(([type,item])=>[type,{
-      label:String(item.label||SERVICES[type]?.label||type),description:String(item.description||""),limit:Math.max(0,Math.floor(Number(item.limit)||0)),contractText:String(item.contractText||item.label||SERVICES[type]?.label||type)
+      label:String(item.label||SERVICES[type]?.label||type),description:String(item.description||""),limit:Math.max(0,Math.floor(Number(item.limit)||0)),contractText:String(item.contractText||item.label||SERVICES[type]?.label||type),standalonePrice:Math.max(0,Number(item.standalonePrice||0)||0)
     }]));
     const snapshotPlanBenefits = (clientOrDocument) => cloneData(getConfiguredPlanBenefits(clientOrDocument));
     const getPlanPrice = (clientOrDocument) => {
@@ -2272,6 +2286,7 @@
       return getConfiguredPlanBenefits(clientOrDocument);
     };
     const getBenefit = (clientOrDocument, type) => getPlanBenefits(clientOrDocument)[type] || null;
+    const getStandaloneServicePrice = (clientOrDocument,type) => Math.max(0,Number(getConfiguredPlan(clientOrDocument)?.benefits?.[type]?.standalonePrice||0)||0);
     const serviceEntries = (client, type) => {
       const service=client?.services?.[type];
       if(!service) return [];
@@ -2331,8 +2346,8 @@
           <div class="contract-client-field"><span>Responsável pela venda</span><strong>${safe(contractValue(c.seller))}</strong></div>
           <div class="contract-client-field"><span>Forma de pagamento</span><strong>${safe(contractValue(c.payment))}</strong></div>
           <div class="contract-client-field"><span>Situação do pagamento</span><strong>${safe(paymentStatus)}</strong></div>
-          <div class="contract-client-field"><span>Início do plano</span><strong>${safe(c.planStart?formatDate(c.planStart):"Não informado")}</strong></div>
-          <div class="contract-client-field"><span>Fim do plano</span><strong>${safe(c.planEnd?formatDate(c.planEnd):"Não informado")}</strong></div>
+          <div class="contract-client-field"><span>Início da contratação</span><strong>${safe(c.planStart?formatDate(c.planStart):"Não informado")}</strong></div>
+          <div class="contract-client-field"><span>Fim da vigência</span><strong>${safe(c.planEnd?formatDate(c.planEnd):"Não informado")}</strong></div>
           <div class="contract-client-field full"><span>Observações do cadastro</span><strong>${safe(contractValue(c.notes,"Nenhuma observação"))}</strong></div>
         </div>
       </div>`;
@@ -2456,25 +2471,30 @@
       const price=money(getPlanPrice(data));
       const planLabel=getPlanLabel(data);
       const benefits=Object.values(getPlanBenefits(data)).map(item=>`<li>${safe(item.contractText)};</li>`).join("");
+      const single=data.saleMode==="single_service";
       const contractConfig=state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract;
       const renewalText=safe(contractConfig.renewalClause||DEFAULT_PLAN_SETTINGS.contract.renewalClause).replace(/\n/g,"<br>");
-      const renewalClause=contractConfig.automaticRenewalEnabled
+      const renewalClause=!single && contractConfig.automaticRenewalEnabled
         ? `<h2>6. Renovação automática e encerramento</h2><p>${renewalText}</p>`
         : "";
-      const nextSection=contractConfig.automaticRenewalEnabled?7:6;
-      return `<h1>Contrato de adesão ao plano de monitoramento</h1>
+      const nextSection=(!single&&contractConfig.automaticRenewalEnabled)?7:6;
+      const title=single?"Contrato de serviço avulso de monitoramento":"Contrato de adesão ao plano de monitoramento";
+      const objectText=single?`Este contrato formaliza a contratação avulsa de <strong>${safe(planLabel)}</strong>, limitada ao serviço e à quantidade descritos na cláusula 2.`:`Este contrato formaliza a adesão do CONTRATANTE ao ${safe(planLabel)}, destinado ao acompanhamento do sistema de energia solar durante o período anual contratado.`;
+      const serviceIntro=single?"A contratação contempla exclusivamente o serviço abaixo, na quantidade indicada:":"Durante a vigência, o plano concede os benefícios abaixo, respeitando os limites anuais indicados:";
+      const valueText=single?`O valor desta contratação avulsa é de <strong>${price}</strong>.`:`O valor anual deste contrato é de <strong>${price}</strong>, definido conforme o documento do CONTRATANTE.`;
+      const validityText=single?`A contratação poderá ser utilizada entre <strong>${formatDate(data.planStart)}</strong> e <strong>${formatDate(data.planEnd||addYear(data.planStart))}</strong>, limitada à quantidade contratada. A contratação avulsa não implica adesão automática ao pacote completo de monitoramento nem renovação automática.`:`O plano terá vigência de 12 meses, iniciando em <strong>${formatDate(data.planStart)}</strong> e encerrando em <strong>${formatDate(data.planEnd||addYear(data.planStart))}</strong>. Os benefícios não utilizados não são cumulativos para o período seguinte.`;
+      return `<h1>${title}</h1>
         <div class="contract-number">Contrato nº ${safe(number)} · Versão ${CONTRACT_VERSION}</div>
         ${contractPartiesHtml(data)}
-        <h2>1. Objeto</h2><p>Este contrato formaliza a adesão do CONTRATANTE ao ${safe(planLabel)}, destinado ao acompanhamento do sistema de energia solar durante o período anual contratado.</p>
-        <h2>2. Serviços incluídos</h2><p>Durante a vigência, o plano concede os benefícios abaixo, respeitando os limites anuais indicados:</p><ul>${benefits}</ul>
-        <h2>3. Valor e pagamento</h2><p>O valor anual deste contrato é de <strong>${price}</strong>, definido conforme o documento do CONTRATANTE. A forma de pagamento cadastrada é ${safe(data.payment||"a combinar")}.</p>
-        <h2>4. Vigência</h2><p>O plano terá vigência de 12 meses, iniciando em <strong>${formatDate(data.planStart)}</strong> e encerrando em <strong>${formatDate(data.planEnd||addYear(data.planStart))}</strong>. Os benefícios não utilizados não são cumulativos para o período seguinte.</p>
-        <h2>5. Carência para atendimento presencial</h2><p>O CONTRATANTE estará sujeito à carência de 30 (trinta) dias corridos, contados a partir da data de início da vigência do plano indicada na cláusula 4, para utilizar os atendimentos técnicos presenciais incluídos no plano contratado. Durante esse período, permanecem disponíveis os serviços de monitoramento e suporte remoto previstos no plano. Se o CONTRATANTE solicitar atendimento presencial antes do término da carência, a CONTRATADA poderá realizá-lo mediante orçamento e aprovação prévia do CONTRATANTE, com cobrança à parte, sem consumo do benefício presencial anual incluído no plano. Após o término da carência, os atendimentos presenciais incluídos poderão ser solicitados, respeitados os limites, o agendamento e as demais condições deste contrato.</p>
+        <h2>1. Objeto</h2><p>${objectText}</p>
+        <h2>2. Serviço${single?"":"s"} contratado${single?"":"s"}</h2><p>${serviceIntro}</p><ul>${benefits}</ul>
+        <h2>3. Valor e pagamento</h2><p>${valueText} A forma de pagamento cadastrada é ${safe(data.payment||"a combinar")}.</p>
+        <h2>4. Vigência</h2><p>${validityText}</p>
+        <h2>5. Condições de atendimento</h2><p>Os atendimentos dependem de solicitação e, quando aplicável, agendamento. O CONTRATANTE deverá disponibilizar acesso ao aplicativo, faturas e demais informações necessárias. Peças, materiais, deslocamentos extraordinários, reparos corretivos e serviços não descritos na cláusula 2 não estão incluídos, podendo ser orçados separadamente.</p>
         ${renewalClause}
-        <h2>${nextSection}. Condições de atendimento</h2><p>Os atendimentos dependem de solicitação e agendamento. O CONTRATANTE deverá disponibilizar acesso ao aplicativo, faturas e demais informações necessárias. Peças, materiais, deslocamentos extraordinários, reparos corretivos e serviços não descritos na cláusula 2 não estão incluídos, podendo ser orçados separadamente.</p>
-        <h2>${nextSection+1}. Aceite eletrônico</h2><p>O CONTRATANTE declara que teve acesso ao conteúdo integral deste instrumento e concorda que o aceite eletrônico seja utilizado como manifestação de vontade. O sistema registrará a data, a hora, a identificação informada e dados técnicos do dispositivo utilizado.</p>
-        <h2>${nextSection+2}. Dados pessoais</h2><p>Os dados fornecidos serão utilizados para cadastro, execução do plano, comunicação, comprovação do aceite e manutenção do histórico contratual, observadas as obrigações legais aplicáveis.</p>
-        <h2>${nextSection+3}. Disposições gerais</h2><p>As situações não previstas serão tratadas entre as partes conforme a legislação aplicável. Alterações relevantes no plano deverão ser formalizadas em novo instrumento ou renovação.</p>`;
+        <h2>${nextSection}. Aceite eletrônico</h2><p>O CONTRATANTE declara que teve acesso ao conteúdo integral deste instrumento e concorda que o aceite eletrônico seja utilizado como manifestação de vontade. O sistema registrará a data, a hora, a identificação informada e dados técnicos do dispositivo utilizado.</p>
+        <h2>${nextSection+1}. Dados pessoais</h2><p>Os dados fornecidos serão utilizados para cadastro, execução do serviço contratado, comunicação, comprovação do aceite e manutenção do histórico contratual, observadas as obrigações legais aplicáveis.</p>
+        <h2>${nextSection+2}. Disposições gerais</h2><p>As situações não previstas serão tratadas entre as partes conforme a legislação aplicável. Alterações relevantes deverão ser formalizadas em novo instrumento.</p>`;
     }
     async function createContractRecord(clientId,data,reason="new"){
       const token=makeContractToken();
@@ -2483,11 +2503,11 @@
       return {
         token, number, version:CONTRACT_VERSION, reason, clientId,
         clientName:data.name, clientDocument:data.document||"", documentType:getClientType(data), documentMasked:maskDocument(data.document),
-        documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data), planPriceCustom:!!data.planPriceCustom,
+        documentHash:await hashText(documentDigits(data.document)), planLabel:getPlanLabel(data), planPrice:getPlanPrice(data), planPriceCustom:!!data.planPriceCustom, saleMode:data.saleMode||"plan",
         planStart:data.planStart, planEnd:data.planEnd||addYear(data.planStart), city:data.city||"", address:data.address||"",
         clientPhone:data.phone||"", clientEmail:data.email||"", clientSeller:data.seller||"", payment:data.payment||"", paymentStatus:data.paymentStatus||"", clientNotes:data.notes||"",
         clientSnapshot:contractClientSnapshot(data), status:"pending", generatedAt,
-        automaticRenewalEnabled:!!(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).automaticRenewalEnabled,
+        automaticRenewalEnabled:data.saleMode==="single_service"?false:!!(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).automaticRenewalEnabled,
         renewalClause:(state.planSettings.contract||DEFAULT_PLAN_SETTINGS.contract).renewalClause||"",
         contractHtml:buildContractHtml(data,number)
       };
@@ -2844,11 +2864,12 @@
       return `<div class="benefit-editor ${active?"":"inactive"}" data-benefit-row="${planType}-${type}">
         <div class="benefit-editor-summary">
           <input class="benefit-toggle" type="checkbox" data-benefit-enabled="${planType}-${type}" ${active?"checked":""} aria-label="Ativar benefício">
-          <div><strong data-benefit-summary="${planType}-${type}">${safe(benefit.label||SERVICES[type].label)}</strong><span>${active?"Benefício ativo no plano":"Benefício desativado"}</span></div>
+          <div><strong data-benefit-summary="${planType}-${type}">${safe(benefit.label||SERVICES[type].label)}</strong><span>${active?"Incluído no plano":"Fora do plano · configurável para avulso"}</span></div>
           <input type="number" min="1" step="1" value="${active?Math.max(1,Number(benefit.limit)||1):Math.max(1,Number(DEFAULT_PLAN_SETTINGS[planType].benefits[type].limit)||1)}" data-benefit-limit="${planType}-${type}" aria-label="Quantidade anual" ${active?"":"disabled"}>
         </div>
         <div class="benefit-editor-fields">
           <div class="field"><label>Nome do benefício</label><input value="${safe(benefit.label||SERVICES[type].label)}" data-benefit-label="${planType}-${type}"></div>
+          <div class="field"><label>Preço-base avulso (R$)</label><input type="number" min="0" step="0.01" value="${Number(benefit.standalonePrice||0).toFixed(2)}" data-benefit-standalone-price="${planType}-${type}" placeholder="0,00"><span class="small muted">Usado ao vender somente este serviço. O operador ainda pode alterar o valor na venda.</span></div>
           <div class="field"><label>Descrição apresentada na ficha do cliente</label><textarea data-benefit-description="${planType}-${type}">${safe(benefit.description||"")}</textarea></div>
           <div class="field"><label>Texto apresentado no contrato</label><input value="${safe(benefit.contractText||"")}" data-benefit-contract="${planType}-${type}"></div>
         </div>
@@ -2897,12 +2918,13 @@
       const label=document.querySelector(`[data-benefit-label="${key}"]`)?.value.trim()||SERVICES[type].label;
       const description=document.querySelector(`[data-benefit-description="${key}"]`)?.value.trim()||"";
       const contractText=document.querySelector(`[data-benefit-contract="${key}"]`)?.value.trim()||`${limit} ${label}`;
-      return {enabled,label,description,limit,contractText};
+      const standalonePrice=Math.max(0,Number(document.querySelector(`[data-benefit-standalone-price="${key}"]`)?.value)||0);
+      return {enabled,label,description,limit,contractText,standalonePrice};
     }
     function readPlanSettingsForm(){
       const automaticRenewalEnabled=$("planAutomaticRenewalEnabled").checked;
       const renewalClause=$("planRenewalClause").value.trim();
-      const settings={version:2,name:$("planGeneralName").value.trim(),contract:{automaticRenewalEnabled,renewalClause},cpf:{label:$("planCpfLabel").value.trim(),price:Number($("planCpfPrice").value),benefits:{}},cnpj:{label:$("planCnpjLabel").value.trim(),price:Number($("planCnpjPrice").value),benefits:{}}};
+      const settings={version:3,name:$("planGeneralName").value.trim(),contract:{automaticRenewalEnabled,renewalClause},cpf:{label:$("planCpfLabel").value.trim(),price:Number($("planCpfPrice").value),benefits:{}},cnpj:{label:$("planCnpjLabel").value.trim(),price:Number($("planCnpjPrice").value),benefits:{}}};
       if(!settings.name||!settings.cpf.label||!settings.cnpj.label)throw new Error("Preencha os nomes dos planos.");
       if(automaticRenewalEnabled&&!renewalClause)throw new Error("Informe o texto da cláusula de renovação automática.");
       if(!Number.isFinite(settings.cpf.price)||settings.cpf.price<0||!Number.isFinite(settings.cnpj.price)||settings.cnpj.price<0)throw new Error("Informe valores anuais válidos.");
@@ -2924,7 +2946,7 @@
       const isCpf=planType==="cpf";
       const input=$(isCpf?"planCpfPrice":"planCnpjPrice");
       const value=Number(input?.value);
-      if(!Number.isFinite(value)||value<0){showToast("Informe um valor anual válido.","error");input?.focus();return;}
+      if(!Number.isFinite(value)||value<0){showToast("Informe um valor válido para a contratação.","error");input?.focus();return;}
       const settings=normalizePlanSettings({
         ...state.planSettings,
         [planType]:{...state.planSettings[planType],price:value}
@@ -3170,11 +3192,14 @@
         // separados logicamente para não aparecerem na lista de monitoramento.
         state.serviceContracts=allContracts.filter(c=>c.contractKind==="service").sort((a,b)=>new Date(b.createdAt||b.updatedAt||0)-new Date(a.createdAt||a.updatedAt||0));
         state.contracts=allContracts.filter(c=>c.contractKind!=="service");
-        renderClients();renderContracts();renderServiceContracts();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();
+        state.serviceContractsLoaded=true;
+        renderClients();renderContracts();renderServiceContracts();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();syncServiceContractsToMaintenance();
       },err=>showToast("Erro ao carregar contratos: "+err.message,"error")));
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"maintenanceJobs"),orderBy("createdAt","desc")),snap=>{
         state.maintenanceJobs=snap.docs.map(d=>{const raw=d.data();return {id:d.id,...raw,createdAt:timestampISO(raw.createdAt)||raw.createdAt||null,updatedAt:timestampISO(raw.updatedAt)||raw.updatedAt||null,approvedAt:timestampISO(raw.approvedAt)||raw.approvedAt||null,paidAt:timestampISO(raw.paidAt)||raw.paidAt||null,osGeneratedAt:timestampISO(raw.osGeneratedAt)||raw.osGeneratedAt||null,startedAt:timestampISO(raw.startedAt)||raw.startedAt||null,completedAt:timestampISO(raw.completedAt)||raw.completedAt||null};});
+        state.maintenanceJobsLoaded=true;
         renderMaintenanceJobs();
+        syncServiceContractsToMaintenance();
         if(state.selectedMaintenanceId && $("maintenanceDetailBackdrop")?.classList.contains("open")) openMaintenanceDetail(state.selectedMaintenanceId);
         if(state.selectedServiceOrderId && $("serviceOrderBackdrop")?.classList.contains("open")) renderServiceOrder(state.selectedServiceOrderId);
       },err=>showToast("Erro ao carregar preventivas e limpeza: "+err.message,"error")));
@@ -3190,7 +3215,14 @@
       const expiring=infos.filter(x=>x.status==="expiring").length;
       const expired=infos.filter(x=>x.status==="expired").length;
       $("statActive").textContent=active;
-      $("statRevenue").textContent=money(state.clients.filter(hasActivePlan).reduce((sum, client)=>sum+getPlanPrice(client),0));
+      const activeContracted=state.clients.filter(hasActivePlan);
+      const activePlans=activeContracted.filter(c=>(c.saleMode||"plan")!=="single_service");
+      const activeSingles=activeContracted.filter(c=>c.saleMode==="single_service");
+      if($("statActiveBreakdown"))$("statActiveBreakdown").textContent=`${activePlans.length} plano(s) · ${activeSingles.length} avulso(s)`;
+      const planRevenue=activePlans.reduce((sum,c)=>sum+getPlanPrice(c),0);
+      const singleRevenue=activeSingles.reduce((sum,c)=>sum+getPlanPrice(c),0);
+      $("statRevenue").textContent=money(planRevenue+singleRevenue);
+      if($("statRevenueBreakdown"))$("statRevenueBreakdown").textContent=`Planos ${money(planRevenue)} · Avulsos ${money(singleRevenue)}`;
       $("statExpiring").textContent=expiring;
       $("statExpired").textContent=expired;
 
@@ -3229,10 +3261,11 @@
     function filteredClients(){
       const term=$("clientSearch").value.trim().toLowerCase();
       const filter=$("clientStatusFilter").value;
+      const saleModeFilter=$("clientSaleModeFilter")?.value||"";
       return state.clients.filter(c=>{
         const hay=[c.name,c.document,c.city,c.phone,c.email].join(" ").toLowerCase();
         const info=getPlanInfo(c);
-        return (!term||hay.includes(term))&&(!filter||info.status===filter);
+        return (!term||hay.includes(term))&&(!filter||info.status===filter)&&(!saleModeFilter||(c.saleMode||"plan")===saleModeFilter);
       });
     }
     function generationReportEntries(c){
@@ -3293,15 +3326,16 @@
     function renderClients(){
       const list=filteredClients();
       $("clientsTable").innerHTML=list.map(c=>{
-        const p=getPlanInfo(c);const used=usedPlanBenefits(c);const total=totalPlanBenefits(c);const contract=getContractForClient(c);
-        const planText=hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano`:`Sem plano contratado`;
-        const benefitHtml=hasActivePlan(c)?`<span class="badge info">${used}/${total} utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}`:`<span class="badge gray">Plano não ativado</span>`;
+        const p=getPlanInfo(c);
+      const isSingle=c.saleMode==="single_service";const used=usedPlanBenefits(c);const total=totalPlanBenefits(c);const contract=getContractForClient(c);
+        const planText=hasActivePlan(c)?(c.saleMode==="single_service"?`AVULSO · ${getPlanLabel(c)} · ${money(getPlanPrice(c))}`:`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))}/ano`):`Sem plano contratado`;
+        const benefitHtml=hasActivePlan(c)?`<span class="badge info">${used}/${total} utilizados</span>${c.paymentStatus==="pending"?` <span class="badge warning">Pagamento pendente</span>`:""}`:`<span class="badge gray">Sem contratação ativa</span>`;
         return `<tr>
           <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name)}</div><div><strong>${safe(c.name)}</strong><span>${safe(c.document||"Documento não informado")} · ${planText}</span>
             <div class="client-list-plan-editor">
-              <span class="client-list-plan-label">Valor do plano</span>
+              <span class="client-list-plan-label">${c.saleMode==="single_service"?"Valor avulso":"Valor do plano"}</span>
               <span class="money-prefix">R$</span>
-              <input id="clientPlanPrice_${c.id}" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(getPlanPrice(c)||0).toFixed(2)}" ${can("clientsEdit")?"":"disabled"} aria-label="Valor anual do plano de ${safe(c.name)}">
+              <input id="clientPlanPrice_${c.id}" type="number" min="0" step="0.01" inputmode="decimal" value="${Number(getPlanPrice(c)||0).toFixed(2)}" ${can("clientsEdit")?"":"disabled"} aria-label="Valor da contratação de ${safe(c.name)}">
               <button type="button" class="btn btn-primary btn-sm" onclick="saveClientPlanPriceFromList('${c.id}',this)" ${can("clientsEdit")?"":"disabled"}>Salvar valor</button>
             </div>
           </div></div></td>
@@ -3309,10 +3343,10 @@
           <td class="mono">${formatDate(p.start)}</td>
           <td class="mono">${formatDate(p.end)}</td>
           <td>${statusBadge(p.status,p.days)}</td>
-          <td>${hasActivePlan(c)?contractBadge(contract):'<span class="badge gray">Aguardando ativação</span>'}${contract?.number?`<div class="small muted" style="margin-top:5px">${safe(contract.number)}</div>`:""}</td>
+          <td>${hasActivePlan(c)?contractBadge(contract):'<span class="badge gray">Aguardando contratação</span>'}${contract?.number?`<div class="small muted" style="margin-top:5px">${safe(contract.number)}</div>`:""}</td>
           <td>${benefitHtml}</td>
           <td class="generation-report-cell">${generationReportCell(c)}</td>
-          <td><div class="actions"><button class="btn btn-soft btn-sm" onclick="${hasActivePlan(c)?`openClient('${c.id}')`:`startPlanActivation('${c.id}')`}">${hasActivePlan(c)?"Ver ficha":"Ativar plano"}</button>
+          <td><div class="actions"><button class="btn btn-soft btn-sm" onclick="${hasActivePlan(c)?`openClient('${c.id}')`:`startPlanActivation('${c.id}')`}">${hasActivePlan(c)?"Ver ficha":"Nova contratação"}</button>
           ${contract?`<button class="btn btn-ghost btn-sm" onclick="openContractByToken('${contract.token}')" title="Visualizar contrato">▤ Ver contrato</button>`:""}
           <button class="btn btn-ghost btn-sm" onclick="editClient('${c.id}')" ${can("clientsEdit")?"":"disabled"}>✎</button>
           <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')" ${can("clientsDelete")?"":"disabled"}>×</button></div></td>
@@ -3470,7 +3504,7 @@
           ? `<button class="btn btn-primary btn-sm" onclick="openContractForClient('${contract.clientId}')" ${can("clientsEdit")?"":"disabled"}>Gerar contrato</button>`
           : `<button class="btn btn-soft btn-sm" onclick="openContractByToken('${contract.token}')">Ver contrato</button>`;
         return `<tr>
-          <td><strong>${safe(contract.number||"—")}</strong><div class="small muted" style="margin-top:4px">${safe(contract.reason==="renewal"?"Renovação":contract.reason==="activation"?"Ativação":contract.reason==="not_generated"?"Plano ativo":"Contrato do plano")}</div></td>
+          <td><strong>${safe(contract.number||"—")}</strong><div class="small muted" style="margin-top:4px">${safe(contract.saleMode==="single_service"?"Serviço avulso":contract.reason==="renewal"?"Renovação":contract.reason==="activation"?"Ativação":contract.reason==="not_generated"?"Plano ativo":"Contrato do plano")}</div></td>
           <td><div class="customer-cell"><div class="customer-avatar">${initials(clientName)}</div><div><strong>${safe(clientName)}</strong><span>${safe(clientDoc||contract.clientPhone||"Sem documento")}</span></div></div></td>
           <td class="mono">${contract.generatedAt?formatDateTime(timestampISO(contract.generatedAt)):"—"}</td>
           <td>${statusHtml}</td>
@@ -3641,6 +3675,7 @@
         const localIndex=state.serviceContracts.findIndex(c=>c.id===ref.id);
         if(localIndex>=0)state.serviceContracts[localIndex]=localRecord;else state.serviceContracts.unshift(localRecord);
         renderServiceContracts();
+        try{await ensureMaintenanceJobForServiceContract(localRecord,{silent:false});}catch(syncErr){console.warn(syncErr);showToast("Contrato salvo, mas não foi possível criar automaticamente o serviço na aba Preventivas e limpeza.","error");}
         renderServiceContractPreview(localRecord);
         openModal("serviceContractPreviewBackdrop");
         try{await logActivity("service-contract",data.clientId||ref.id,id?"Contrato de serviço atualizado":"Contrato de serviço gerado",`${data.clientName} · ${number} · ${serviceContractTypeLabel(data.serviceType)}`);}catch(_){ }
@@ -3708,9 +3743,10 @@
       $("renewalPotential").textContent=money(list.reduce((sum, item)=>sum+getPlanPrice(item.client),0));
       $("expirationsTable").innerHTML=list.map(x=>`<tr>
         <td><div class="customer-cell"><div class="customer-avatar">${initials(x.client.name)}</div><div><strong>${safe(x.client.name)}</strong><span>${safe(x.client.document||"")}</span></div></div></td>
+        <td><span class="badge ${x.client.saleMode==="single_service"?"warning":"info"}">${x.client.saleMode==="single_service"?`Avulso · ${safe(getPlanLabel(x.client))}`:"Plano completo"}</span></td>
         <td class="mono">${formatDate(x.end)}</td><td>${statusBadge(x.status,x.days)}</td>
         <td>${safe(x.client.seller||"Não informado")}</td><td>${safe(x.client.phone||"—")}</td>
-        <td class="text-right"><button class="btn btn-soft btn-sm" onclick="openClient('${x.client.id}')">Abrir ficha</button></td></tr>`).join("");
+        <td class="text-right"><button class="btn btn-soft btn-sm" onclick="openClient('${x.client.id}')">${x.client.saleMode==="single_service"?"Reofertar":"Renovar"}</button></td></tr>`).join("");
       $("expirationsEmpty").classList.toggle("hidden",list.length>0);
     }
     function renderUsers(){
@@ -3742,7 +3778,7 @@
       if(!state.connected){showToast("Realtime Database indisponível.","error");return;}
       const input=document.getElementById(`clientPlanPrice_${id}`);
       const value=Number(String(input?.value||"").replace(",","."));
-      if(!Number.isFinite(value)||value<0){showToast("Informe um valor anual válido.","error");input?.focus();return;}
+      if(!Number.isFinite(value)||value<0){showToast("Informe um valor válido para a contratação.","error");input?.focus();return;}
       const previous=getPlanPrice(c);
       const existingContract=getContractForClient(c);
       const originalText=button?.textContent||"Salvar valor";
@@ -3752,7 +3788,7 @@
         c.planPrice=value;c.planPriceCustom=true;
         if(existingContract?.status!=="accepted")await refreshPendingContractForClient(c.id,c);
         try{
-          await logActivity("client_edit",c.id,"Valor do plano ajustado",`${c.name} · ${money(previous)} → ${money(value)} por ano · por ${state.currentProfile?.name||state.currentProfile?.email||"operador"}`);
+          await logActivity("client_edit",c.id,c.saleMode==="single_service"?"Valor do serviço avulso ajustado":"Valor do plano ajustado",`${c.name} · ${money(previous)} → ${money(value)}${c.saleMode==="single_service"?"":" por ano"} · por ${state.currentProfile?.name||state.currentProfile?.email||"operador"}`);
         }catch(activityError){console.warn("Não foi possível registrar o ajuste de valor no histórico.",activityError);}
         renderClients();renderContracts();
         if(state.selectedClientId===c.id)renderClientDetail();
@@ -3774,7 +3810,7 @@
       if(!state.connected){showToast("Realtime Database indisponível.","error");return;}
       const input=$("detailPlanPriceInput");
       const value=Number(String(input?.value||"").replace(",","."));
-      if(!Number.isFinite(value)||value<0){showToast("Informe um valor anual válido.","error");input?.focus();return;}
+      if(!Number.isFinite(value)||value<0){showToast("Informe um valor válido para a contratação.","error");input?.focus();return;}
       const previous=getPlanPrice(c);
       const existingContract=getContractForClient(c);
       const saveBtn=$("saveDetailPlanPrice");
@@ -3786,7 +3822,7 @@
         c.planPrice=value;c.planPriceCustom=true;
         if(existingContract?.status!=="accepted")await refreshPendingContractForClient(c.id,c);
         try{
-          await logActivity("client_edit",c.id,"Valor do plano ajustado",`${c.name} · ${money(previous)} → ${money(value)} por ano · por ${state.currentProfile?.name||state.currentProfile?.email||"operador"}`);
+          await logActivity("client_edit",c.id,c.saleMode==="single_service"?"Valor do serviço avulso ajustado":"Valor do plano ajustado",`${c.name} · ${money(previous)} → ${money(value)}${c.saleMode==="single_service"?"":" por ano"} · por ${state.currentProfile?.name||state.currentProfile?.email||"operador"}`);
         }catch(activityError){console.warn("Não foi possível registrar o ajuste de valor no histórico.",activityError);}
         renderClientDetail();renderClients();renderContracts();
         showToast(!hasActivePlan(c)
@@ -3807,8 +3843,8 @@
       const p=getPlanInfo(c);
       $("detailAvatar").textContent=initials(c.name);$("detailName").textContent=c.name;
       $("detailMeta").textContent=[c.document,c.city,c.phone].filter(Boolean).join(" · ")||"Dados cadastrais";
-      $("detailPlanLabel").textContent=hasActivePlan(c)?getPlanLabel(c):"Plano de monitoramento · aguardando ativação";
-      $("detailPlanPrice").textContent=`${money(getPlanPrice(c))} / ano`;
+      $("detailPlanLabel").textContent=hasActivePlan(c)?(c.saleMode==="single_service"?`Serviço avulso · ${getPlanLabel(c)}`:getPlanLabel(c)):"Monitoramento · aguardando contratação";
+      $("detailPlanPrice").textContent=c.saleMode==="single_service"?money(getPlanPrice(c)):`${money(getPlanPrice(c))} / ano`;
       const priceEditor=$("detailPlanPriceEditor"),priceInput=$("detailPlanPriceInput"),priceSave=$("saveDetailPlanPrice"),priceHint=$("detailPlanPriceHint");
       const detailContract=getContractForClient(c);
       if(priceEditor){
@@ -3818,16 +3854,16 @@
         if(priceHint){
           priceHint.classList.toggle("custom",!!c.planPriceCustom);
           priceHint.textContent=!hasActivePlan(c)
-            ? `${c.planPriceCustom?"Valor personalizado salvo. ":""}Você pode definir o valor agora; ele será usado quando o plano for ativado.`
+            ? `${c.planPriceCustom?"Valor personalizado salvo. ":""}Você pode definir o valor agora; ele será usado na próxima contratação.`
             : detailContract?.status==="accepted"
-              ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O contrato já aceito preserva o valor que foi assinado.`
+              ? `${c.planPriceCustom?"Valor personalizado desta contratação. ":""}O contrato já aceito preserva o valor que foi assinado.`
               : detailContract
-                ? `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}Ao salvar, o contrato pendente será atualizado automaticamente.`
-                : `${c.planPriceCustom?"Valor personalizado deste cliente. ":""}O valor será usado quando o contrato for gerado.`;
+                ? `${c.planPriceCustom?"Valor personalizado desta contratação. ":""}Ao salvar, o contrato pendente será atualizado automaticamente.`
+                : `${c.planPriceCustom?"Valor personalizado desta contratação. ":""}O valor será usado quando o contrato for gerado.`;
         }
       }
       $("detailStart").textContent=formatDate(p.start);$("detailEnd").textContent=formatDate(p.end);
-      $("detailStatus").textContent=p.status==="no_plan"?"Sem plano":p.status==="expired"?"Vencido":p.status==="expiring"?"Próximo do vencimento":"Ativo";
+      $("detailStatus").textContent=p.status==="no_plan"?"Sem contratação":p.status==="expired"?"Vencido":p.status==="expiring"?"Próximo do vencimento":"Ativo";
       $("detailSeller").textContent=c.seller||"Não informado";
       const reportInfo=generationReportInfo(c);
       const reportLast=reportInfo.last;
@@ -3844,8 +3880,8 @@
         reportBtn.textContent=reportLast?"✓ Registrar novo envio":"✓ Registrar envio do relatório";
       }
       $("detailDays").textContent=p.status==="no_plan"?"—":Math.max(0,p.days);$("detailDaysRing").style.setProperty("--ring",p.status==="no_plan"?"0%":`${Math.max(0,100-p.progress)}%`);
-      $("detailDaysRing").querySelector("span").textContent=p.status==="no_plan"?"plano não ativado":p.days<0?`vencido há ${Math.abs(p.days)} dias`:"dias restantes";
-      $("renewClientBtn").textContent=hasActivePlan(c)?"↻ Renovar plano":"＋ Ativar plano";
+      $("detailDaysRing").querySelector("span").textContent=p.status==="no_plan"?"sem contratação":p.days<0?`vencido há ${Math.abs(p.days)} dias`:"dias restantes";
+      $("renewClientBtn").textContent=!hasActivePlan(c)?"＋ Nova contratação":c.saleMode==="single_service"?"↻ Reofertar serviço":"↻ Renovar plano";
       renderDetailContract(c);
 
       Object.keys(SERVICES).forEach(type=>{
@@ -3863,7 +3899,7 @@
         const btn=card.querySelector(".register-service");
         if(btn){
           btn.disabled=complete||p.status==="expired"||p.status==="no_plan"||!can("servicesRegister");
-          btn.textContent=complete?"Limite atingido":p.status==="no_plan"?"Ative o plano":p.status==="expired"?"Plano vencido":type==="quarterlyReport"?"Registrar envio":(type==="appCheck"||type==="invoiceAnalysis")?(used>0?"Registrar nova análise":"Registrar análise"):(used>0?"Registrar novo uso":"Registrar uso");
+          btn.textContent=complete?"Limite atingido":p.status==="no_plan"?"Contrate o serviço":p.status==="expired"?(c.saleMode==="single_service"?"Serviço vencido":"Plano vencido"):type==="quarterlyReport"?"Registrar envio":(type==="appCheck"||type==="invoiceAnalysis")?(used>0?"Registrar nova análise":"Registrar análise"):(used>0?"Registrar novo uso":"Registrar uso");
         }
       });
       const histories=[];
@@ -3882,7 +3918,7 @@
       $("clientTimeline").innerHTML=histories.map(h=>`<div class="timeline-item"><span class="timeline-dot"></span><strong>${safe(h.title)}</strong><p>${safe(h.description||"")}</p><time>${formatTimelineDate(h.date)}</time></div>`).join("");
       $("clientInfo").innerHTML=`
         ${infoLine("Telefone",c.phone)}${infoLine("E-mail",c.email)}${infoLine("Documento",c.document)}
-        ${infoLine("Tipo de plano",hasActivePlan(c)?`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))} por ano`:"Sem plano contratado")}
+        ${infoLine(c.saleMode==="single_service"?"Tipo de venda":"Tipo de plano",hasActivePlan(c)?(c.saleMode==="single_service"?`Serviço avulso · ${getPlanLabel(c)} · ${money(getPlanPrice(c))}`:`${getClientType(c).toUpperCase()} · ${money(getPlanPrice(c))} por ano`):"Sem plano contratado")}
         ${infoLine("Contrato",contract?`${contract.number} · ${contract.status==="accepted"?"Aceito":"Aguardando aceite"}`:"Não gerado")}
         ${(()=>{const r=generationReportInfo(c),last=r.last,lastDate=last?(last.sentAt||last.date):null;return infoLine("Relatório de geração",last?`Enviado · último em ${lastDate&&String(lastDate).includes("T")?formatDateTime(lastDate):formatDate(lastDate)} · ${last.operator||"Técnico não informado"}`:"Pendente · nenhum envio registrado");})()}
         ${infoLine("Cidade",c.city)}${infoLine("Endereço",c.address)}${infoLine("Pagamento",`${c.payment||"—"} · ${c.paymentStatus==="paid"?"Pago":"Pendente"}`)}
@@ -3894,9 +3930,9 @@
     function renderDetailContract(client){
       const contract=getContractForClient(client);
       if(!hasActivePlan(client)){
-        $("detailContractStatus").innerHTML='<span class="badge gray">Aguardando ativação</span>';
-        $("detailContractMeta").textContent="Ative o plano para gerar o contrato de adesão.";
-        $("primaryContractActionBtn").textContent="Ativar plano";
+        $("detailContractStatus").innerHTML='<span class="badge gray">Aguardando contratação</span>';
+        $("detailContractMeta").textContent="Faça a contratação para gerar o contrato digital.";
+        $("primaryContractActionBtn").textContent="Nova contratação";
         $("primaryContractActionBtn").disabled=!can("clientsEdit");
         $("copyDetailContractLink").disabled=true;
         return;
@@ -3931,7 +3967,7 @@
       if(existingIndex>=0)state.contracts[existingIndex]=contract;else state.contracts.unshift(contract);
       renderContracts();
       if(state.selectedClientId===client.id)renderClientDetail();
-      await logActivity("contract",client.id,"Contrato do plano gerado",`${client.name} · ${contract.number}`);
+      await logActivity("contract",client.id,client.saleMode==="single_service"?"Contrato de serviço avulso gerado":"Contrato do plano gerado",`${client.name} · ${contract.number}`);
       return contract;
     }
     function renderContractModal(contract){
@@ -3940,6 +3976,8 @@
       state.selectedContractToken=contract.token;
       state.selectedContractClientId=contract.clientId||null;
       $("contractModalNumber").textContent=contract.number||"—";
+      const contractModalTitle=document.querySelector("#contractModalBackdrop .modal-header h3");
+      if(contractModalTitle)contractModalTitle.textContent=contract.saleMode==="single_service"?"Contrato de serviço avulso":"Contrato do plano";
       $("contractModalStatus").innerHTML=contractBadge(contract);
       $("contractLinkInput").value=getContractLink(contract.token);
       const normalizedContractHtml=normalizeContractHtml(contract.contractHtml||"",contract.clientSnapshot||contract);
@@ -3947,7 +3985,7 @@
       const accepted=contract.status==="accepted";
       $("contractModalAccepted").classList.toggle("hidden",!accepted);
       if(accepted){
-        const renewalStatus=typeof contract.renewalAuthorization==="boolean"?`<br>Renovação automática: <strong>${contract.renewalAuthorization?"autorizada":"não autorizada"}</strong>.`:"";
+        const renewalStatus=contract.saleMode!=="single_service"&&typeof contract.renewalAuthorization==="boolean"?`<br>Renovação automática: <strong>${contract.renewalAuthorization?"autorizada":"não autorizada"}</strong>.`:"";
         $("contractModalAccepted").innerHTML=`<strong>Contrato aceito.</strong><br>${safe(contract.acceptedBy||"Responsável")} confirmou o aceite em ${formatDateTime(timestampISO(contract.acceptedAt))}.${renewalStatus}`;
       }
       $("openAcceptanceBtn").textContent=accepted?"Abrir contrato aceito":"Abrir página de aceite";
@@ -4359,8 +4397,8 @@
           <div class="contract-client-field"><span>E-mail</span><strong>${safe(contractValue(contract.clientEmail||acceptanceSnapshot.email))}</strong></div>
           <div class="contract-client-field"><span>Cidade</span><strong>${safe(contractValue(contract.city||acceptanceSnapshot.city))}</strong></div>
           <div class="contract-client-field full"><span>Endereço</span><strong>${safe(contractValue(contract.address||acceptanceSnapshot.address))}</strong></div>
-          <div class="contract-client-field"><span>Plano</span><strong>${safe(contractValue(contract.planLabel))}</strong></div>
-          <div class="contract-client-field"><span>Valor anual</span><strong>${money(Number(contract.status==="accepted"?contract.planPrice:acceptancePlanPrice)||0)}</strong></div>
+          <div class="contract-client-field"><span>${contract.saleMode==="single_service"?"Serviço":"Plano"}</span><strong>${safe(contractValue(contract.planLabel))}</strong></div>
+          <div class="contract-client-field"><span>${contract.saleMode==="single_service"?"Valor contratado":"Valor anual"}</span><strong>${money(Number(contract.status==="accepted"?contract.planPrice:acceptancePlanPrice)||0)}</strong></div>
           <div class="contract-client-field"><span>Forma de pagamento</span><strong>${safe(contractValue(contract.payment||acceptanceSnapshot.payment))}</strong></div>
           <div class="contract-client-field"><span>Situação</span><strong>${safe(acceptancePaymentStatus)}</strong></div>
         </div>`;
@@ -4404,8 +4442,9 @@
       $("clientEmail").value=c.email||"";$("clientCity").value=c.city||"";$("clientAddress").value=c.address||"";
       $("clientPlanStart").value=c.planStart||"";$("clientSeller").value=c.seller||"";
       $("clientPayment").value=c.payment||"PIX";$("clientPaymentStatus").value=c.paymentStatus||"paid";$("clientNotes").value=c.notes||"";
+      $("clientSaleMode").value=c.saleMode||"plan";$("clientSalePrice").value=Number(getPlanPrice(c)||0).toFixed(2);
       $("clientContractNote").classList.add("hidden");updateClientPlanPreview();
-      renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",c.document||"",c.planBenefits&&Object.keys(c.planBenefits).length?c.planBenefits:null,true);
+      renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",c.document||"",c.planBenefits&&Object.keys(c.planBenefits).length?c.planBenefits:null,true);applySaleMode("client");
       openModal("clientModalBackdrop");
     };
     window.deleteClient=(id)=>{
@@ -4507,6 +4546,104 @@
     function newServiceOrderNumber(){return `OS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;}
     function maintenanceUnitValue(job){const q=Number(job.moduleCount)||0,a=Number(job.amount)||0;return q?money(a/q):"—";}
     function maintenanceSnapshot(client={}){return {name:client.name||"",document:client.document||"",phone:client.phone||"",email:client.email||"",city:client.city||"",address:client.address||""};}
+    function serviceContractMaintenanceDocId(contract={}){
+      const raw=String(contract.id||contract.token||contract.number||uid()).replace(/[^a-zA-Z0-9_-]/g,"_");
+      return `contract_${raw}`.slice(0,180);
+    }
+    function findClientForServiceContract(contract={}){
+      if(contract.clientId){const direct=state.clients.find(c=>c.id===contract.clientId);if(direct)return direct;}
+      const digits=documentDigits(contract.clientDocument||"");
+      if(digits){const byDoc=state.clients.find(c=>documentDigits(c.document||"")===digits);if(byDoc)return byDoc;}
+      const name=String(contract.clientName||"").trim().toLowerCase();
+      if(name){const byName=state.clients.find(c=>String(c.name||"").trim().toLowerCase()===name);if(byName)return byName;}
+      return null;
+    }
+    function serviceContractSnapshot(contract={},client=null){
+      return {
+        name:client?.name||contract.clientName||"",
+        document:client?.document||contract.clientDocument||"",
+        phone:client?.phone||contract.clientPhone||"",
+        email:client?.email||contract.clientEmail||"",
+        city:client?.city||contract.city||"",
+        address:contract.siteAddress||client?.address||contract.clientAddress||""
+      };
+    }
+    function equivalentMaintenanceForContract(contract={}){
+      const created=toDateObject(contract.createdAt||contract.updatedAt);
+      return state.maintenanceJobs.find(job=>{
+        if(job.sourceServiceContractId===contract.id||job.sourceServiceContractNumber===contract.number)return true;
+        if(job.serviceType!==contract.serviceType)return false;
+        if((Number(job.moduleCount)||0)!==(Number(contract.moduleCount)||0))return false;
+        if(Math.abs((Number(job.amount)||0)-(Number(contract.amount)||0))>0.01)return false;
+        const sameClient=(contract.clientId&&job.clientId===contract.clientId)||
+          (documentDigits(job.clientSnapshot?.document||"")&&documentDigits(job.clientSnapshot?.document||"")===documentDigits(contract.clientDocument||""));
+        if(!sameClient)return false;
+        const jobCreated=toDateObject(job.createdAt||job.updatedAt);
+        if(created&&jobCreated&&Math.abs(created-jobCreated)<=10*60*1000)return true;
+        return false;
+      })||null;
+    }
+    async function ensureMaintenanceJobForServiceContract(contract={},options={}){
+      if(!state.connected||!state.db||!state.serviceApi||!contract?.id)return null;
+      const already=equivalentMaintenanceForContract(contract);
+      if(already){
+        if(!already.sourceServiceContractId){
+          try{await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"maintenanceJobs",already.id),{sourceServiceContractId:contract.id,sourceServiceContractNumber:contract.number||"",sourceType:"service_contract",updatedAt:state.serviceApi.serverTimestamp()},{merge:true});}catch(_){ }
+        }
+        state.serviceContractMaintenanceSynced.add(contract.id);
+        return already;
+      }
+      const maintenanceId=serviceContractMaintenanceDocId(contract);
+      try{
+        const existingSnap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"maintenanceJobs",maintenanceId));
+        if(existingSnap.exists()){
+          state.serviceContractMaintenanceSynced.add(contract.id);
+          return {id:maintenanceId,...existingSnap.data()};
+        }
+      }catch(_){ }
+      const client=findClientForServiceContract(contract);
+      const snapshot=serviceContractSnapshot(contract,client);
+      const payload={
+        clientId:client?.id||contract.clientId||"",
+        clientSnapshot:snapshot,
+        serviceType:contract.serviceType||"preventive",
+        moduleCount:Math.max(1,Math.floor(Number(contract.moduleCount)||1)),
+        amount:Number(contract.amount)||0,
+        requestedDate:contract.contractDate||"",
+        operator:contract.seller||state.currentProfile?.name||"",
+        notes:[`Gerado automaticamente a partir do contrato ${contract.number||contract.id}.`,contract.notes||""].filter(Boolean).join("\n"),
+        sourceType:"service_contract",
+        sourceServiceContractId:contract.id,
+        sourceServiceContractNumber:contract.number||"",
+        sourceServiceContractCreatedAt:contract.createdAt||null,
+        requestNumber:newMaintenanceRequestNumber(),
+        budgetSentAt:null,
+        approved:false,
+        paymentStatus:"pending",
+        status:"quote",
+        serviceOrderNumber:"",
+        createdAt:state.serviceApi.serverTimestamp(),
+        updatedAt:state.serviceApi.serverTimestamp()
+      };
+      await state.serviceApi.setDoc(state.serviceApi.doc(state.db,"maintenanceJobs",maintenanceId),payload,{merge:false});
+      state.serviceContractMaintenanceSynced.add(contract.id);
+      try{await logActivity("maintenance",client?.id||contract.clientId||maintenanceId,"Serviço criado automaticamente pelo contrato",`${snapshot.name||"Cliente"} · ${contract.number||"Contrato"} · ${maintenanceServiceLabel(payload.serviceType)}`);}catch(_){ }
+      if(!options.silent)showToast(`Serviço ${contract.number||""} criado automaticamente em Preventivas e limpeza.`);
+      return {id:maintenanceId,...payload};
+    }
+    async function syncServiceContractsToMaintenance(){
+      if(!state.connected||!state.serviceContractsLoaded||!state.maintenanceJobsLoaded||state.serviceContractMaintenanceSyncRunning)return;
+      state.serviceContractMaintenanceSyncRunning=true;
+      let created=0;
+      try{
+        for(const contract of state.serviceContracts){
+          if(state.serviceContractMaintenanceSynced.has(contract.id)&&equivalentMaintenanceForContract(contract))continue;
+          const before=equivalentMaintenanceForContract(contract);
+          try{await ensureMaintenanceJobForServiceContract(contract,{silent:true});if(!before)created++;}catch(err){console.warn("Não foi possível criar o serviço do contrato",contract.number||contract.id,err);}
+        }
+        if(created>0)showToast(`${created} serviço${created===1?"":"s"} de contrato${created===1?"":"s"} existente${created===1?"":"s"} sincronizado${created===1?"":"s"} com Preventivas e limpeza.`);
+      }finally{state.serviceContractMaintenanceSyncRunning=false;}
+    }
     function refreshMaintenanceClientOptions(selectedId="",filterText=""){
       const select=$("maintenanceClientId");if(!select)return;
       const current=selectedId||select.value;
@@ -4545,7 +4682,7 @@
       $("maintenanceTable").innerHTML=rows.map(job=>{const c=maintenanceClient(job),status=maintenanceComputedStatus(job);return `<tr>
         <td><strong class="mono">${safe(maintenanceRequestNumber(job))}</strong><div class="small muted" style="margin-top:3px">${formatDate(timestampISO(job.createdAt)||job.createdAt)}</div></td>
         <td><div class="customer-cell"><div class="customer-avatar">${initials(c.name||job.clientSnapshot?.name)}</div><div><strong>${safe(c.name||job.clientSnapshot?.name||"Cliente")}</strong><span>${safe(c.city||job.clientSnapshot?.city||"Cidade não informada")}</span></div></div></td>
-        <td>${safe(maintenanceServiceLabel(job.serviceType))}</td><td class="mono">${Number(job.moduleCount)||0}</td>
+        <td>${safe(maintenanceServiceLabel(job.serviceType))}${job.sourceServiceContractNumber?`<div class="small muted" style="margin-top:3px">Contrato ${safe(job.sourceServiceContractNumber)}</div>`:""}</td><td class="mono">${Number(job.moduleCount)||0}</td>
         <td><strong>${money(Number(job.amount)||0)}</strong><div class="small muted">${maintenanceUnitValue(job)} / módulo</div></td>
         <td>${maintenanceStatusBadge(job)}</td>
         <td>${maintenanceRenewalBadge(job)}</td>
@@ -4606,7 +4743,7 @@
       $("maintenanceDetailContent").innerHTML=`<div class="maintenance-status-line" style="margin-bottom:15px">${maintenanceStatusBadge(job)}<span class="badge gray">${safe(maintenanceRequestNumber(job))}</span>${job.serviceOrderNumber?`<span class="badge success">${safe(job.serviceOrderNumber)}</span>`:""}</div>
         <div class="maintenance-detail-grid">
           <div class="maintenance-detail-item"><span>Cliente</span><strong>${safe(c.name||"—")}</strong></div><div class="maintenance-detail-item"><span>CPF / CNPJ</span><strong>${safe(c.document||"—")}</strong></div><div class="maintenance-detail-item"><span>Telefone</span><strong>${safe(c.phone||"—")}</strong></div>
-          <div class="maintenance-detail-item"><span>Serviço</span><strong>${safe(maintenanceServiceLabel(job.serviceType))}</strong></div><div class="maintenance-detail-item"><span>Quantidade de módulos</span><strong>${Number(job.moduleCount)||0}</strong></div><div class="maintenance-detail-item"><span>Valor</span><strong>${money(Number(job.amount)||0)} · ${maintenanceUnitValue(job)}/módulo</strong></div>
+          <div class="maintenance-detail-item"><span>Serviço</span><strong>${safe(maintenanceServiceLabel(job.serviceType))}</strong>${job.sourceServiceContractNumber?`<div class="small muted" style="margin-top:4px">Origem: contrato ${safe(job.sourceServiceContractNumber)}</div>`:""}</div><div class="maintenance-detail-item"><span>Quantidade de módulos</span><strong>${Number(job.moduleCount)||0}</strong></div><div class="maintenance-detail-item"><span>Valor</span><strong>${money(Number(job.amount)||0)} · ${maintenanceUnitValue(job)}/módulo</strong></div>
           <div class="maintenance-detail-item"><span>Operadora</span><strong>${safe(job.operator||"—")}</strong></div><div class="maintenance-detail-item"><span>Data solicitada</span><strong>${job.requestedDate?formatDate(job.requestedDate):"—"}</strong></div><div class="maintenance-detail-item"><span>Pagamento</span><strong>${job.paymentStatus==="paid"?"Pago":"Pendente"}</strong></div>
           <div class="maintenance-detail-item full"><span>Endereço da execução</span><strong>${safe([c.address,c.city].filter(Boolean).join(" · ")||"Não informado")}</strong></div>
           <div class="maintenance-detail-item full"><span>Observações</span><strong>${safe(job.notes||"Nenhuma observação")}</strong></div>
@@ -4685,7 +4822,7 @@
       const rows=saleBenefitsSource(document,selectedBenefits);
       container.innerHTML=rows.map(({type,base,active,limit})=>`<div class="sale-benefit-item ${active?"active":""}" data-sale-benefit-row="${type}">
         <input class="sale-benefit-check" type="checkbox" data-sale-benefit-check="${type}" ${active?"checked":""} aria-label="Incluir ${safe(base.label||SERVICES[type].label)}">
-        <span class="sale-benefit-copy"><strong>${safe(base.label||SERVICES[type].label)}</strong><span>${safe(base.description||"Selecione para incluir no contrato deste cliente.")}</span></span>
+        <span class="sale-benefit-copy"><strong>${safe(base.label||SERVICES[type].label)}</strong><span>${safe(base.description||"Selecione para incluir no contrato deste cliente.")} ${Number(base.standalonePrice||0)>0?`· Avulso: ${money(Number(base.standalonePrice))}`:""}</span></span>
         <span class="sale-benefit-qty"><span class="sale-benefit-qty-label">Qtd./ano</span><input type="number" min="1" step="1" value="${limit}" data-sale-benefit-qty="${type}" ${active?"":"disabled"}></span>
       </div>`).join("");
       const updateSummary=()=>{
@@ -4714,10 +4851,66 @@
         const qty=container.querySelector(`[data-sale-benefit-qty="${type}"]`);
         const limit=Math.max(1,Math.floor(Number(qty?.value)||1));
         const base=config[type]||{label:SERVICES[type]?.label||type,description:"",contractText:SERVICES[type]?.label||type};
-        result[type]={label:String(base.label||SERVICES[type]?.label||type),description:String(base.description||""),limit,contractText:saleBenefitContractText(base,limit,type)};
+        result[type]={label:String(base.label||SERVICES[type]?.label||type),description:String(base.description||""),limit,contractText:saleBenefitContractText(base,limit,type),standalonePrice:Math.max(0,Number(base.standalonePrice||0)||0)};
       });
       if(!Object.keys(result).length)throw new Error("Marque pelo menos um item incluso no plano antes de salvar a venda.");
       return normalizeBenefitSnapshot(result);
+    }
+
+    function saleModeLabel(mode){ return mode==="single_service"?"Serviço avulso":"Plano completo"; }
+    function selectedBenefitTypes(containerId){
+      const container=$(containerId);if(!container)return [];
+      return [...container.querySelectorAll("[data-sale-benefit-check]:checked")].map(el=>el.dataset.saleBenefitCheck);
+    }
+    function applySaleMode(prefix){
+      const mode=$(prefix+"SaleMode")?.value||"plan";
+      const containerId=prefix+"SaleBenefits";
+      const container=$(containerId);
+      const price=$(prefix+"SalePrice");
+      const hint=$(prefix+"SalePriceHint");
+      if(!container||!price)return;
+      const checks=[...container.querySelectorAll("[data-sale-benefit-check]")];
+      if(mode==="single_service"){
+        let selected=checks.filter(c=>c.checked);
+        if(selected.length>1){ selected.slice(1).forEach(c=>{c.checked=false;c.dispatchEvent(new Event("change"));}); selected=selected.slice(0,1); }
+        checks.forEach(check=>{
+          check.onchange=()=>{
+            if(check.checked) checks.forEach(other=>{if(other!==check&&other.checked){other.checked=false;other.dispatchEvent(new Event("change"));}});
+            if(check.checked){ const doc=$(prefix+"Document")?.value||""; const basePrice=getStandaloneServicePrice(doc,check.dataset.saleBenefitCheck); if(basePrice>0) price.value=basePrice.toFixed(2); }
+            const row=check.closest(".sale-benefit-item"),qty=container.querySelector(`[data-sale-benefit-qty="${check.dataset.saleBenefitCheck}"]`);
+            row?.classList.toggle("active",check.checked);if(qty)qty.disabled=!check.checked;
+            updateSaleModeSummary(prefix);
+          };
+        });
+        price.required=true;
+        const currentSelected=checks.find(c=>c.checked);
+        if(currentSelected){ const doc=$(prefix+"Document")?.value||""; const basePrice=getStandaloneServicePrice(doc,currentSelected.dataset.saleBenefitCheck); if(basePrice>0 && !Number(price.value)) price.value=basePrice.toFixed(2); }
+        if(!Number(price.value))price.value="";
+        if(hint)hint.innerHTML="<strong>Serviço avulso:</strong> selecione somente um serviço. Se houver preço-base configurado, ele será preenchido automaticamente e poderá ser alterado.";
+      }else{
+        checks.forEach(check=>check.onchange=null);
+        price.required=false;
+        const document=$(prefix+"Document")?.value||"";
+        price.value=Number(getPlanPrice(document)||0).toFixed(2);
+        if(hint)hint.textContent="Plano completo: o valor padrão configurado é carregado automaticamente, mas pode ser alterado nesta venda.";
+      }
+      updateSaleModeSummary(prefix);
+    }
+    function updateSaleModeSummary(prefix){
+      const mode=$(prefix+"SaleMode")?.value||"plan";
+      const summary=$(prefix+"SaleBenefitsSummary");
+      const container=$(prefix+"SaleBenefits");if(!summary||!container)return;
+      const selected=[...container.querySelectorAll("[data-sale-benefit-check]:checked")];
+      const total=selected.reduce((sum,check)=>{const qty=container.querySelector(`[data-sale-benefit-qty="${check.dataset.saleBenefitCheck}"]`);return sum+Math.max(1,Math.floor(Number(qty?.value)||1));},0);
+      if(mode==="single_service") summary.innerHTML=selected.length?`<strong>Serviço avulso selecionado:</strong> ${safe(selected[0].closest(".sale-benefit-item")?.querySelector("strong")?.textContent||"")} · ${total} utilização(ões).`:`<strong>Serviço avulso:</strong> selecione exatamente um serviço.`;
+    }
+    function validateSaleSelection(prefix,benefits){
+      const mode=$(prefix+"SaleMode")?.value||"plan";
+      const types=Object.keys(benefits||{});
+      if(mode==="single_service" && types.length!==1)throw new Error("Na venda avulsa, selecione exatamente um serviço.");
+      const value=Number($(prefix+"SalePrice")?.value);
+      if(mode==="single_service" && (!Number.isFinite(value)||value<0))throw new Error("Informe o valor da venda do serviço avulso.");
+      return {mode,price:Number.isFinite(value)&&value>=0?value:null,types};
     }
 
     function updateClientPlanPreview(){
@@ -4730,6 +4923,7 @@
       const type = getClientType(document);
       const complete = digits.length === 11 || digits.length === 14;
       renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",document,null,false);
+      applySaleMode("client");
       const benefitCount=totalPlanBenefits(document);
       const renewalInfo=state.planSettings.contract?.automaticRenewalEnabled?" · renovação automática":"";
       $("clientPlanPreview").innerHTML = `<strong>${type.toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano · ${benefitCount} utilizações/entregas previstas${renewalInfo}${complete?"":" · documento incompleto"}`;
@@ -4743,10 +4937,12 @@
       }
       const complete=digits.length===11||digits.length===14;
       renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",document,null,false);
+      applySaleMode("activate");
       const renewalInfo=state.planSettings.contract?.automaticRenewalEnabled?" · renovação automática":"";
       $("activatePlanPreview").innerHTML=`<strong>${getClientType(document).toUpperCase()}</strong> · ${money(getPlanPrice(document))} por ano · ${totalPlanBenefits(document)} utilizações/entregas previstas${renewalInfo}${complete?"":" · documento incompleto"}`;
     }
     window.startPlanActivation=(id)=>{
+      state.activationReoffer=false;
       if(!can("clientsEdit")){showToast("Você não possui permissão para ativar planos.","error");return;}
       const c=state.clients.find(x=>x.id===id);if(!c)return;
       if(hasActivePlan(c)){openClient(id);return;}
@@ -4764,12 +4960,15 @@
       $("activatePayment").value=c.payment||"PIX";
       $("activatePaymentStatus").value=c.paymentStatus||"pending";
       $("activateNotes").value=c.notes||"";
+      $("activateSaleMode").value=c.saleMode||"plan";
+      $("activateSalePrice").value=Number(getPlanPrice(c)||getPlanPrice(c.document||"")).toFixed(2);
       updateActivationPlanPreview();
       renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",c.document||"",c.planBenefits&&Object.keys(c.planBenefits).length?c.planBenefits:null,true);
+      applySaleMode("activate");
       openModal("activatePlanModalBackdrop");
     };
     function resetClientForm(){
-      $("clientForm").reset();$("clientId").value="";$("clientPlanStart").value=todayISO();$("clientModalTitle").textContent="Cadastrar cliente";$("clientContractNote").classList.remove("hidden");updateClientPlanPreview();
+      $("clientForm").reset();$("clientId").value="";$("clientPlanStart").value=todayISO();$("clientSaleMode").value="plan";$("clientModalTitle").textContent="Cadastrar cliente";$("clientContractNote").classList.remove("hidden");updateClientPlanPreview();applySaleMode("client");
       renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",$("clientDocument").value||"",null,true);
     }
     function openNewClient(){if(!can("clientsCreate"))return;resetClientForm();openModal("clientModalBackdrop");}
@@ -4817,7 +5016,7 @@
         await batch.commit();
       }
       await logActivity(id?"client_edit":"client",clientId,id?"Ficha de cliente atualizada":"Novo cliente cadastrado",`${data.name} · por ${state.currentProfile.name}`);
-      if(generatedContract)await logActivity("contract",clientId,"Contrato do plano gerado",`${data.name} · ${generatedContract.number}`);
+      if(generatedContract)await logActivity("contract",clientId,data.saleMode==="single_service"?"Contrato de serviço avulso gerado":"Contrato do plano gerado",`${data.name} · ${generatedContract.number}`);
       return {clientId,contract:generatedContract};
     }
     async function logActivity(typeClient,id,title,description){
@@ -4834,8 +5033,8 @@
       const benefit=getBenefit(c,type);
       const limit=benefit?.limit||0;
       const currentEntries=serviceEntries(c,type);
-      if(!limit){showToast("Este benefício não faz parte do plano do cliente.","error");return;}
-      if(currentEntries.length>=limit){showToast("O limite deste benefício já foi atingido no período.","error");return;}
+      if(!limit){showToast("Este serviço não faz parte da contratação atual do cliente.","error");return;}
+      if(currentEntries.length>=limit){showToast("O limite deste serviço já foi atingido na contratação atual.","error");return;}
       const entry={date:$("serviceDate").value,operator:$("serviceOperator").value.trim(),description:$("serviceDescription").value.trim()};
       const entries=[...currentEntries,entry];
       const service={used:entries.length>0,count:entries.length,entries,date:entry.date,operator:entry.operator,description:entry.description};
@@ -4843,34 +5042,36 @@
       if(!state.connected) throw new Error("Realtime Database indisponível");
       await state.serviceApi.updateDoc(state.serviceApi.doc(state.db,"clients",c.id),{services,updatedAt:state.serviceApi.serverTimestamp()});
       await logActivity("service",c.id,`${benefit.label} registrado`,`${c.name} · ${entries.length}/${limit} · por ${entry.operator}`);
-      closeModal("serviceModalBackdrop");$("serviceForm").reset();renderClientDetail();showToast("Benefício registrado no histórico do cliente.");
+      closeModal("serviceModalBackdrop");$("serviceForm").reset();renderClientDetail();showToast("Serviço registrado no histórico do cliente.");
     }
 
     async function activatePlan(event){
       event.preventDefault();
       const clientId=$("activateClientId").value||state.activationClientId;
       const c=state.clients.find(x=>x.id===clientId);if(!c)return;
-      if(hasActivePlan(c)){closeModal("activatePlanModalBackdrop");openClient(c.id);return;}
+      if(hasActivePlan(c)&&!state.activationReoffer){closeModal("activatePlanModalBackdrop");openClient(c.id);return;}
       const document=$("activateDocument").value.trim();
       const digits=documentDigits(document);
       if(digits.length!==11&&digits.length!==14){showToast("Informe um CPF com 11 dígitos ou um CNPJ com 14 dígitos.","error");return;}
       const phone=$("activatePhone").value.trim();
       if(documentDigits(phone).length<10){showToast("Informe um telefone ou WhatsApp válido para o envio do contrato.","error");return;}
       const start=$("activateStart").value;
-      let selectedActivationBenefits;
-      try{selectedActivationBenefits=readSaleBenefits("activateSaleBenefits",document);}catch(err){showToast(err.message,"error");return;}
+      let selectedActivationBenefits,saleInfo;
+      try{selectedActivationBenefits=readSaleBenefits("activateSaleBenefits",document);saleInfo=validateSaleSelection("activate",selectedActivationBenefits);}catch(err){showToast(err.message,"error");return;}
+      const onlyType=saleInfo.types[0];
+      const saleLabel=saleInfo.mode==="single_service"?(selectedActivationBenefits[onlyType]?.label||SERVICES[onlyType]?.label||"Serviço avulso"):getPlanLabel(document);
       const completeData={
         ...c,
-        name:$("activateName").value.trim(),document,documentType:getClientType(document),planPrice:c.planPriceCustom?getPlanPrice(c):getPlanPrice(document),planPriceCustom:!!c.planPriceCustom,planLabel:getPlanLabel(document),planBenefits:selectedActivationBenefits,
+        name:$("activateName").value.trim(),document,documentType:getClientType(document),saleMode:saleInfo.mode,planPrice:saleInfo.price??(c.planPriceCustom?getPlanPrice(c):getPlanPrice(document)),planPriceCustom:saleInfo.mode==="single_service"||saleInfo.price!==null,planLabel:saleLabel,planBenefits:selectedActivationBenefits,
         phone,email:$("activateEmail").value.trim(),city:$("activateCity").value.trim(),address:$("activateAddress").value.trim(),
         planActive:true,planStart:start,planEnd:addYear(start),planActivationSource:"manual",planActivatedAt:new Date().toISOString(),seller:$("activateSeller").value.trim()||state.currentProfile?.name||c.seller||"",
         payment:$("activatePayment").value,paymentStatus:$("activatePaymentStatus").value,notes:$("activateNotes").value.trim()
       };
       const history=[...(c.history||[])];
       const contract=await createContractRecord(c.id,completeData,"activation");
-      history.push({date:new Date().toISOString(),title:"Plano ativado",description:`${getPlanLabel(completeData)} no valor de ${money(getPlanPrice(completeData))}. Contrato: ${contract.number}.`});
+      history.push({date:new Date().toISOString(),title:completeData.saleMode==="single_service"?"Serviço avulso vendido":"Plano ativado",description:`${getPlanLabel(completeData)} no valor de ${money(getPlanPrice(completeData))}. Contrato: ${contract.number}.`});
       const update={
-        name:completeData.name,document:completeData.document,documentType:completeData.documentType,planPrice:completeData.planPrice,planPriceCustom:!!completeData.planPriceCustom,planLabel:completeData.planLabel,planBenefits:completeData.planBenefits,
+        name:completeData.name,document:completeData.document,documentType:completeData.documentType,saleMode:completeData.saleMode,planPrice:completeData.planPrice,planPriceCustom:!!completeData.planPriceCustom,planLabel:completeData.planLabel,planBenefits:completeData.planBenefits,
         phone:completeData.phone,email:completeData.email,city:completeData.city,address:completeData.address,
         planActive:true,planStart:completeData.planStart,planEnd:completeData.planEnd,
         planActivationSource:"manual",planActivatedAt:completeData.planActivatedAt,seller:completeData.seller,
@@ -4882,11 +5083,11 @@
       batch.update(state.serviceApi.doc(state.db,"clients",c.id),{...update,updatedAt:state.serviceApi.serverTimestamp()});
       batch.set(state.serviceApi.doc(state.db,"publicContracts",contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
       await batch.commit();
-      await logActivity("activation",c.id,"Plano anual ativado",`${completeData.name} · período iniciado em ${formatDate(start)} · ${contract.number}`);
-      await logActivity("contract",c.id,"Contrato do plano gerado",`${completeData.name} · ${contract.number}`);
+      await logActivity("activation",c.id,completeData.saleMode==="single_service"?"Serviço avulso vendido":"Plano anual ativado",`${completeData.name} · início em ${formatDate(start)} · ${contract.number}`);
+      await logActivity("contract",c.id,completeData.saleMode==="single_service"?"Contrato de serviço avulso gerado":"Contrato do plano gerado",`${completeData.name} · ${contract.number}`);
       closeModal("activatePlanModalBackdrop");
-      state.activationClientId=null;
-      showToast("Plano ativado. O link de aceite está pronto para envio.");
+      state.activationClientId=null; state.activationReoffer=false;
+      showToast(completeData.saleMode==="single_service"?"Serviço avulso registrado. O link de aceite está pronto para envio.":"Plano ativado. O link de aceite está pronto para envio.");
       renderContractModal(contract);
       openModal("contractModalBackdrop");
     }
@@ -4894,6 +5095,7 @@
     async function renewClient(event){
       event.preventDefault();
       const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
+      if(c.saleMode==="single_service"){closeModal("renewModalBackdrop");showToast("Serviço avulso não possui renovação automática. Use Reofertar serviço para criar uma nova contratação.","error");return;}
       if(!hasActivePlan(c)){closeModal("renewModalBackdrop");startPlanActivation(c.id);return;}
       const newStart=$("renewStart").value;const history=[...(c.history||[])];
       const renewalReference=c.document;
@@ -5035,8 +5237,8 @@
 
     function exportCSV(){
       if(!can("reportsExport"))return;
-      const headers=["Cliente","CPF/CNPJ","Tipo de plano","Valor anual","Telefone","E-mail","Cidade","Início do plano","Fim do plano","Dias restantes","Status","Contrato","Número do contrato","Aceito em","Chamado técnico","Atendimento aplicativo","Análise fatura","Visita técnica","Relatório trimestral WhatsApp","Responsável","Pagamento"];
-      const rows=state.clients.map(c=>{const p=getPlanInfo(c),contract=getContractForClient(c),usage=type=>`${serviceUsage(c,type)}/${serviceLimit(c,type)}`;return [c.name,c.document,getClientType(c).toUpperCase(),getPlanPrice(c),c.phone,c.email,c.city,c.planStart,p.end,p.days,p.status,contract?.status==="accepted"?"Aceito":contract?"Aguardando aceite":"Não gerado",contract?.number||"",timestampISO(contract?.acceptedAt)||"",usage("technicalCall"),usage("appCheck"),usage("invoiceAnalysis"),usage("technicalVisit"),usage("quarterlyReport"),c.seller,c.paymentStatus==="paid"?"Pago":"Pendente"]});
+      const headers=["Cliente","CPF/CNPJ","Tipo de venda","Produto/serviço","Valor contratado","Telefone","E-mail","Cidade","Início","Fim da vigência","Dias restantes","Status","Contrato","Número do contrato","Aceito em","Chamado técnico","Atendimento aplicativo","Análise fatura","Visita técnica","Relatório trimestral WhatsApp","Responsável","Pagamento"];
+      const rows=state.clients.map(c=>{const p=getPlanInfo(c),contract=getContractForClient(c),usage=type=>`${serviceUsage(c,type)}/${serviceLimit(c,type)}`;return [c.name,c.document,c.saleMode==="single_service"?"Serviço avulso":"Plano completo",getPlanLabel(c),getPlanPrice(c),c.phone,c.email,c.city,c.planStart,p.end,p.days,p.status,contract?.status==="accepted"?"Aceito":contract?"Aguardando aceite":"Não gerado",contract?.number||"",timestampISO(contract?.acceptedAt)||"",usage("technicalCall"),usage("appCheck"),usage("invoiceAnalysis"),usage("technicalVisit"),usage("quarterlyReport"),c.seller,c.paymentStatus==="paid"?"Pago":"Pendente"]});
       const csv="\uFEFF"+[headers,...rows].map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n");
       const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");
       a.href=URL.createObjectURL(blob);a.download=`clientes_ig_monitoramento_${todayISO()}.csv`;a.click();URL.revokeObjectURL(a.href);
@@ -5313,7 +5515,7 @@
     $$(".modal-backdrop").forEach(back=>back.addEventListener("click",e=>{if(e.target===back)closeModal(back.id)}));
     $("quickAddClient").addEventListener("click",openNewClient);$("addClientBtn").addEventListener("click",openNewClient);
 
-    $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);
+    $("clientSearch").addEventListener("input",renderClients);$("clientStatusFilter").addEventListener("change",renderClients);$("clientSaleModeFilter")?.addEventListener("change",renderClients);
     $("contractSearch").addEventListener("input",renderContracts);$("contractStatusFilter").addEventListener("change",renderContracts);
     $("serviceContractSearch")?.addEventListener("input",renderServiceContracts);
     $("newPreventiveContractBtn")?.addEventListener("click",()=>openNewServiceContract("preventive"));
@@ -5338,8 +5540,10 @@
     $("printServiceOrderBtn").addEventListener("click",printServiceOrder);
     $("clientDocument").addEventListener("input",updateClientPlanPreview);
     $("activateDocument").addEventListener("input",updateActivationPlanPreview);
-    $("clientResetSaleBenefits")?.addEventListener("click",()=>renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",$("clientDocument").value||"",null,true));
-    $("activateResetSaleBenefits")?.addEventListener("click",()=>renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",$("activateDocument").value||"",null,true));
+    $("clientResetSaleBenefits")?.addEventListener("click",()=>{renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",$("clientDocument").value||"",null,true);applySaleMode("client");});
+    $("activateResetSaleBenefits")?.addEventListener("click",()=>{renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",$("activateDocument").value||"",null,true);applySaleMode("activate");});
+    $("clientSaleMode")?.addEventListener("change",()=>applySaleMode("client"));
+    $("activateSaleMode")?.addEventListener("change",()=>applySaleMode("activate"));
     $("importClientsCsvBtn").addEventListener("click",()=>$("clientsCsvInput").click());
     $("clientsCsvInput").addEventListener("change",async event=>{const file=event.target.files?.[0];event.target.value="";if(file)await importClientsCsvFile(file);});
     $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
@@ -5424,9 +5628,11 @@
       const existingClient=id?state.clients.find(client=>client.id===id):null;
       const preserveExistingPlan=existingClient&&getClientType(existingClient)===getClientType(document);
       const preserveCustomPrice=!!(preserveExistingPlan&&existingClient?.planPriceCustom);
-      let selectedPlanBenefits;
-      try{selectedPlanBenefits=readSaleBenefits("clientSaleBenefits",document);}catch(err){showToast(err.message,"error");return;}
-      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),planPrice:preserveCustomPrice?getPlanPrice(existingClient):getLivePlanPrice(document),planPriceCustom:preserveCustomPrice,planLabel:getLivePlanLabel(document),planBenefits:selectedPlanBenefits,phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
+      let selectedPlanBenefits,saleInfo;
+      try{selectedPlanBenefits=readSaleBenefits("clientSaleBenefits",document);saleInfo=validateSaleSelection("client",selectedPlanBenefits);}catch(err){showToast(err.message,"error");return;}
+      const onlyType=saleInfo.types[0];
+      const saleLabel=saleInfo.mode==="single_service"?(selectedPlanBenefits[onlyType]?.label||SERVICES[onlyType]?.label||"Serviço avulso"):getLivePlanLabel(document);
+      const data={name:$("clientName").value.trim(),document,documentType:getClientType(document),saleMode:saleInfo.mode,planPrice:saleInfo.price??(preserveCustomPrice?getPlanPrice(existingClient):getLivePlanPrice(document)),planPriceCustom:saleInfo.mode==="single_service"||saleInfo.price!==null||preserveCustomPrice,planLabel:saleLabel,planBenefits:selectedPlanBenefits,phone:$("clientPhone").value.trim(),email:$("clientEmail").value.trim(),city:$("clientCity").value.trim(),address:$("clientAddress").value.trim(),planStart:$("clientPlanStart").value,planEnd:addYear($("clientPlanStart").value),seller:$("clientSeller").value.trim(),payment:$("clientPayment").value,paymentStatus:$("clientPaymentStatus").value,notes:$("clientNotes").value.trim()};
       if(!id)data.services=emptyServices();
       try{const result=await saveClient(data,id);closeModal("clientModalBackdrop");showToast(id?"Ficha atualizada.":"Cliente cadastrado e contrato gerado.");if(!id&&result.contract){renderContractModal(result.contract);openModal("contractModalBackdrop");}}catch(err){showToast("Erro ao salvar cliente: "+err.message,"error");}
     });
@@ -5434,7 +5640,7 @@
       const type=btn.dataset.service,c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
       $("serviceType").value=type;$("serviceDate").value=todayISO();$("serviceOperator").value=state.currentProfile?.name||"";
       const benefit=getBenefit(c,type),used=serviceUsage(c,type),limit=serviceLimit(c,type);
-      $("serviceDescription").value="";$("serviceModalInfo").innerHTML=`<strong>${safe(benefit?.label||SERVICES[type].label)}</strong><br>Cliente: ${safe(c.name)} · utilização ${used+1} de ${limit}. Após confirmar, o registro será incluído no histórico deste período anual.`;
+      $("serviceDescription").value="";$("serviceModalInfo").innerHTML=`<strong>${safe(benefit?.label||SERVICES[type].label)}</strong><br>Cliente: ${safe(c.name)} · utilização ${used+1} de ${limit}. Após confirmar, o registro será incluído no histórico desta contratação.`;
       openModal("serviceModalBackdrop");
     }));
     $("serviceForm").addEventListener("submit",registerService);
@@ -5442,6 +5648,14 @@
     $("renewClientBtn").addEventListener("click",()=>{
       const c=state.clients.find(x=>x.id===state.selectedClientId);if(!c)return;
       if(!hasActivePlan(c)){startPlanActivation(c.id);return;}
+      if(c.saleMode==="single_service"){
+        // Serviço avulso não renova automaticamente: abre uma nova oferta mantendo cliente e serviço como referência.
+        state.activationReoffer=true; state.activationClientId=c.id; state.selectedClientId=c.id;
+        $("activateClientId").value=c.id; $("activateName").value=c.name||""; $("activateDocument").value=c.document||""; $("activatePhone").value=c.phone||""; $("activateEmail").value=c.email||""; $("activateCity").value=c.city||""; $("activateAddress").value=c.address||""; $("activateStart").value=todayISO(); $("activateSeller").value=c.seller||state.currentProfile?.name||""; $("activatePayment").value=c.payment||"PIX"; $("activatePaymentStatus").value="pending"; $("activateNotes").value=c.notes||"";
+        $("activateSaleMode").value="single_service"; $("activateSalePrice").value=Number(getPlanPrice(c)||0).toFixed(2);
+        renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",c.document||"",c.planBenefits&&Object.keys(c.planBenefits).length?c.planBenefits:null,true); applySaleMode("activate"); updateActivationPlanPreview();
+        openModal("activatePlanModalBackdrop"); return;
+      }
       $("renewModalTitle").textContent="Renovar plano anual";
       $("renewStart").value=todayISO();$("renewSeller").value=c.seller||state.currentProfile?.name||"";$("renewNotes").value="";
       $("renewPlanInfo").innerHTML=`<strong>${getPlanLabel(c)} · ${money(getPlanPrice(c))} por ano</strong><br>A renovação iniciará um novo período de 12 meses, zerará os benefícios do plano e preservará todo o histórico anterior.`;
@@ -5498,6 +5712,7 @@
     updateActivationPlanPreview();
     renderSaleBenefits("clientSaleBenefits","clientSaleBenefitsSummary",$("clientDocument")?.value||"",null,true);
     renderSaleBenefits("activateSaleBenefits","activateSaleBenefitsSummary",$("activateDocument")?.value||"",null,true);
+    applySaleMode("client");applySaleMode("activate");
     $("serviceDate").value=todayISO();
     $("renewStart").value=todayISO();
     if($("serviceContractDate"))$("serviceContractDate").value=todayISO();
