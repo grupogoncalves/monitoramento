@@ -985,6 +985,20 @@
       #page-insurance .insurance-hero-actions #insuranceNewBtn {flex:1;}
     }
 
+
+    /* VENDA AVULSA · serviços independentes dos planos */
+    .avulsa-subnav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .avulsa-guide{padding:15px 17px;background:#f7faeb;border:1px solid #d9e5bb;border-left:4px solid var(--accent);border-radius:10px;font-size:12px;line-height:1.6;color:#496129;margin-bottom:18px}
+    .avulsa-summary{padding:17px;background:linear-gradient(120deg,#f3f9e9,#fff);border:1px solid #dae5ce;border-radius:12px;line-height:1.7;font-size:12px}
+    .avulsa-badge{display:inline-flex;align-items:center;border-radius:99px;background:#e9f6e9;color:#07591a;padding:6px 10px;font-size:11px;font-weight:800}
+    .avulsa-progress{min-width:100px;font-size:11px}
+    .avulsa-form-section{padding:14px 0 17px;border-bottom:1px solid var(--line)}
+    .avulsa-form-section:first-child{padding-top:0}
+    .avulsa-form-section h4{margin:0 0 13px;color:var(--primary);font-size:13px}
+    .avulsa-new-fields{background:#f9fbf6;border:1px solid var(--line);padding:14px;border-radius:12px;margin-top:10px}
+    .avulsa-hero-actions{position:relative;z-index:2;flex-shrink:0}
+    .avulsa-hero-actions button{position:relative;z-index:3}
+    @media(max-width:650px){.avulsa-subnav{width:100%}.avulsa-subnav .btn{flex:1}.avulsa-hero-actions{width:100%}.avulsa-hero-actions button{width:100%}}
   </style>
 </head>
 <body>
@@ -1159,6 +1173,7 @@
         <button class="nav-item" data-page="report-sends" data-permission="clientsView"><span class="nav-icon">▥</span> Envio de relatórios</button>
         <button class="nav-item" data-page="maintenance" data-permission="maintenanceView"><span class="nav-icon">✦</span> Preventivas e limpeza</button>
         <button class="nav-item" data-page="insurance"><span class="nav-icon">◈</span> Seguro Solar</button>
+        <button class="nav-item" data-page="standalone" data-permission="clientsView"><span class="nav-icon">▦</span> Venda Avulsa</button>
         <button class="nav-item" data-page="expirations" data-permission="clientsView"><span class="nav-icon">◷</span> Vencimentos</button>
         <button class="nav-item" data-page="users" data-permission="usersManage"><span class="nav-icon">⚙</span> Usuários e permissões</button>
       </nav>
@@ -1214,6 +1229,12 @@
             <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
               <div><div class="card-title">◈ Seguro Solar</div><div class="card-subtitle" style="font-size:12px;line-height:1.5">Venda seguros para sistemas fotovoltaicos, acompanhe cotações e renovações.</div></div>
               <button type="button" class="btn btn-primary" data-go-page="insurance">Acessar Seguro Solar →</button>
+            </div>
+          </div>
+          <div class="card" style="margin:0 0 20px;border-left:5px solid var(--accent)">
+            <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+              <div><div class="card-title">▦ Venda Avulsa</div><div class="card-subtitle" style="font-size:12px;line-height:1.5">Venda apenas um serviço do monitoramento, com quantidade, preço e contrato próprios, sem modificar o plano atual do cliente.</div></div>
+              <button type="button" class="btn btn-primary" data-go-page="standalone">Acessar Venda Avulsa →</button>
             </div>
           </div>
           <div class="stats-grid">
@@ -1512,6 +1533,42 @@
           <div class="table-wrap"><table><thead><tr><th>Cliente / sistema</th><th>Seguradora</th><th>Valor segurado</th><th>Prêmio anual</th><th>Status</th><th>Fim da vigência</th><th>Ações</th></tr></thead><tbody id="insuranceRows"></tbody></table></div><div id="insuranceEmpty" class="empty"><div class="empty-icon">◈</div><strong>Nenhum seguro cadastrado</strong><span>Crie uma cotação para iniciar as vendas.</span></div></div>
         </section>
 
+
+        <!-- NOVA ABA · VENDA AVULSA DE MONITORAMENTO -->
+        <section id="page-standalone" class="page">
+          <div class="hero">
+            <div class="hero-copy">
+              <h2>Venda Avulsa</h2>
+              <p>Venda um serviço do monitoramento de forma independente, para clientes já cadastrados ou novos. O plano atual, suas utilizações e seu contrato permanecem intactos.</p>
+              <p style="font-size:10px;color:var(--accent);margin-top:8px">Módulo Venda Avulsa · versão 13/10/2026</p>
+            </div>
+            <div class="avulsa-hero-actions"><button id="standaloneNewBtn" type="button" class="btn btn-primary" data-permission="clientsEdit">＋ Nova venda avulsa</button></div>
+          </div>
+          <div class="avulsa-guide"><strong>Como funciona:</strong> selecione o cliente, escolha exatamente um serviço, configure a quantidade e o valor da venda. Ao salvar, o CRM registra a venda em seu cadastro e gera um contrato avulso com link para aceite digital. Os preços-base podem ser configurados em Configurações → Planos e benefícios.</div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-top"><div class="stat-icon">▦</div></div><div class="stat-value" id="standaloneCount">0</div><div class="stat-label">Vendas avulsas cadastradas</div></div>
+            <div class="stat-card accent"><div class="stat-top"><div class="stat-icon">◷</div></div><div class="stat-value" id="standaloneAwaiting">0</div><div class="stat-label">Aguardando aceite do contrato</div></div>
+            <div class="stat-card success"><div class="stat-top"><div class="stat-icon">✓</div></div><div class="stat-value" id="standaloneActive">0</div><div class="stat-label">Contratos aceitos e dentro da vigência</div></div>
+            <div class="stat-card"><div class="stat-top"><div class="stat-icon">R$</div></div><div class="stat-value" id="standaloneRevenue">R$ 0</div><div class="stat-label">Valor total das vendas avulsas</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">Histórico de vendas avulsas</div><div class="card-subtitle">Vendas independentes, vinculadas ao cadastro do cliente</div></div>
+              <button id="standaloneCsvBtn" type="button" class="btn btn-ghost btn-sm" data-permission="reportsExport">⇩ Exportar CSV</button>
+            </div>
+            <div class="card-body">
+              <div class="toolbar">
+                <div class="search-box"><span>⌕</span><input id="standaloneSearch" placeholder="Buscar por cliente, documento, serviço ou vendedor"></div>
+                <select id="standaloneFilter" class="filter-select">
+                  <option value="">Todas as vendas</option><option value="pending">Aguardando aceite</option><option value="scheduled">A iniciar</option><option value="active">Vigentes</option><option value="completed">Utilizações concluídas</option><option value="expired">Vencidas</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Cliente / documento</th><th>Serviço</th><th>Valor</th><th>Utilizações</th><th>Vigência</th><th>Situação</th><th>Contrato / ações</th></tr></thead><tbody id="standaloneRows"></tbody></table></div>
+            <div id="standaloneEmpty" class="empty"><div class="empty-icon">▦</div><strong>Nenhuma venda avulsa encontrada</strong><span>Use “Nova venda avulsa” para registrar o primeiro serviço separado do plano.</span></div>
+          </div>
+        </section>
+
         <!-- Vencimentos -->
         <section id="page-expirations" class="page">
           <div class="stats-grid">
@@ -1683,6 +1740,7 @@
             </div>
             <div class="detail-actions">
               <button id="newMaintenanceFromClient" class="btn btn-soft btn-sm" data-permission="maintenanceCreate">✦ Preventiva / limpeza</button>
+              <button id="newStandaloneFromClient" class="btn btn-soft btn-sm" data-permission="clientsEdit">▦ Venda Avulsa</button>
               <button id="editDetailClient" class="btn btn-ghost btn-sm" data-permission="clientsEdit">✎ Editar ficha</button>
               <button id="renewClientBtn" class="btn btn-accent btn-sm" data-permission="clientsEdit">↻ Renovar plano</button>
             </div>
@@ -1868,6 +1926,73 @@
           </div>
         </div>
         <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="clientModalBackdrop">Cancelar</button><button type="submit" class="btn btn-primary">Salvar cliente</button></div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL VENDA AVULSA -->
+  <div id="standaloneModalBackdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header"><h3>Nova venda avulsa de monitoramento</h3><button class="close-btn" type="button" data-close="standaloneModalBackdrop">×</button></div>
+      <form id="standaloneForm">
+        <div class="modal-body">
+          <div class="avulsa-form-section">
+            <h4>1. Cliente</h4>
+            <div class="form-grid">
+              <div class="field full"><label>Tipo de cadastro</label><select id="standaloneClientMode"><option value="existing">Selecionar cliente existente</option><option value="new">Cadastrar novo cliente sem plano</option></select></div>
+              <div id="standaloneExistingFields" class="field full">
+                <label>Pesquisar cliente cadastrado</label>
+                <input id="standaloneClientSearch" placeholder="Digite nome, documento ou cidade para filtrar">
+                <select id="standaloneClientSelect" style="margin-top:8px"><option value="">Selecione um cliente</option></select>
+                <span id="standaloneClientHint" class="small muted">Selecione um cliente para preencher os dados automaticamente.</span>
+              </div>
+              <div class="field full hidden" id="standaloneNewFields">
+                <div class="form-grid avulsa-new-fields">
+                  <div class="field full"><label>Nome / razão social *</label><input id="standaloneNewName" maxlength="160"></div>
+                  <div class="field"><label>CPF ou CNPJ *</label><input id="standaloneNewDocument" inputmode="numeric" maxlength="20"></div>
+                  <div class="field"><label>WhatsApp</label><input id="standaloneNewPhone" maxlength="30"></div>
+                  <div class="field"><label>E-mail</label><input id="standaloneNewEmail" type="email" maxlength="160"></div>
+                  <div class="field"><label>Cidade</label><input id="standaloneNewCity" maxlength="100"></div>
+                  <div class="field full"><label>Endereço</label><input id="standaloneNewAddress" maxlength="230"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="avulsa-form-section">
+            <h4>2. Serviço vendido — somente um item por venda</h4>
+            <div class="form-grid">
+              <div class="field full"><label>Serviço do monitoramento *</label><select id="standaloneService" required></select><span id="standaloneServiceDescription" class="small muted"></span></div>
+              <div class="field"><label>Quantidade de utilizações *</label><input id="standaloneQty" type="number" min="1" max="999" step="1" value="1" required></div>
+              <div class="field"><label>Preço unitário (R$) *</label><input id="standaloneUnitPrice" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Informe o valor" required></div>
+              <div class="field"><label>Data inicial *</label><input id="standaloneStart" type="date" required></div>
+              <div class="field"><label>Data final *</label><input id="standaloneEnd" type="date" required></div>
+              <div class="field"><label>Forma de pagamento</label><select id="standalonePayment"><option>PIX</option><option>Dinheiro</option><option>Cartão</option><option>Boleto</option><option>Outro</option></select></div>
+              <div class="field"><label>Situação do pagamento</label><select id="standalonePaymentStatus"><option value="pending">Pendente</option><option value="paid">Pago</option></select></div>
+              <div class="field"><label>Responsável pela venda</label><input id="standaloneSeller" maxlength="120"></div>
+              <div class="field full"><label>Observações para o contrato</label><textarea id="standaloneNotes" placeholder="Condições acordadas, detalhes do atendimento..."></textarea></div>
+              <div class="field full"><div id="standaloneSaleSummary" class="avulsa-summary" aria-live="polite">Selecione o cliente e o serviço para conferir o resumo.</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="standaloneModalBackdrop">Cancelar</button><button id="standaloneSubmit" type="submit" class="btn btn-primary">Salvar e gerar contrato</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REGISTRAR UTILIZAÇÃO AVULSA -->
+  <div id="standaloneUsageBackdrop" class="modal-backdrop">
+    <div class="modal sm">
+      <div class="modal-header"><h3>Registrar utilização avulsa</h3><button class="close-btn" type="button" data-close="standaloneUsageBackdrop">×</button></div>
+      <form id="standaloneUsageForm">
+        <div class="modal-body form-grid one">
+          <input id="standaloneUsageClientId" type="hidden"><input id="standaloneUsageSaleId" type="hidden">
+          <div id="standaloneUsageInfo" class="demo-note"></div>
+          <div class="field"><label>Data da execução *</label><input id="standaloneUsageDate" type="date" required></div>
+          <div class="field"><label>Responsável *</label><input id="standaloneUsageOperator" required></div>
+          <div class="field"><label>Descrição / observações</label><textarea id="standaloneUsageNotes" placeholder="Descreva o serviço prestado..."></textarea></div>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="standaloneUsageBackdrop">Cancelar</button><button id="standaloneUsageSubmit" type="submit" class="btn btn-primary">Confirmar utilização</button></div>
       </form>
     </div>
   </div>
@@ -2246,6 +2371,7 @@
       users: [],
       activities: [],
       contracts: [],
+      standaloneContracts: [],
       serviceContracts: [],
       selectedServiceContractId: null,
       maintenanceJobs: [],
@@ -2530,6 +2656,12 @@
     }
     function hydrateContractClientData(contract,client){
       if(!contract)return contract;
+      // Contratos avulsos extras pertencem a uma venda independente. Nunca
+      // usar preço, benefícios ou prazo do plano atual para reconstruí-los.
+      if(contract.contractKind==="standalone_sale"){
+        const snapshot=contract.clientSnapshot||contract;
+        return {...contract,contractHtml:normalizeContractHtml(contract.contractHtml||"",snapshot)};
+      }
       const useLivePrice=contract.status!=="accepted";
       const data=contractDataFromClient(contract,client,{useLivePrice});
       const snapshot=contractClientSnapshot(data);
@@ -3304,9 +3436,10 @@
         // Contratos de serviços usam a mesma rota já autorizada pelo CRM, mas ficam
         // separados logicamente para não aparecerem na lista de monitoramento.
         state.serviceContracts=allContracts.filter(c=>c.contractKind==="service").sort((a,b)=>new Date(b.createdAt||b.updatedAt||0)-new Date(a.createdAt||a.updatedAt||0));
-        state.contracts=allContracts.filter(c=>c.contractKind!=="service");
+        state.standaloneContracts=allContracts.filter(c=>c.contractKind==="standalone_sale");
+        state.contracts=allContracts.filter(c=>c.contractKind!=="service" && c.contractKind!=="standalone_sale");
         state.serviceContractsLoaded=true;
-        renderClients();renderContracts();renderServiceContracts();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();syncServiceContractsToMaintenance();
+        renderClients();renderContracts();renderServiceContracts();renderStandaloneSales();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();syncServiceContractsToMaintenance();
       },err=>showToast("Erro ao carregar contratos: "+err.message,"error")));
       // Seguro Solar pertence ao REAlTIME Database, no caminho /solarInsurance.
       // As regras do Cloud Firestore NÃO afetam este listener.
@@ -3335,7 +3468,7 @@
     }
 
     function renderAll(){
-      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderServiceContracts();renderReportSends();renderMaintenanceJobs();renderInsurance();renderExpirations();renderUsers();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderServiceContracts();renderStandaloneSales();renderReportSends();renderMaintenanceJobs();renderInsurance();renderExpirations();renderUsers();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -4125,7 +4258,7 @@
     }
     async function openContractByToken(token){
       if(!token)return;
-      let contract=state.contracts.find(c=>c.token===token)||null;
+      let contract=[...state.contracts,...state.standaloneContracts].find(c=>c.token===token)||null;
       if((!contract || !contract.contractHtml) && state.connected){
         try{
           const snap=await state.serviceApi.getDoc(state.serviceApi.doc(state.db,"publicContracts",token));
@@ -5079,11 +5212,251 @@
       const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='ig-seguros-solares.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
     }
 
+
+    /* =========================================================
+       VENDA AVULSA INDEPENDENTE · Realtime Database
+       Armazenamento: /clients/{clientId}/standaloneSales/{saleId}
+       Usa as regras já existentes do caminho /clients.
+       Cada venda gera contrato em /publicContracts/{token}.
+       ========================================================= */
+    function standaloneAllSales(){
+      const rows=[];
+      state.clients.forEach(client=>{
+        Object.entries(client.standaloneSales||{}).forEach(([id,record])=>{
+          if(record && typeof record==='object')rows.push({client,id,...record});
+        });
+      });
+      return rows.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    }
+    function standaloneContract(sale){
+      return state.standaloneContracts.find(c=>c.token===sale.contractToken)||null;
+    }
+    function standaloneState(sale){
+      const signed=standaloneContract(sale)?.status==='accepted';
+      if(!signed)return 'pending';
+      if(sale.start && sale.start>todayISO())return 'scheduled';
+      const remaining=daysBetween(todayISO(),sale.end||sale.start||todayISO());
+      if(remaining<0)return 'expired';
+      if(Object.keys(sale.usage||{}).length>=Number(sale.quantity||1))return 'completed';
+      return 'active';
+    }
+    function standaloneStatusLabel(status){
+      return {pending:'Aguardando aceite',scheduled:'A iniciar',active:'Vigente',completed:'Concluído',expired:'Vencido'}[status]||status;
+    }
+    function renderStandaloneSales(){
+      if(!$('standaloneRows'))return;
+      const all=standaloneAllSales();
+      const search=String($('standaloneSearch')?.value||'').trim().toLowerCase();
+      const filter=$('standaloneFilter')?.value||'';
+      const rows=all.filter(sale=>{
+        const key=[sale.client?.name,sale.client?.document,sale.label,sale.seller,sale.client?.phone].join(' ').toLowerCase();
+        return (!search||key.includes(search)) && (!filter||standaloneState(sale)===filter);
+      });
+      $('standaloneCount').textContent=all.length;
+      $('standaloneAwaiting').textContent=all.filter(x=>standaloneState(x)==='pending').length;
+      $('standaloneActive').textContent=all.filter(x=>standaloneState(x)==='active').length;
+      $('standaloneRevenue').textContent=money(all.reduce((sum,x)=>sum+Number(x.total||0),0));
+      $('standaloneRows').innerHTML=rows.map(sale=>{
+        const status=standaloneState(sale),used=Object.keys(sale.usage||{}).length,limit=Number(sale.quantity||1);
+        const id=safe(sale.id),clientId=safe(sale.client.id),token=safe(sale.contractToken||'');
+        const statusClass={pending:'warning',scheduled:'info',active:'success',completed:'info',expired:'danger'}[status]||'gray';
+        const registerEnabled=used<limit && status==='active' && can('servicesRegister');
+        return `<tr>
+          <td><div class="customer-cell"><div class="customer-avatar">${safe(initials(sale.client.name))}</div><div><strong>${safe(sale.client.name||'Cliente')}</strong><span>${safe(sale.client.document||'Sem documento')}</span></div></div></td>
+          <td><strong>${safe(sale.label||SERVICES[sale.serviceType]?.label||'Serviço')}</strong><div class="small muted">${safe(sale.seller||'Sem vendedor')} · ${safe(sale.paymentStatus==='paid'?'Pago':'Pagamento pendente')}</div></td>
+          <td><strong>${money(Number(sale.total||0))}</strong><div class="small muted">${money(Number(sale.unitPrice||0))} por utilização</div></td>
+          <td><div class="avulsa-progress"><strong>${used} de ${limit}</strong><div class="progress-line" style="margin-top:7px"><span style="width:${Math.min(100,Math.round(used/Math.max(1,limit)*100))}%"></span></div></div></td>
+          <td>${safe(formatDate(sale.start))}<div class="small muted">até ${safe(formatDate(sale.end))}</div></td>
+          <td><span class="badge ${statusClass}">${standaloneStatusLabel(status)}</span></td>
+          <td><div class="actions" style="justify-content:flex-start;flex-wrap:wrap">
+            <button type="button" class="btn btn-soft btn-sm" onclick="openContractByToken('${token}')">▤ Contrato</button>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="copyStandaloneContractLink('${clientId}','${id}')" title="Copiar link para enviar ao cliente">Link</button>
+            ${registerEnabled?`<button type="button" class="btn btn-primary btn-sm" onclick="openStandaloneUsage('${clientId}','${id}')">＋ Uso</button>`:''}
+          </div></td>
+        </tr>`;
+      }).join('');
+      $('standaloneEmpty').classList.toggle('hidden',rows.length>0);
+    }
+    function standaloneSelectedClient(){
+      return state.clients.find(c=>c.id===$('standaloneClientSelect').value)||null;
+    }
+    function standaloneSaleDocument(){
+      return $('standaloneClientMode').value==='new'?$('standaloneNewDocument').value:standaloneSelectedClient()?.document||'';
+    }
+    function refreshStandaloneClientOptions(){
+      const select=$('standaloneClientSelect'),current=select.value;
+      const q=$('standaloneClientSearch').value.trim().toLowerCase();
+      const matches=state.clients.filter(c=>!q||[c.name,c.document,c.phone,c.city].join(' ').toLowerCase().includes(q)).slice(0,500);
+      select.innerHTML='<option value="">Selecione um cliente</option>'+matches.map(c=>`<option value="${safe(c.id)}">${safe(c.name||'Cliente')} · ${safe(c.document||'sem documento')}</option>`).join('');
+      if(matches.some(c=>c.id===current))select.value=current;
+      refreshStandalonePrice();
+    }
+    function updateStandaloneClientMode(){
+      const isNew=$('standaloneClientMode').value==='new';
+      $('standaloneExistingFields').classList.toggle('hidden',isNew);
+      $('standaloneNewFields').classList.toggle('hidden',!isNew);
+      ['standaloneNewName','standaloneNewDocument'].forEach(id=>$(id).required=isNew);
+      $('standaloneClientSelect').required=!isNew;
+      refreshStandalonePrice();
+    }
+    function refreshStandalonePrice(){
+      const client=standaloneSelectedClient(),newMode=$('standaloneClientMode').value==='new';
+      const document=standaloneSaleDocument();
+      if(client&&!newMode){
+        $('standaloneClientHint').textContent=`${client.name||'Cliente'} · ${client.document||'Documento não informado'} · ${client.planActive===false?'sem plano ativo':'plano atual preservado'}`;
+      }else $('standaloneClientHint').textContent='O plano de monitoramento atual do cliente não será modificado.';
+      const type=$('standaloneService').value;
+      const base=getConfiguredPlan(document)?.benefits?.[type]||DEFAULT_PLAN_SETTINGS[getClientType(document)]?.benefits?.[type]||{};
+      $('standaloneServiceDescription').textContent=`${base.description||SERVICES[type]?.label||'Serviço independente'}${Number(base.standalonePrice||0)>0?' · Preço-base: '+money(Number(base.standalonePrice)):''}`;
+      $('standaloneUnitPrice').value=Number(base.standalonePrice||0)>0?Number(base.standalonePrice).toFixed(2):'';
+      updateStandaloneSummary();
+    }
+    function updateStandaloneSummary(){
+      const qty=Number($('standaloneQty').value||0),price=Number($('standaloneUnitPrice').value||0);
+      const amount=qty>0 && Number.isFinite(qty)&&Number.isFinite(price)?qty*price:0;
+      const client=$('standaloneClientMode').value==='new'?$('standaloneNewName').value:standaloneSelectedClient()?.name;
+      const type=$('standaloneService').value;
+      const serviceLabel=getConfiguredPlan(standaloneSaleDocument())?.benefits?.[type]?.label||SERVICES[type]?.label||'Selecione o serviço';
+      $('standaloneSaleSummary').innerHTML=`<span class="avulsa-badge">Venda independente · sem renovação automática</span><div style="margin-top:9px"><strong>Cliente:</strong> ${safe(client||'A definir')}<br><strong>Serviço:</strong> ${safe(serviceLabel)}<br><strong>Quantidade:</strong> ${Number.isInteger(qty)&&qty>0?qty:'—'}<br><strong>Valor total:</strong> <strong style="font-size:19px;color:var(--primary)">${money(amount)}</strong><br><strong>Vigência:</strong> ${safe($('standaloneStart').value?formatDate($('standaloneStart').value):'A definir')} a ${safe($('standaloneEnd').value?formatDate($('standaloneEnd').value):'A definir')}</div><div class="small muted" style="margin-top:7px">Ao salvar, será gerado contrato avulso. Nenhuma informação de plano existente será sobrescrita.</div>`;
+    }
+    function openStandaloneSale(clientId=''){
+      if(!can('clientsEdit')){showToast('Você não possui permissão para registrar vendas avulsas.','error');return;}
+      $('standaloneForm').reset();
+      $('standaloneClientMode').value='existing';
+      $('standaloneClientSearch').value='';
+      $('standaloneStart').value=todayISO();
+      $('standaloneEnd').value=addYear(todayISO());
+      $('standaloneQty').value='1';
+      $('standaloneSeller').value=state.currentProfile?.name||'';
+      $('standaloneService').innerHTML=Object.entries(SERVICES).map(([key,item])=>`<option value="${key}">${safe(item.label)}</option>`).join('');
+      refreshStandaloneClientOptions();
+      if(clientId && state.clients.some(c=>c.id===clientId))$('standaloneClientSelect').value=clientId;
+      updateStandaloneClientMode();
+      refreshStandalonePrice();
+      openModal('standaloneModalBackdrop');
+    }
+    window.openStandaloneSale=openStandaloneSale;
+    async function saveStandaloneSale(event){
+      event.preventDefault();
+      if(!state.connected){showToast('Realtime Database indisponível.','error');return;}
+      if(!can('clientsEdit')){showToast('Seu perfil não tem permissão para vender serviços avulsos.','error');return;}
+      const button=$('standaloneSubmit'),original=button.textContent;
+      if(button.disabled)return;
+      try{
+        const newMode=$('standaloneClientMode').value==='new';
+        if(newMode&&!can('clientsCreate'))throw new Error('Você não tem permissão para cadastrar novos clientes.');
+        const existing=standaloneSelectedClient();
+        if(!newMode&&!existing)throw new Error('Selecione um cliente existente.');
+        const document=String(newMode?$('standaloneNewDocument').value:existing.document||'').trim();
+        const digits=documentDigits(document);
+        if(digits.length!==11&&digits.length!==14)throw new Error('Informe CPF com 11 dígitos ou CNPJ com 14 dígitos.');
+        if(newMode && state.clients.some(c=>documentDigits(c.document||'')===digits))throw new Error('Este CPF/CNPJ já existe. Selecione o cadastro do cliente para não duplicar.');
+        const type=$('standaloneService').value;
+        if(!Object.hasOwn(SERVICES,type))throw new Error('Escolha um serviço válido.');
+        const quantity=Number($('standaloneQty').value),unitPrice=Number($('standaloneUnitPrice').value);
+        if(!Number.isInteger(quantity)||quantity<1||quantity>999)throw new Error('Quantidade deve ser um número inteiro de 1 a 999.');
+        if(!Number.isFinite(unitPrice)||unitPrice<=0)throw new Error('Informe o preço unitário maior que zero.');
+        const start=$('standaloneStart').value,end=$('standaloneEnd').value;
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||end<start)throw new Error('Confira as datas de início e término da vigência.');
+        const total=Math.round(quantity*unitPrice*100)/100;
+        const customer=newMode?{
+          name:$('standaloneNewName').value.trim(),document,documentType:getClientType(document),
+          phone:$('standaloneNewPhone').value.trim(),email:$('standaloneNewEmail').value.trim(),city:$('standaloneNewCity').value.trim(),address:$('standaloneNewAddress').value.trim(),
+          planActive:false,saleMode:'plan',services:emptyServices(),planBenefits:{},source:'Venda Avulsa'
+        }:existing;
+        if(!customer.name)throw new Error('Informe o nome do cliente.');
+        const config=getConfiguredPlan(document)?.benefits?.[type]||DEFAULT_PLAN_SETTINGS[getClientType(document)].benefits[type];
+        const label=config?.label||SERVICES[type].label;
+        const payment=$('standalonePayment').value;
+        const paymentStatus=$('standalonePaymentStatus').value;
+        const seller=$('standaloneSeller').value.trim()||state.currentProfile?.name||'';
+        const notes=$('standaloneNotes').value.trim();
+        const saleId=uid();
+        const clientId=newMode?state.serviceApi.doc(state.serviceApi.collection(state.db,'clients')).id:existing.id;
+        const benefit={label,description:config?.description||'',limit:quantity,contractText:saleBenefitContractText(config||{label},quantity,type),standalonePrice:unitPrice};
+        const saleData={
+          ...customer,saleMode:'single_service',planLabel:label,planBenefits:{[type]:benefit},
+          planPrice:total,planPriceCustom:true,planStart:start,planEnd:end,payment,paymentStatus,seller,notes
+        };
+        button.disabled=true;button.textContent='Salvando venda...';
+        const contract=await createContractRecord(clientId,saleData,'standalone_sale');
+        contract.contractKind='standalone_sale';contract.standaloneSaleId=saleId;
+        const record={serviceType:type,label,quantity,unitPrice:Math.round(unitPrice*100)/100,total,start,end,payment,paymentStatus,seller,notes,contractToken:contract.token,contractNumber:contract.number,createdAt:new Date().toISOString(),createdBy:state.currentUser?.uid||'',usage:{}};
+        const batch=state.serviceApi.writeBatch(state.db);
+        if(newMode){
+          batch.set(state.serviceApi.doc(state.db,'clients',clientId),{
+            ...customer,standaloneSales:{[saleId]:record},createdAt:state.serviceApi.serverTimestamp(),updatedAt:state.serviceApi.serverTimestamp()
+          });
+        }else{
+          batch.set(state.serviceApi.doc(state.db,'clients',clientId,'standaloneSales',saleId),record);
+        }
+        batch.set(state.serviceApi.doc(state.db,'publicContracts',contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
+        await batch.commit();
+        // O registro do contrato fica disponível no próprio modal imediatamente,
+        // sem aguardar o evento assíncrono de sincronização do Realtime Database.
+        state.standaloneContracts.unshift(contract);
+        try{await logActivity('standalone',clientId,'Venda avulsa registrada',`${customer.name} · ${label} (${quantity}) · ${money(total)} · ${seller}`);}catch(err){console.warn('Venda salva, mas histórico não registrado',err);}
+        closeModal('standaloneModalBackdrop');
+        showToast('Venda avulsa salva! Contrato gerado e pronto para envio.');
+        renderStandaloneSales();
+        renderContractModal(contract);openModal('contractModalBackdrop');
+      }catch(err){console.error('Falha ao salvar venda avulsa',err);showToast('Não foi possível salvar: '+(err.message||'erro desconhecido'),'error');}
+      finally{button.disabled=false;button.textContent=original;}
+    }
+    function copyStandaloneContractLink(clientId,saleId){
+      const client=state.clients.find(c=>c.id===clientId),sale=client?.standaloneSales?.[saleId];
+      if(!sale?.contractToken){showToast('Contrato não localizado.','error');return;}
+      copyText(getContractLink(sale.contractToken));
+    }
+    window.copyStandaloneContractLink=copyStandaloneContractLink;
+    function openStandaloneUsage(clientId,saleId){
+      const c=state.clients.find(x=>x.id===clientId),sale=c?.standaloneSales?.[saleId];
+      if(!sale)return showToast('Venda não localizada.','error');
+      if(!can('servicesRegister'))return showToast('Sem permissão para registrar utilização.','error');
+      if(standaloneState({...sale,client:c,id:saleId})!=='active')return showToast('Esta venda precisa de contrato aceito e vigência ativa.','error');
+      const used=Object.keys(sale.usage||{}).length;
+      if(used>=Number(sale.quantity||1))return showToast('Todas as utilizações foram registradas.','error');
+      $('standaloneUsageForm').reset();
+      $('standaloneUsageClientId').value=clientId;
+      $('standaloneUsageSaleId').value=saleId;
+      $('standaloneUsageDate').value=todayISO();
+      $('standaloneUsageOperator').value=state.currentProfile?.name||'';
+      $('standaloneUsageInfo').innerHTML=`<strong>${safe(sale.label)}</strong><br>Cliente: ${safe(c.name)}<br>Registrar utilização ${used+1} de ${sale.quantity}.`;
+      openModal('standaloneUsageBackdrop');
+    }
+    window.openStandaloneUsage=openStandaloneUsage;
+    async function registerStandaloneUsage(event){
+      event.preventDefault();
+      const clientId=$('standaloneUsageClientId').value,saleId=$('standaloneUsageSaleId').value;
+      const c=state.clients.find(x=>x.id===clientId),sale=c?.standaloneSales?.[saleId];
+      if(!c||!sale||!can('servicesRegister'))return showToast('Registro não autorizado.','error');
+      if(standaloneState({...sale,client:c,id:saleId})!=='active')return showToast('Contrato não aceito, vencido ou utilizações esgotadas.','error');
+      const count=Object.keys(sale.usage||{}).length;
+      if(count>=Number(sale.quantity||1))return showToast('Limite de utilizações atingido.','error');
+      const button=$('standaloneUsageSubmit');button.disabled=true;
+      try{
+        const ref=state.serviceApi.doc(state.db,'clients',clientId,'standaloneSales',saleId,'usage',uid());
+        await state.serviceApi.setDoc(ref,{date:$('standaloneUsageDate').value,operator:$('standaloneUsageOperator').value.trim(),notes:$('standaloneUsageNotes').value.trim(),createdAt:new Date().toISOString(),createdBy:state.currentUser?.uid||''});
+        try{await logActivity('service',clientId,'Utilização de serviço avulso',`${c.name} · ${sale.label} · ${count+1} de ${sale.quantity}`);}catch(err){console.warn(err);}
+        closeModal('standaloneUsageBackdrop');showToast('Utilização registrada com sucesso.');
+      }catch(err){showToast('Erro ao registrar utilização: '+err.message,'error');}
+      finally{button.disabled=false;}
+    }
+    function exportStandaloneSales(){
+      if(!can('reportsExport'))return;
+      const fields=['Cliente','CPF/CNPJ','Serviço','Quantidade','Utilizadas','Preço unitário','Valor total','Pagamento','Situação pagamento','Vendedor','Início','Fim','Status','Nº contrato','Link do contrato'];
+      const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
+      const rows=standaloneAllSales().map(s=>[s.client.name,s.client.document,s.label,s.quantity,Object.keys(s.usage||{}).length,s.unitPrice,s.total,s.payment,s.paymentStatus,s.seller,s.start,s.end,standaloneStatusLabel(standaloneState(s)),s.contractNumber,getContractLink(s.contractToken)]);
+      const csv='\uFEFF'+[fields,...rows].map(row=>row.map(quote).join(';')).join('\r\n');
+      const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+      const a=document.createElement('a');a.href=url;a.download='ig_energia_vendas_avulsas_'+todayISO()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+    }
+
     function navigate(page){
       $$(".page").forEach(p=>p.classList.remove("active"));
       $(`page-${page}`).classList.add("active");
       $$(".nav-item[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===page));
-      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos","report-sends":"Envio de relatórios",maintenance:"Preventivas e limpeza",insurance:"Seguro Solar",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
+      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos","report-sends":"Envio de relatórios",maintenance:"Preventivas e limpeza",insurance:"Seguro Solar",standalone:"Venda Avulsa",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
       $("topPageTitle").textContent=titles[page]||"CRM";
       $("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open");
       window.scrollTo({top:0,behavior:"smooth"});
@@ -5857,24 +6230,38 @@
     $("importClientsCsvBtn").addEventListener("click",()=>$("clientsCsvInput").click());
     $("clientsCsvInput").addEventListener("change",async event=>{const file=event.target.files?.[0];event.target.value="";if(file)await importClientsCsvFile(file);});
     $("exportClients").addEventListener("click",exportCSV);$("exportSidebar").addEventListener("click",exportCSV);
+
+    $("standaloneNewBtn")?.addEventListener("click",()=>openStandaloneSale());
+    $("standaloneClientMode")?.addEventListener("change",updateStandaloneClientMode);
+    $("standaloneClientSearch")?.addEventListener("input",refreshStandaloneClientOptions);
+    $("standaloneClientSelect")?.addEventListener("change",refreshStandalonePrice);
+    $("standaloneNewDocument")?.addEventListener("input",refreshStandalonePrice);
+    $("standaloneService")?.addEventListener("change",refreshStandalonePrice);
+    ["standaloneQty","standaloneUnitPrice","standaloneStart","standaloneEnd"].forEach(id=>$(id)?.addEventListener("input",updateStandaloneSummary));
+    $("standaloneForm")?.addEventListener("submit",saveStandaloneSale);
+    $("standaloneSearch")?.addEventListener("input",renderStandaloneSales);
+    $("standaloneFilter")?.addEventListener("change",renderStandaloneSales);
+    $("standaloneCsvBtn")?.addEventListener("click",exportStandaloneSales);
+    $("standaloneUsageForm")?.addEventListener("submit",registerStandaloneUsage);
     $("backClients").addEventListener("click",()=>navigate("clients"));
     $("newMaintenanceFromClient").addEventListener("click",()=>openMaintenanceForClient(state.selectedClientId));
+    $("newStandaloneFromClient")?.addEventListener("click",()=>openStandaloneSale(state.selectedClientId));
     $("editDetailClient").addEventListener("click",()=>editClient(state.selectedClientId));
     $("primaryContractActionBtn").addEventListener("click",()=>openContractForClient(state.selectedClientId));
     $("copyDetailContractLink").addEventListener("click",()=>{const c=state.clients.find(x=>x.id===state.selectedClientId),contract=getContractForClient(c);if(contract)copyText(getContractLink(contract.token));});
     $("copyContractLinkBtn").addEventListener("click",()=>copyText($("contractLinkInput").value));
     $("sendContractWhatsAppBtn").addEventListener("click",()=>{
-      const contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);
+      const contract=[...state.contracts,...state.standaloneContracts].find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);
       if(!contract)return;
       const client=state.clients.find(c=>c.id===(contract.clientId||state.selectedContractClientId));
       const phone=documentDigits(contract.clientPhone||client?.phone||"");
       if(!phone){showToast("Cadastre o telefone do cliente para enviar pelo WhatsApp.","error");return;}
       const countryPhone=phone.startsWith("55")?phone:`55${phone}`;
-      const message=`Olá, ${contract.clientName||client?.name||"cliente"}! Segue o contrato do plano de monitoramento da IG Energia para leitura e aceite digital: ${getContractLink(contract.token)}`;
+      const message=`Olá, ${contract.clientName||client?.name||"cliente"}! Segue o ${contract.saleMode==="single_service"?"contrato do serviço avulso":"contrato do plano de monitoramento"} da IG Energia para leitura e aceite digital: ${getContractLink(contract.token)}`;
       window.open(`https://wa.me/${countryPhone}?text=${encodeURIComponent(message)}`,"_blank");
     });
     $("openAcceptanceBtn").addEventListener("click",()=>{if(state.selectedContractToken)window.open(getContractLink(state.selectedContractToken),"_blank")});
-    $("printContractBtn").addEventListener("click",()=>{let contract=state.contracts.find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract){const client=state.clients.find(c=>c.id===(contract.clientId||state.selectedContractClientId));contract=hydrateContractClientData(contract,client);printContract(contract);}});
+    $("printContractBtn").addEventListener("click",()=>{let contract=[...state.contracts,...state.standaloneContracts].find(c=>c.token===state.selectedContractToken)||state.clients.map(getContractForClient).find(c=>c?.token===state.selectedContractToken);if(contract){const client=state.clients.find(c=>c.id===(contract.clientId||state.selectedContractClientId));contract=hydrateContractClientData(contract,client);printContract(contract);}});
     $("saveDetailPlanPrice").addEventListener("click",saveDetailClientPlanPrice);
     $("detailPlanPriceInput").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();saveDetailClientPlanPrice();}});
     $("publicStartFaceCamera")?.addEventListener("click",startPublicFaceCamera);
