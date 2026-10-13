@@ -958,6 +958,33 @@
       pointer-events: auto;
       touch-action: manipulation;
     }
+  
+    /* Seguro Solar: indicador discreto no cabeçalho do módulo */
+    #page-insurance .insurance-hero-actions {
+      display:flex;gap:12px;align-items:center;justify-content:flex-end;
+      position:relative;z-index:2;flex-wrap:wrap;
+    }
+    #page-insurance .insurance-connection {
+      display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+      color:rgba(255,255,255,.92);font-size:11px;font-weight:700;
+      padding:7px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.10);
+    }
+    #page-insurance .insurance-connection-dot {
+      display:inline-block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;
+      background:#f0c15d;box-shadow:0 0 0 3px rgba(240,193,93,.18);
+    }
+    #page-insurance .insurance-connection[data-state="ok"] .insurance-connection-dot {
+      background:#87eeaa;box-shadow:0 0 0 3px rgba(135,238,170,.15);
+    }
+    #page-insurance .insurance-connection[data-state="error"] .insurance-connection-dot {
+      background:#ff9292;box-shadow:0 0 0 3px rgba(255,146,146,.18);
+    }
+    @media (max-width:650px) {
+      #page-insurance .insurance-hero-actions {width:100%;justify-content:space-between;}
+      #page-insurance .insurance-hero-actions #insuranceNewBtn {flex:1;}
+    }
+
   </style>
 </head>
 <body>
@@ -1460,14 +1487,20 @@
 
 
 
-        <!-- Seguro Solar usa o Firebase Realtime Database, não o Firestore -->
+        <!-- Seguro Solar: visual limpo, sem painel de diagnostico na tela comercial -->
         <section id="page-insurance" class="page">
-          <div class="service-contract-form-note" style="margin-bottom:12px">Os seguros são armazenados no <strong>Firebase Realtime Database</strong>, no caminho <strong>/solarInsurance</strong> (não no Firestore). Acesso conforme o perfil gravado no banco: master/admin possuem acesso completo; comercial e gestor podem cadastrar/editar; demais usuários ativos podem visualizar.</div>
-          <div id="insuranceAccessPanel" role="status" aria-live="polite" style="margin-bottom:16px;padding:14px 16px;border:1px solid #d4e3aa;border-left:5px solid #b1c903;background:#fff;border-radius:8px;color:#34503a;font-size:12px;line-height:1.7;overflow-wrap:anywhere">
-            <strong id="insuranceAccessTitle">Conferindo acesso aos seguros…</strong><div id="insuranceAccessMessage">Aguarde a conexão com o banco.</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button id="insuranceTestBtn" type="button" class="btn btn-soft btn-sm">Verificar acesso agora</button><button id="insuranceRulesCopyBtn" type="button" class="btn btn-ghost btn-sm">Copiar regra do Realtime Database</button></div>
+          <div class="hero">
+            <div class="hero-copy">
+              <h2>Seguro para Energia Solar</h2>
+              <p>Central comercial para cotações, propostas, apólices e renovações de sistemas fotovoltaicos. O seguro só é considerado contratado após confirmação da seguradora.</p>
+            </div>
+            <div class="insurance-hero-actions">
+              <span id="insuranceConnection" class="insurance-connection" data-state="loading" role="status" aria-live="polite" title="Aguardando conexão com o banco de seguros">
+                <span class="insurance-connection-dot" aria-hidden="true"></span><span id="insuranceConnectionLabel">Verificando…</span>
+              </span>
+              <button id="insuranceNewBtn" type="button" class="btn btn-primary">＋ Nova cotação</button>
+            </div>
           </div>
-          <div class="hero"><div class="hero-copy"><h2>Seguro para Energia Solar</h2><p>Central comercial para cotações, propostas, apólices e renovações de sistemas fotovoltaicos. O seguro só é considerado contratado após confirmação da seguradora.</p><div style="font-size:10px;color:#d8e64f;margin-top:8px">Módulo Seguro Solar · botão de cotação corrigido 13/10/2026</div></div><button id="insuranceNewBtn" type="button" class="btn btn-primary">＋ Nova cotação</button></div>
           <div class="stats-grid">
             <div class="stat-card"><div class="stat-top"><div class="stat-icon">◈</div></div><div id="insTotal" class="stat-value">0</div><div class="stat-label">Cotações e propostas</div></div>
             <div class="stat-card accent"><div class="stat-top"><div class="stat-icon">◷</div></div><div id="insPending" class="stat-value">0</div><div class="stat-label">Em negociação</div></div>
@@ -1616,6 +1649,24 @@
               <div class="card-header"><div><div class="card-title">Como as mudanças funcionam</div><div class="card-subtitle">Proteção das condições já contratadas</div></div></div>
               <div class="card-body">
                 <div class="demo-note" style="margin:0"><strong>Novos valores não alteram contratos antigos.</strong><br>O sistema salva uma cópia do preço e dos benefícios dentro da ficha do cliente quando o plano é ativado ou renovado. Contratos digitais já gerados continuam com o conteúdo original.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagnostico tecnico restrito a perfis master / admin -->
+          <div id="insuranceAdminDiagnostics" class="card hidden" style="margin-top:18px">
+            <div class="card-header"><div>
+              <div class="card-title">Diagnóstico técnico · Seguro Solar</div>
+              <div class="card-subtitle">Ferramentas administrativas para testar a conexão e conferir permissões</div>
+            </div></div>
+            <div class="card-body">
+              <div id="insuranceAccessPanel" role="status" aria-live="polite" style="padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;line-height:1.6;font-size:12px;overflow-wrap:anywhere">
+                <strong id="insuranceAccessTitle">Conferindo acesso aos seguros…</strong>
+                <div id="insuranceAccessMessage">Aguarde a conexão com o banco.</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                <button id="insuranceTestBtn" type="button" class="btn btn-soft btn-sm">Verificar acesso agora</button>
+                <button id="insuranceRulesCopyBtn" type="button" class="btn btn-ghost btn-sm">Copiar regras do Realtime Database</button>
               </div>
             </div>
           </div>
@@ -2853,6 +2904,7 @@
       });
       const masterOption=$("userRole")?.querySelector('option[value="master"]');
       if(masterOption) masterOption.disabled=!isMasterProfile(state.currentProfile);
+      $('insuranceAdminDiagnostics')?.classList.toggle('hidden', !isInsuranceAdmin());
     }
 
     const PLAN_SETTINGS_LOCAL_KEY = "ig_monitoring_plan_settings";
@@ -4908,6 +4960,16 @@
       return "Falha ao consultar /solarInsurance no Realtime Database: " + (err?.message||code||"erro desconhecido");
     }
     function setInsuranceAccessStatus(type,message){
+      // Indicador compacto sempre visível no cabeçalho do módulo.
+      const indicator=$('insuranceConnection'), indicatorLabel=$('insuranceConnectionLabel');
+      if(indicator){
+        indicator.dataset.state=type;
+        indicator.title=message||'Status do Seguro Solar';
+      }
+      if(indicatorLabel){
+        indicatorLabel.textContent=type==='ok'?'Conectado':type==='error'?'Sem acesso':'Verificando…';
+      }
+      // Informações técnicas completas ficam somente em Configurações (master/admin).
       const title=$('insuranceAccessTitle'), body=$('insuranceAccessMessage'), panel=$('insuranceAccessPanel');
       if(!title||!body||!panel)return;
       const profile=state.currentProfile||{};
@@ -5736,7 +5798,8 @@
     $("logoutBtn").addEventListener("click",async()=>{
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
       if(state.connected) await state.serviceApi.signOut(state.auth);
-      state.currentUser=null;state.currentProfile=null;showAuth();
+      state.currentUser=null;state.currentProfile=null;
+      setInsuranceAccessStatus('loading','Aguardando novo login.');showAuth();
     });
     $('insuranceNewBtn')?.addEventListener('click',function(event){ event.preventDefault(); insuranceOpen(); });
     $('insuranceForm')?.addEventListener('submit',insuranceSave);
