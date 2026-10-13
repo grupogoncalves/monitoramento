@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#07529c" />
-  <title>IG Energia | CRM Monitoramento</title>
+  <title>IG Energia | CRM Monitoramento + Seguro Solar</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
@@ -194,6 +194,7 @@
       padding:24px 16px; display:flex; flex-direction:column; z-index:40;
     }
     .sidebar .brand-lockup { padding:2px 8px 25px; }
+    .sidebar { overflow-y:auto; scrollbar-width:thin; }
     .sidebar .brand-mark { width:44px;height:44px;border-radius:12px;font-size:19px; }
     .sidebar .brand-text strong { font-size:17px; }
     .sidebar .brand-text span { font-size:9px; }
@@ -945,6 +946,18 @@
       .service-order-number { text-align:left; }
     }
 
+  
+    /* Correção 13/10/2026: a decoração circular do cabeçalho
+       estava interceptando o clique no botão Nova cotação. */
+    #page-insurance .hero::before {
+      pointer-events: none !important;
+    }
+    #page-insurance #insuranceNewBtn {
+      position: relative;
+      z-index: 3;
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
   </style>
 </head>
 <body>
@@ -1118,6 +1131,7 @@
         <button class="nav-item" data-page="contracts" data-permission="clientsView"><span class="nav-icon">▤</span> Contratos</button>
         <button class="nav-item" data-page="report-sends" data-permission="clientsView"><span class="nav-icon">▥</span> Envio de relatórios</button>
         <button class="nav-item" data-page="maintenance" data-permission="maintenanceView"><span class="nav-icon">✦</span> Preventivas e limpeza</button>
+        <button class="nav-item" data-page="insurance"><span class="nav-icon">◈</span> Seguro Solar</button>
         <button class="nav-item" data-page="expirations" data-permission="clientsView"><span class="nav-icon">◷</span> Vencimentos</button>
         <button class="nav-item" data-page="users" data-permission="usersManage"><span class="nav-icon">⚙</span> Usuários e permissões</button>
       </nav>
@@ -1169,6 +1183,12 @@
             </div>
           </div>
 
+          <div class="card" style="margin:0 0 20px;border-left:5px solid var(--accent)">
+            <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+              <div><div class="card-title">◈ Seguro Solar</div><div class="card-subtitle" style="font-size:12px;line-height:1.5">Venda seguros para sistemas fotovoltaicos, acompanhe cotações e renovações.</div></div>
+              <button type="button" class="btn btn-primary" data-go-page="insurance">Acessar Seguro Solar →</button>
+            </div>
+          </div>
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-top"><div class="stat-icon">♙</div><span class="stat-trend">Base ativa</span></div>
@@ -1438,6 +1458,26 @@
           </div>
         </section>
 
+
+
+        <!-- Seguro Solar usa o Firebase Realtime Database, não o Firestore -->
+        <section id="page-insurance" class="page">
+          <div class="service-contract-form-note" style="margin-bottom:12px">Os seguros são armazenados no <strong>Firebase Realtime Database</strong>, no caminho <strong>/solarInsurance</strong> (não no Firestore). Acesso conforme o perfil gravado no banco: master/admin possuem acesso completo; comercial e gestor podem cadastrar/editar; demais usuários ativos podem visualizar.</div>
+          <div id="insuranceAccessPanel" role="status" aria-live="polite" style="margin-bottom:16px;padding:14px 16px;border:1px solid #d4e3aa;border-left:5px solid #b1c903;background:#fff;border-radius:8px;color:#34503a;font-size:12px;line-height:1.7;overflow-wrap:anywhere">
+            <strong id="insuranceAccessTitle">Conferindo acesso aos seguros…</strong><div id="insuranceAccessMessage">Aguarde a conexão com o banco.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button id="insuranceTestBtn" type="button" class="btn btn-soft btn-sm">Verificar acesso agora</button><button id="insuranceRulesCopyBtn" type="button" class="btn btn-ghost btn-sm">Copiar regra do Realtime Database</button></div>
+          </div>
+          <div class="hero"><div class="hero-copy"><h2>Seguro para Energia Solar</h2><p>Central comercial para cotações, propostas, apólices e renovações de sistemas fotovoltaicos. O seguro só é considerado contratado após confirmação da seguradora.</p><div style="font-size:10px;color:#d8e64f;margin-top:8px">Módulo Seguro Solar · botão de cotação corrigido 13/10/2026</div></div><button id="insuranceNewBtn" type="button" class="btn btn-primary">＋ Nova cotação</button></div>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-top"><div class="stat-icon">◈</div></div><div id="insTotal" class="stat-value">0</div><div class="stat-label">Cotações e propostas</div></div>
+            <div class="stat-card accent"><div class="stat-top"><div class="stat-icon">◷</div></div><div id="insPending" class="stat-value">0</div><div class="stat-label">Em negociação</div></div>
+            <div class="stat-card success"><div class="stat-top"><div class="stat-icon">✓</div></div><div id="insActive" class="stat-value">0</div><div class="stat-label">Apólices vigentes</div></div>
+            <div class="stat-card danger"><div class="stat-top"><div class="stat-icon">!</div></div><div id="insRenew" class="stat-value">0</div><div class="stat-label">Vencidas ou a vencer em 30 dias</div></div>
+          </div>
+          <div class="card"><div class="card-header"><div><div class="card-title">Gestão de seguros solares</div><div class="card-subtitle">Consulte o funil comercial, os valores e a situação das apólices.</div></div><button id="insuranceCsvBtn" class="btn btn-ghost btn-sm" data-permission="reportsExport">⇩ Exportar CSV</button></div>
+          <div class="card-body"><div class="toolbar"><div class="search-box"><span>⌕</span><input id="insuranceSearch" placeholder="Buscar cliente, CPF/CNPJ, seguradora ou apólice"></div><select id="insuranceFilter" class="filter-select"><option value="">Todos os status</option><option value="cotacao">Cotação</option><option value="enviada">Proposta enviada</option><option value="negociacao">Negociação</option><option value="contratado">Contratado</option><option value="perdido">Perdido</option></select></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Cliente / sistema</th><th>Seguradora</th><th>Valor segurado</th><th>Prêmio anual</th><th>Status</th><th>Fim da vigência</th><th>Ações</th></tr></thead><tbody id="insuranceRows"></tbody></table></div><div id="insuranceEmpty" class="empty"><div class="empty-icon">◈</div><strong>Nenhum seguro cadastrado</strong><span>Crie uma cotação para iniciar as vendas.</span></div></div>
+        </section>
 
         <!-- Vencimentos -->
         <section id="page-expirations" class="page">
@@ -2019,6 +2059,38 @@
     </div>
   </div>
 
+
+  <div id="insuranceModalBackdrop" class="modal-backdrop"><div class="modal" style="width:min(860px,100%)">
+    <div class="modal-header"><h3 id="insuranceModalTitle">Nova cotação de seguro solar</h3><button class="close-btn" data-close="insuranceModalBackdrop">×</button></div>
+    <form id="insuranceForm"><div class="modal-body">
+      <input type="hidden" id="insId">
+      <div class="service-contract-form-note" style="margin-bottom:12px">Simulação e proposta comercial: a cobertura, franquia, aceitação e preço definitivo dependem da seguradora. Não use esta tela como certificado de cobertura.</div>
+      <div id="insuranceModalMessage" role="status" aria-live="polite" class="hidden" style="margin-bottom:16px;padding:12px 14px;border:1px solid #d6e2b1;border-left:4px solid #b1c903;border-radius:8px;background:#f7faeb;color:#40520e;font-size:12px;line-height:1.5"></div>
+      <div class="form-grid">
+        <div class="field full"><label>Selecionar cliente já cadastrado (opcional)</label><select id="insClientId"><option value="">Cadastro manual</option></select></div>
+        <div class="field"><label>Nome do segurado *</label><input id="insClient" required maxlength="160"></div>
+        <div class="field"><label>CPF / CNPJ</label><input id="insDocument" maxlength="20"></div>
+        <div class="field"><label>Telefone / WhatsApp</label><input id="insPhone" maxlength="30"></div>
+        <div class="field"><label>E-mail</label><input id="insEmail" type="email" maxlength="160"></div>
+        <div class="field full"><label>Endereço do sistema / risco *</label><input id="insAddress" required maxlength="250"></div>
+        <div class="field"><label>Tipo de instalação</label><select id="insInstallation"><option>Telhado</option><option>Solo</option><option>Carport</option><option>Outro</option></select></div>
+        <div class="field"><label>Potência do sistema (kWp) *</label><input id="insKwp" type="number" min="0.01" step="0.01" required></div>
+        <div class="field"><label>Valor total segurado (R$) *</label><input id="insValue" type="number" min="0.01" step="0.01" required></div>
+        <div class="field"><label>Prêmio anual cotado (R$) *</label><input id="insPremium" type="number" min="0" step="0.01" required></div>
+        <div class="field"><label>Seguradora / corretora</label><input id="insInsurer" maxlength="140" placeholder="Nome da parceira responsável"></div>
+        <div class="field"><label>Franquia / participação do segurado</label><input id="insDeductible" maxlength="140"></div>
+        <div class="field"><label>Status comercial *</label><select id="insStatus"><option value="cotacao">Cotação</option><option value="enviada">Proposta enviada</option><option value="negociacao">Negociação</option><option value="contratado">Contratado (apólice emitida)</option><option value="perdido">Perdido / recusado</option></select></div>
+        <div class="field"><label>Número da apólice</label><input id="insPolicy" maxlength="90"></div>
+        <div class="field"><label>Início da vigência</label><input id="insStart" type="date"></div>
+        <div class="field"><label>Fim da vigência</label><input id="insEnd" type="date"></div>
+        <div class="field"><label>Responsável comercial</label><input id="insSeller" maxlength="110"></div>
+        <div class="field"><label>Link da proposta / apólice (https)</label><input id="insLink" type="url" placeholder="https://..."></div>
+        <div class="field full"><label>Coberturas oferecidas (conforme a proposta da seguradora)</label><textarea id="insCoverage" placeholder="Ex.: danos elétricos, incêndio, vendaval, roubo — sujeitos a condições e exclusões."></textarea></div>
+        <div class="field full"><label>Observações comerciais</label><textarea id="insNotes"></textarea></div>
+      </div>
+    </div><div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="insuranceModalBackdrop">Cancelar</button><button type="submit" id="insSaveBtn" class="btn btn-primary">Salvar seguro</button></div></form>
+  </div></div>
+
   <div id="toastStack" class="toast-stack"></div>
 
   <script>
@@ -2126,6 +2198,7 @@
       serviceContracts: [],
       selectedServiceContractId: null,
       maintenanceJobs: [],
+      insurancePolicies: [],
       selectedMaintenanceId: null,
       selectedServiceOrderId: null,
       planSettings: JSON.parse(JSON.stringify(DEFAULT_PLAN_SETTINGS)),
@@ -2538,7 +2611,9 @@
     };
     const normalizedIdentity = (profile={}) => { profile=profile||{}; return `${profile.name||""} ${profile.email||""}`.trim(); };
     const isLucasProfile = (profile={}) => { profile=profile||{}; return /(^|\s)lucas(?:\s|$|[._-])/i.test(normalizedIdentity(profile)) || /^lucas[^@]*@/i.test(profile.email||""); };
-    const isMasterProfile = (profile={}) => { profile=profile||{}; return profile.role === "master" || isLucasProfile(profile); };
+    // Acesso master só existe se o papel master estiver realmente salvo no banco.
+    // Nome/e-mail não comprovam autorização.
+    const isMasterProfile = (profile={}) => profile?.role === "master";
     const permissions = () => {
       if(isMasterProfile(state.currentProfile))return ROLE_PERMISSIONS.master;
       const role=state.currentProfile?.role;
@@ -2740,15 +2815,6 @@
         state.planSettingsSource="online";
         state.planSettingsUpdatedAt=timestampISO(profile.planSettingsUpdatedAt||profile.updatedAt)||null;
         saveLocalPlanSettings(state.planSettings);
-      }
-      if(profile.active && isLucasProfile(profile)){
-        const masterData={role:"master",active:true,permissions:ROLE_PERMISSIONS.master};
-        Object.assign(profile,masterData);
-        try{
-          await setDoc(ref,{...masterData,updatedAt:serverTimestamp()},{merge:true});
-        }catch(masterError){
-          console.warn("Não foi possível gravar o perfil Master automaticamente.",masterError);
-        }
       }
       if(!profile.active){
         await state.serviceApi.signOut(state.auth);
@@ -3169,11 +3235,6 @@
         const freshProfile=state.users.find(u=>u.uid===state.currentProfile?.uid);
         if(freshProfile){
           state.currentProfile={...state.currentProfile,...freshProfile};
-          if(isLucasProfile(state.currentProfile)){
-            state.currentProfile.role="master";
-            state.currentProfile.active=true;
-            state.currentProfile.permissions=ROLE_PERMISSIONS.master;
-          }
           updateUserUI();applyPermissionUI();
         }
         const settingsOwner=getPlanSettingsOwnerProfile(true);
@@ -3195,6 +3256,22 @@
         state.serviceContractsLoaded=true;
         renderClients();renderContracts();renderServiceContracts();renderReportSends();if(state.selectedClientId)renderClientDetail();syncAcceptedContracts();syncContractClientData();syncServiceContractsToMaintenance();
       },err=>showToast("Erro ao carregar contratos: "+err.message,"error")));
+      // Seguro Solar pertence ao REAlTIME Database, no caminho /solarInsurance.
+      // As regras do Cloud Firestore NÃO afetam este listener.
+      if(insuranceCan("read")) {
+        setInsuranceAccessStatus("loading","Lendo seguros do Realtime Database…");
+        state.unsubscribers.push(onSnapshot(collection(state.db,"solarInsurance"),snap=>{
+          state.insurancePolicies=snap.docs.map(d=>({id:d.id,...d.data()}));
+          renderInsurance();
+          setInsuranceAccessStatus("ok",`Sincronizado: ${state.insurancePolicies.length} registro(s) de Seguro Solar.`);
+        },err=>{
+          state.insurancePolicies=[];renderInsurance();
+          setInsuranceAccessStatus("error",insuranceErrorMessage(err));
+        }));
+      } else {
+        state.insurancePolicies=[];renderInsurance();
+        setInsuranceAccessStatus("error","Seu perfil ativo não tem autorização para consultar seguros. Consulte o administrador.");
+      }
       state.unsubscribers.push(onSnapshot(query(collection(state.db,"maintenanceJobs"),orderBy("createdAt","desc")),snap=>{
         state.maintenanceJobs=snap.docs.map(d=>{const raw=d.data();return {id:d.id,...raw,createdAt:timestampISO(raw.createdAt)||raw.createdAt||null,updatedAt:timestampISO(raw.updatedAt)||raw.updatedAt||null,approvedAt:timestampISO(raw.approvedAt)||raw.approvedAt||null,paidAt:timestampISO(raw.paidAt)||raw.paidAt||null,osGeneratedAt:timestampISO(raw.osGeneratedAt)||raw.osGeneratedAt||null,startedAt:timestampISO(raw.startedAt)||raw.startedAt||null,completedAt:timestampISO(raw.completedAt)||raw.completedAt||null};});
         state.maintenanceJobsLoaded=true;
@@ -3206,7 +3283,7 @@
     }
 
     function renderAll(){
-      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderServiceContracts();renderReportSends();renderMaintenanceJobs();renderExpirations();renderUsers();
+      renderPlanSummary();renderPlanSettings();renderDashboard();renderClients();renderContracts();renderServiceContracts();renderReportSends();renderMaintenanceJobs();renderInsurance();renderExpirations();renderUsers();
       if(state.selectedClientId) renderClientDetail();
     }
     function renderDashboard(){
@@ -4786,11 +4863,165 @@
     function printServiceOrder(){const job=state.maintenanceJobs.find(j=>j.id===state.selectedServiceOrderId);if(!job)return;const win=window.open("","_blank","width=980,height=900");if(!win){showToast("O navegador bloqueou a janela de impressão.","error");return;}win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${safe(job.serviceOrderNumber)}</title><style>body{font-family:Arial,sans-serif;color:#1f2b21;padding:28px;font-size:12px;line-height:1.55}.service-order-head{display:flex;justify-content:space-between;gap:20px;border-bottom:3px solid #b1c903;padding-bottom:16px;margin-bottom:18px}.service-order-head h2{margin:0;color:#043c09;font-size:25px;text-transform:uppercase}.service-order-number{text-align:right;font-weight:800;color:#043c09}.service-order-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px;margin:13px 0}.service-order-field span{display:block;color:#687568;font-size:9px;text-transform:uppercase;font-weight:700}.service-order-field strong{display:block;font-size:11px}.service-order-section{margin-top:18px}.service-order-section h3{margin:0 0 8px;color:#043c09;font-size:12px;text-transform:uppercase;border-bottom:1px solid #dfe6dc;padding-bottom:6px}.service-order-checklist{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px}.service-order-check{font-size:10px}.service-order-check:before{content:'☐ ';font-size:14px}.service-order-signatures{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:40px}.service-order-signature{text-align:center;border-top:1px solid #526055;padding-top:7px;font-size:9px}@media print{body{padding:0}}<\/style></head><body>${serviceOrderHtml(job)}</body></html>`);win.document.close();setTimeout(()=>win.print(),250);}
 
 
+
+    // Seguro Solar: registros comerciais sincronizados em /solarInsurance no Realtime Database.
+    const INSURANCE_RTDB_RULES = "{\n  \"solarInsurance\": {\n    \".read\": \"auth != null && root.child('users').child(auth.uid).child('active').val() === true && (root.child('users').child(auth.uid).child('role').val() === 'master' || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'manager' || root.child('users').child(auth.uid).child('role').val() === 'sales' || root.child('users').child(auth.uid).child('role').val() === 'technical' || root.child('users').child(auth.uid).child('role').val() === 'viewer')\",\n    \"$insuranceId\": {\n      \".write\": \"auth != null && root.child('users').child(auth.uid).child('active').val() === true && ((newData.exists() && (root.child('users').child(auth.uid).child('role').val() === 'master' || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'manager' || root.child('users').child(auth.uid).child('role').val() === 'sales')) || (!newData.exists() && (root.child('users').child(auth.uid).child('role').val() === 'master' || root.child('users').child(auth.uid).child('role').val() === 'admin')))\",\n      \".validate\": \"newData.hasChildren(['client','address','kwp','value','premium','status']) && newData.child('client').isString() && newData.child('client').val().length > 0 && newData.child('address').isString() && newData.child('address').val().length > 0 && newData.child('kwp').isNumber() && newData.child('kwp').val() > 0 && newData.child('value').isNumber() && newData.child('value').val() > 0 && newData.child('premium').isNumber() && newData.child('premium').val() >= 0 && newData.child('status').isString()\"\n    }\n  }\n}";
+    const INS_STATUS={cotacao:"Cotação",enviada:"Proposta enviada",negociacao:"Negociação",contratado:"Contratado",perdido:"Perdido / recusado"};
+    const INS_FIELDS={client:"insClient",document:"insDocument",phone:"insPhone",email:"insEmail",address:"insAddress",installation:"insInstallation",kwp:"insKwp",value:"insValue",premium:"insPremium",insurer:"insInsurer",deductible:"insDeductible",status:"insStatus",policy:"insPolicy",start:"insStart",end:"insEnd",seller:"insSeller",link:"insLink",coverage:"insCoverage",notes:"insNotes",clientId:"insClientId"};
+    function renderInsurance(){
+      if(!$('insuranceRows'))return;
+      const all=state.insurancePolicies||[];
+      const now=todayISO(), in30=new Date(Date.now()+30*86400000).toISOString().slice(0,10);
+      $('insTotal').textContent=all.length;
+      $('insPending').textContent=all.filter(x=>['cotacao','enviada','negociacao'].includes(x.status)).length;
+      $('insActive').textContent=all.filter(x=>x.status==='contratado'&&x.end&&x.end>=now).length;
+      $('insRenew').textContent=all.filter(x=>x.status==='contratado'&&x.end&&x.end<=in30).length;
+      const search=($('insuranceSearch')?.value||'').trim().toLowerCase(), status=$('insuranceFilter')?.value||'';
+      const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+      const list=all.filter(x=>(!status||x.status===status)&&(!search||[x.client,x.document,x.insurer,x.policy].some(v=>String(v||'').toLowerCase().includes(search)))).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+      $('insuranceRows').innerHTML=list.map(x=>`<tr><td><strong>${safe(x.client)}</strong><div class="small muted">${safe(x.document||'')} · ${safe(x.kwp||'—')} kWp</div></td><td>${safe(x.insurer||'A definir')}</td><td>${money(x.value)}</td><td>${money(x.premium)}</td><td><span class="badge ${x.status==='contratado'?'success':x.status==='perdido'?'danger':'warning'}">${safe(INS_STATUS[x.status]||x.status)}</span></td><td>${x.end?formatDate(x.end):'—'}</td><td><div class="actions"><button class="btn btn-soft btn-sm" onclick="insuranceEdit('${safe(x.id)}')" ${insuranceCan('update')?'':'disabled title="Sem permissão para editar"'}>Editar</button><button class="btn btn-ghost btn-sm" onclick="insurancePrint('${safe(x.id)}')">Proposta</button>${x.link?.startsWith('https://')?`<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="${safe(x.link)}">Arquivo</a>`:''}${isInsuranceAdmin()?`<button class="btn btn-danger btn-sm" onclick="insuranceDelete('${safe(x.id)}')">Excluir</button>`:''}</div></td></tr>`).join('');
+      $('insuranceEmpty').classList.toggle('hidden',list.length>0);
+      populateInsuranceClients();
+    }
+    function populateInsuranceClients(){
+      const el=$('insClientId');if(!el)return;const selected=el.value;
+      el.innerHTML='<option value="">Cadastro manual</option>'+state.clients.map(c=>`<option value="${safe(c.id)}">${safe(c.name||c.clientName||'Cliente')} · ${safe(c.document||c.cpfCnpj||'')}</option>`).join('');
+      el.value=state.clients.some(c=>c.id===selected)?selected:'';
+    }
+    function isInsuranceAdmin(){
+      return insuranceCan("delete");
+    }
+    function insuranceCan(operation){
+      const p=state.currentProfile;
+      if(!p || p.active!==true || !state.currentUser)return false;
+      const role=String(p.role||"");
+      if(role==="master" || role==="admin")return true;
+      if(operation==="read")return ["manager","sales","technical","viewer"].includes(role);
+      if(operation==="create" || operation==="update")return ["manager","sales"].includes(role);
+      return false;
+    }
+    function insuranceErrorMessage(err){
+      const code=String(err?.code||"");
+      if(/permission[-_]?denied/i.test(code)){
+        return "Permissão negada pelo Realtime Database em /solarInsurance. Publique o trecho de regras correspondente em Realtime Database → Regras. As regras do Firestore não resolvem este erro.";
+      }
+      return "Falha ao consultar /solarInsurance no Realtime Database: " + (err?.message||code||"erro desconhecido");
+    }
+    function setInsuranceAccessStatus(type,message){
+      const title=$('insuranceAccessTitle'), body=$('insuranceAccessMessage'), panel=$('insuranceAccessPanel');
+      if(!title||!body||!panel)return;
+      const profile=state.currentProfile||{};
+      const role=String(profile.role||'sem perfil');
+      const suffix=`Projeto: ${serviceConfig.projectId} · Caminho: /solarInsurance · Perfil no banco: ${role} · Ativo: ${profile.active===true?'sim':'não'}`;
+      title.textContent=type==='ok'?'✓ Seguro Solar conectado':type==='error'?'⚠ Seguro Solar sem acesso':'◷ Verificando acesso ao Seguro Solar';
+      body.textContent=message+' '+suffix+'.';
+      panel.style.borderLeftColor=type==='error'?'#b63838':type==='ok'?'#0b7a33':'#b1c903';
+      panel.style.background=type==='error'?'#fff5f5':type==='ok'?'#f4fbef':'#fff';
+    }
+    async function insuranceTestAccess(){
+      if(!state.connected||!state.currentUser){setInsuranceAccessStatus('error','Faça login para verificar as permissões.');return;}
+      setInsuranceAccessStatus('loading','Conferindo leitura no servidor…');
+      try{
+        const snap=await state.serviceApi.getDocs(state.serviceApi.collection(state.db,'solarInsurance'));
+        setInsuranceAccessStatus('ok',`Leitura autorizada pelo servidor: ${snap.docs.length} registro(s) encontrado(s).`);
+      }catch(err){setInsuranceAccessStatus('error',insuranceErrorMessage(err));}
+    }
+    function insuranceOpen(id=''){
+      // Abrir o formulário não exige permissão de escrita: a autorização é
+      // aplicada ao salvar no Firebase. Assim, o botão nunca fica "mudo".
+      if(!state.currentUser){
+        showToast('Entre no CRM para abrir a cotação de seguro.','error');
+        return;
+      }
+      const form=$('insuranceForm'), backdrop=$('insuranceModalBackdrop');
+      if(!form || !backdrop){
+        showToast('Não foi possível localizar o formulário de cotação no HTML.','error');
+        console.error('Seguro Solar: elementos do formulário indisponíveis.');
+        return;
+      }
+      form.reset();
+      populateInsuranceClients();
+      $('insId').value='';
+      const item=id ? state.insurancePolicies.find(x=>x.id===id) : null;
+      if(id && !item){
+        showToast('A cotação selecionada não foi encontrada. Atualize a lista.','error');
+        return;
+      }
+      if(item){
+        $('insId').value=id;
+        Object.entries(INS_FIELDS).forEach(([k,v])=>{if($(v))$(v).value=item[k]??'';});
+      }else{
+        $('insSeller').value=state.currentProfile?.name||'';
+      }
+      $('insuranceModalTitle').textContent=item?'Editar seguro solar':'Nova cotação de seguro solar';
+      const permitted=insuranceCan(item?'update':'create');
+      const note=$('insuranceModalMessage');
+      const saveButton=$('insSaveBtn');
+      if(note){
+        note.classList.remove('hidden');
+        note.textContent=permitted
+          ? 'Formulário liberado para seu perfil. Preencha os dados e clique em Salvar seguro.'
+          : 'Cotação em modo de consulta: seu perfil no Realtime Database ('+
+            String(state.currentProfile?.role||'não identificado')+
+            ') não pode cadastrar ou editar seguros. Solicite ao administrador o perfil master, admin, manager ou sales para salvar.';
+        note.style.borderLeftColor=permitted?'#0b7a33':'#b63838';
+        note.style.background=permitted?'#f4fbef':'#fff5f5';
+      }
+      if(saveButton){
+        saveButton.disabled=!permitted;
+        saveButton.title=permitted?'Salvar cotação no Firebase':'Sem permissão de cadastro de seguros para este perfil';
+      }
+      openModal('insuranceModalBackdrop');
+    }
+    window.insuranceEdit=id=>insuranceOpen(id);
+    window.insuranceDelete=id=>{
+      if(!isInsuranceAdmin()){showToast('A exclusão de seguros é exclusiva de administradores.','error');return;}
+      askConfirm('Excluir seguro','Excluir permanentemente este registro comercial?',async()=>{
+        try{await state.serviceApi.deleteDoc(state.serviceApi.doc(state.db,'solarInsurance',id));showToast('Seguro excluído.');}catch(err){showToast(err.message,'error');}
+      });
+    };
+    async function insuranceSave(e){
+      e.preventDefault();if(!state.connected||!state.currentUser){showToast('Conecte-se ao sistema antes de salvar.','error');return;}
+      const id=$('insId').value, existing=state.insurancePolicies.find(x=>x.id===id);
+      if(!insuranceCan(id?'update':'create')){showToast('Seu perfil não tem permissão para salvar seguros.','error');return;}
+      const data=Object.fromEntries(Object.entries(INS_FIELDS).map(([key,field])=>[key,$(field).value.trim()]));
+      for(const k of ['kwp','value','premium'])data[k]=Number(data[k]);
+      if(data.status==='contratado'&&(!data.policy||!data.start||!data.end||!data.insurer)){showToast('Para marcar como contratado informe seguradora, apólice e datas de vigência.','error');return;}
+      if(data.start&&data.end&&data.end<data.start){showToast('O fim da vigência precisa ser posterior ao início.','error');return;}
+      if(data.link&&!data.link.startsWith('https://')){showToast('O link deve começar por https://','error');return;}
+      $('insSaveBtn').disabled=true;
+      try{
+        const api=state.serviceApi, ref=api.doc(state.db,'solarInsurance',id||(globalThis.crypto?.randomUUID?.() || 'seg_'+Date.now()+'_'+Math.random().toString(36).slice(2)));
+        await api.setDoc(ref,{...data,createdAt:existing?.createdAt||new Date().toISOString(),createdBy:existing?.createdBy||state.currentUser.uid,updatedAt:new Date().toISOString(),updatedBy:state.currentUser.uid});
+        closeModal('insuranceModalBackdrop');showToast('Seguro salvo e sincronizado.');
+      }catch(err){
+        const detail=insuranceErrorMessage(err);
+        setInsuranceAccessStatus('error',detail);
+        const note=$('insuranceModalMessage');
+        if(note){note.classList.remove('hidden');note.textContent='Não foi possível salvar: '+detail;note.style.borderLeftColor='#b63838';note.style.background='#fff5f5';}
+        showToast('Falha ao salvar cotação: '+(err?.code||err?.message||'erro desconhecido'),'error');
+      }finally{$('insSaveBtn').disabled=!insuranceCan($('insId').value?'update':'create');}
+    }
+    window.insurancePrint=id=>{
+      const x=state.insurancePolicies.find(p=>p.id===id);if(!x)return;
+      const money=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+      const rows=[['Segurado',x.client],['CPF/CNPJ',x.document],['Telefone',x.phone],['Endereço do risco',x.address],['Instalação',x.installation],['Potência',x.kwp+' kWp'],['Valor segurado',money(x.value)],['Prêmio anual cotado',money(x.premium)],['Seguradora',x.insurer||'A definir'],['Franquia',x.deductible||'A definir'],['Status',INS_STATUS[x.status]],['Apólice',x.policy||'Não emitida'],['Vigência',x.start&&x.end?formatDate(x.start)+' a '+formatDate(x.end):'A definir'],['Coberturas informadas',x.coverage||'Conforme proposta oficial da seguradora'],['Observações',x.notes||'—']];
+      const w=window.open('','_blank');if(!w){showToast('Libere pop-ups para imprimir.','error');return;}
+      w.document.write('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Proposta de seguro solar</title><style>body{font:14px Arial;max-width:800px;margin:35px auto;color:#12351a}h1{background:#043c09;color:#b1c903;padding:22px}table{width:100%;border-collapse:collapse;min-width:0}td{border-bottom:1px solid #ddd;padding:11px;vertical-align:top;white-space:pre-wrap;overflow-wrap:anywhere}td:first-child{width:35%;font-weight:bold}footer{font-size:12px;line-height:1.6;margin-top:32px;color:#555}@media print{body{margin:12mm}}</style><h1>IG ENERGIA · SEGURO SOLAR</h1><p>Resumo de cotação / acompanhamento comercial</p><table>'+rows.map(([k,v])=>'<tr><td>'+safe(k)+'</td><td>'+safe(v??'—')+'</td></tr>').join('')+'</table><footer>Documento comercial, sem valor de apólice, comprovante de pagamento ou garantia de cobertura. A contratação e as coberturas dependem de aceite e emissão pela seguradora. Consulte as condições gerais, particulares e exclusões aplicáveis.</footer>');w.document.close();w.focus();setTimeout(()=>w.print(),350);
+    };
+    function insuranceCsv(){
+      if(!can('reportsExport'))return;
+      const keys=['client','document','phone','email','address','installation','kwp','value','premium','insurer','deductible','status','policy','start','end','seller','coverage','notes'];
+      const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+      const csv='\ufeff'+[keys.join(';'),...state.insurancePolicies.map(x=>keys.map(k=>quote(x[k])).join(';'))].join('\r\n');
+      const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='ig-seguros-solares.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+    }
+
     function navigate(page){
       $$(".page").forEach(p=>p.classList.remove("active"));
       $(`page-${page}`).classList.add("active");
       $$(".nav-item[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===page));
-      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos","report-sends":"Envio de relatórios",maintenance:"Preventivas e limpeza",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
+      const titles={dashboard:"Visão geral",clients:"Clientes",contracts:"Contratos","report-sends":"Envio de relatórios",maintenance:"Preventivas e limpeza",insurance:"Seguro Solar",expirations:"Vencimentos",users:"Usuários e permissões",settings:"Configurações","client-detail":"Ficha do cliente"};
       $("topPageTitle").textContent=titles[page]||"CRM";
       $("sidebar").classList.remove("open");$("mobileOverlay").classList.remove("open");
       window.scrollTo({top:0,behavior:"smooth"});
@@ -5506,6 +5737,22 @@
       state.unsubscribers.forEach(fn=>fn());state.unsubscribers=[];
       if(state.connected) await state.serviceApi.signOut(state.auth);
       state.currentUser=null;state.currentProfile=null;showAuth();
+    });
+    $('insuranceNewBtn')?.addEventListener('click',function(event){ event.preventDefault(); insuranceOpen(); });
+    $('insuranceForm')?.addEventListener('submit',insuranceSave);
+    $('insuranceSearch')?.addEventListener('input',renderInsurance);
+    $('insuranceFilter')?.addEventListener('change',renderInsurance);
+    $('insuranceCsvBtn')?.addEventListener('click',insuranceCsv);
+    $('insuranceTestBtn')?.addEventListener('click',insuranceTestAccess);
+    $('insuranceRulesCopyBtn')?.addEventListener('click',async()=>{
+      const snippet=INSURANCE_RTDB_RULES;
+      try{await navigator.clipboard.writeText(snippet);showToast('Trecho das regras do Realtime Database copiado. Mescle em Realtime Database → Regras; não substitua as demais regras.');}
+      catch(err){showToast('Não foi possível copiar automaticamente. Abra o arquivo de regras que acompanha o HTML.','error');}
+    });
+    $('insClientId')?.addEventListener('change',e=>{
+      const c=state.clients.find(x=>x.id===e.target.value);if(!c)return;
+      const pairs={insClient:c.name||c.clientName,insDocument:c.document||c.cpfCnpj,insPhone:c.phone||c.whatsapp,insEmail:c.email,insAddress:c.address};
+      Object.entries(pairs).forEach(([id,value])=>{if(value)$(id).value=value;});
     });
     $$(".nav-item[data-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
     $$("[data-go-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.goPage)));
