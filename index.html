@@ -1233,7 +1233,7 @@
           </div>
           <div class="card" style="margin:0 0 20px;border-left:5px solid var(--accent)">
             <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-              <div><div class="card-title">▦ Venda Avulsa</div><div class="card-subtitle" style="font-size:12px;line-height:1.5">Venda apenas um serviço do monitoramento, com quantidade, preço e contrato próprios, sem modificar o plano atual do cliente.</div></div>
+              <div><div class="card-title">▦ Venda Avulsa</div><div class="card-subtitle" style="font-size:12px;line-height:1.5">Venda um serviço de monitoramento separadamente, com quantidade e preço próprios, sem alterar o plano ou os contratos do cliente.</div></div>
               <button type="button" class="btn btn-primary" data-go-page="standalone">Acessar Venda Avulsa →</button>
             </div>
           </div>
@@ -1259,7 +1259,7 @@
           <div class="grid-2">
             <div class="card">
               <div class="card-header">
-                <div><div class="card-title">Clientes que exigem atenção</div><div class="card-subtitle">Planos e serviços avulsos próximos do vencimento ou vencidos</div></div>
+                <div><div class="card-title">Clientes que exigem atenção</div><div class="card-subtitle">Planos e contratos com prazo próximos do vencimento ou vencidos</div></div>
                 <button class="btn btn-soft btn-sm" data-go-page="expirations">Ver todos</button>
               </div>
               <div class="table-wrap">
@@ -1540,15 +1540,15 @@
             <div class="hero-copy">
               <h2>Venda Avulsa</h2>
               <p>Venda um serviço do monitoramento de forma independente, para clientes já cadastrados ou novos. O plano atual, suas utilizações e seu contrato permanecem intactos.</p>
-              <p style="font-size:10px;color:var(--accent);margin-top:8px">Módulo Venda Avulsa · correção de cadastro 19/10/2026</p>
+              <p style="font-size:10px;color:var(--accent);margin-top:8px">Módulo Venda Avulsa · registro direto, sem aceite ou vigência</p>
             </div>
             <div class="avulsa-hero-actions"><button id="standaloneNewBtn" type="button" class="btn btn-primary" data-permission="clientsEdit">＋ Nova venda avulsa</button></div>
           </div>
-          <div class="avulsa-guide"><strong>Como funciona:</strong> selecione o cliente, escolha exatamente um serviço, configure a quantidade e o valor da venda. Ao salvar, o CRM registra a venda em seu cadastro e gera um contrato avulso com link para aceite digital. Os preços-base podem ser configurados em Configurações → Planos e benefícios.</div>
+          <div class="avulsa-guide"><strong>Como funciona:</strong> selecione o cliente, escolha exatamente um serviço, configure a quantidade e o valor da venda. O CRM registra a venda imediatamente, sem contrato, aceite digital, vigência ou acompanhamento de utilizações. Os preços-base podem ser configurados em Configurações → Planos e benefícios.</div>
           <div class="stats-grid">
             <div class="stat-card"><div class="stat-top"><div class="stat-icon">▦</div></div><div class="stat-value" id="standaloneCount">0</div><div class="stat-label">Vendas avulsas cadastradas</div></div>
-            <div class="stat-card accent"><div class="stat-top"><div class="stat-icon">◷</div></div><div class="stat-value" id="standaloneAwaiting">0</div><div class="stat-label">Aguardando aceite do contrato</div></div>
-            <div class="stat-card success"><div class="stat-top"><div class="stat-icon">✓</div></div><div class="stat-value" id="standaloneActive">0</div><div class="stat-label">Contratos aceitos e dentro da vigência</div></div>
+            <div class="stat-card accent"><div class="stat-top"><div class="stat-icon">◷</div></div><div class="stat-value" id="standaloneAwaiting">0</div><div class="stat-label">Pagamento pendente</div></div>
+            <div class="stat-card success"><div class="stat-top"><div class="stat-icon">✓</div></div><div class="stat-value" id="standaloneActive">0</div><div class="stat-label">Pagamentos recebidos</div></div>
             <div class="stat-card"><div class="stat-top"><div class="stat-icon">R$</div></div><div class="stat-value" id="standaloneRevenue">R$ 0</div><div class="stat-label">Valor total das vendas avulsas</div></div>
           </div>
           <div class="card">
@@ -1560,11 +1560,11 @@
               <div class="toolbar">
                 <div class="search-box"><span>⌕</span><input id="standaloneSearch" placeholder="Buscar por cliente, documento, serviço ou vendedor"></div>
                 <select id="standaloneFilter" class="filter-select">
-                  <option value="">Todas as vendas</option><option value="pending">Aguardando aceite</option><option value="scheduled">A iniciar</option><option value="active">Vigentes</option><option value="completed">Utilizações concluídas</option><option value="expired">Vencidas</option>
+                  <option value="">Todas as vendas</option><option value="pending">Pagamento pendente</option><option value="paid">Pagamento recebido</option>
                 </select>
               </div>
             </div>
-            <div class="table-wrap"><table><thead><tr><th>Cliente / documento</th><th>Serviço</th><th>Valor</th><th>Utilizações</th><th>Vigência</th><th>Situação</th><th>Contrato / ações</th></tr></thead><tbody id="standaloneRows"></tbody></table></div>
+            <div class="table-wrap"><table><thead><tr><th>Cliente / documento</th><th>Serviço</th><th>Quantidade</th><th>Valor</th><th>Pagamento</th><th>Data da venda</th><th>Responsável / observações</th></tr></thead><tbody id="standaloneRows"></tbody></table></div>
             <div id="standaloneEmpty" class="empty"><div class="empty-icon">▦</div><strong>Nenhuma venda avulsa encontrada</strong><span>Use “Nova venda avulsa” para registrar o primeiro serviço separado do plano.</span></div>
           </div>
         </section>
@@ -1579,7 +1579,7 @@
           </div>
           <div class="card">
             <div class="card-header">
-              <div><div class="card-title">Agenda de renovação e reoferta</div><div class="card-subtitle">Planos para renovar e serviços avulsos para oferecer novamente</div></div>
+              <div><div class="card-title">Agenda de renovação e reoferta</div><div class="card-subtitle">Renovações de planos e contratos com vigência já existente</div></div>
             </div>
             <div class="table-wrap">
               <table>
@@ -1947,15 +1947,15 @@
                 <select id="standaloneClientSelect" style="margin-top:8px"><option value="">Selecione um cliente</option></select>
                 <span id="standaloneClientHint" class="small muted">Selecione um cliente para preencher os dados automaticamente.</span>
                 <div id="standaloneMissingDocumentFields" class="field hidden" style="margin-top:12px;padding:14px;border:1px solid #d8e4ba;border-left:4px solid var(--accent);border-radius:9px;background:#f9fcf2">
-                  <label for="standaloneExistingDocument" style="color:var(--primary)">CPF ou CNPJ para emissão do contrato *</label>
+                  <label for="standaloneExistingDocument" style="color:var(--primary)">Complementar CPF ou CNPJ (opcional)</label>
                   <input id="standaloneExistingDocument" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="Informe os 11 dígitos do CPF ou os 14 do CNPJ">
-                  <span id="standaloneExistingDocumentHint" class="small muted">Este cadastro não possui CPF/CNPJ. Preencha o documento aqui: ao concluir a venda, ele será atualizado automaticamente no cadastro do cliente, sem alterar seu plano.</span>
+                  <span id="standaloneExistingDocumentHint" class="small muted">Este cliente não possui CPF/CNPJ completo. O documento é opcional para a venda direta. Se informado, será atualizado no cadastro sem alterar o plano.</span>
                 </div>
               </div>
               <div class="field full hidden" id="standaloneNewFields">
                 <div class="form-grid avulsa-new-fields">
                   <div class="field full"><label>Nome / razão social *</label><input id="standaloneNewName" maxlength="160"></div>
-                  <div class="field"><label>CPF ou CNPJ *</label><input id="standaloneNewDocument" inputmode="numeric" maxlength="20"></div>
+                  <div class="field"><label>CPF ou CNPJ (opcional)</label><input id="standaloneNewDocument" inputmode="numeric" maxlength="20"></div>
                   <div class="field"><label>WhatsApp</label><input id="standaloneNewPhone" maxlength="30"></div>
                   <div class="field"><label>E-mail</label><input id="standaloneNewEmail" type="email" maxlength="160"></div>
                   <div class="field"><label>Cidade</label><input id="standaloneNewCity" maxlength="100"></div>
@@ -1969,36 +1969,17 @@
             <h4>2. Serviço vendido — somente um item por venda</h4>
             <div class="form-grid">
               <div class="field full"><label>Serviço do monitoramento *</label><select id="standaloneService" required></select><span id="standaloneServiceDescription" class="small muted"></span></div>
-              <div class="field"><label>Quantidade de utilizações *</label><input id="standaloneQty" type="number" min="1" max="999" step="1" value="1" required></div>
+              <div class="field"><label>Quantidade vendida *</label><input id="standaloneQty" type="number" min="1" max="999" step="1" value="1" required></div>
               <div class="field"><label>Preço unitário (R$) *</label><input id="standaloneUnitPrice" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Informe o valor" required></div>
-              <div class="field"><label>Data inicial *</label><input id="standaloneStart" type="date" required></div>
-              <div class="field"><label>Data final *</label><input id="standaloneEnd" type="date" required></div>
               <div class="field"><label>Forma de pagamento</label><select id="standalonePayment"><option>PIX</option><option>Dinheiro</option><option>Cartão</option><option>Boleto</option><option>Outro</option></select></div>
               <div class="field"><label>Situação do pagamento</label><select id="standalonePaymentStatus"><option value="pending">Pendente</option><option value="paid">Pago</option></select></div>
               <div class="field"><label>Responsável pela venda</label><input id="standaloneSeller" maxlength="120"></div>
-              <div class="field full"><label>Observações para o contrato</label><textarea id="standaloneNotes" placeholder="Condições acordadas, detalhes do atendimento..."></textarea></div>
+              <div class="field full"><label>Observações da venda</label><textarea id="standaloneNotes" placeholder="Condições acordadas, detalhes do atendimento..."></textarea></div>
               <div class="field full"><div id="standaloneSaleSummary" class="avulsa-summary" aria-live="polite">Selecione o cliente e o serviço para conferir o resumo.</div></div>
             </div>
           </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="standaloneModalBackdrop">Cancelar</button><button id="standaloneSubmit" type="submit" class="btn btn-primary">Salvar e gerar contrato</button></div>
-      </form>
-    </div>
-  </div>
-
-  <!-- REGISTRAR UTILIZAÇÃO AVULSA -->
-  <div id="standaloneUsageBackdrop" class="modal-backdrop">
-    <div class="modal sm">
-      <div class="modal-header"><h3>Registrar utilização avulsa</h3><button class="close-btn" type="button" data-close="standaloneUsageBackdrop">×</button></div>
-      <form id="standaloneUsageForm">
-        <div class="modal-body form-grid one">
-          <input id="standaloneUsageClientId" type="hidden"><input id="standaloneUsageSaleId" type="hidden">
-          <div id="standaloneUsageInfo" class="demo-note"></div>
-          <div class="field"><label>Data da execução *</label><input id="standaloneUsageDate" type="date" required></div>
-          <div class="field"><label>Responsável *</label><input id="standaloneUsageOperator" required></div>
-          <div class="field"><label>Descrição / observações</label><textarea id="standaloneUsageNotes" placeholder="Descreva o serviço prestado..."></textarea></div>
-        </div>
-        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="standaloneUsageBackdrop">Cancelar</button><button id="standaloneUsageSubmit" type="submit" class="btn btn-primary">Confirmar utilização</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="standaloneModalBackdrop">Cancelar</button><button id="standaloneSubmit" type="submit" class="btn btn-primary">Salvar venda</button></div>
       </form>
     </div>
   </div>
@@ -5222,8 +5203,9 @@
     /* =========================================================
        VENDA AVULSA INDEPENDENTE · Realtime Database
        Armazenamento: /clients/{clientId}/standaloneSales/{saleId}
-       Usa as regras já existentes do caminho /clients.
-       Cada venda gera contrato em /publicContracts/{token}.
+       Registro comercial imediato, sem aceite, vigência ou uso.
+       A modalidade de venda pelo cadastro de clientes permanece intacta.
+       Registros históricos permanecem armazenados sem migração destrutiva.
        ========================================================= */
     function standaloneAllSales(){
       const rows=[];
@@ -5234,20 +5216,8 @@
       });
       return rows.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
     }
-    function standaloneContract(sale){
-      return state.standaloneContracts.find(c=>c.token===sale.contractToken)||null;
-    }
-    function standaloneState(sale){
-      const signed=standaloneContract(sale)?.status==='accepted';
-      if(!signed)return 'pending';
-      if(sale.start && sale.start>todayISO())return 'scheduled';
-      const remaining=daysBetween(todayISO(),sale.end||sale.start||todayISO());
-      if(remaining<0)return 'expired';
-      if(Object.keys(sale.usage||{}).length>=Number(sale.quantity||1))return 'completed';
-      return 'active';
-    }
-    function standaloneStatusLabel(status){
-      return {pending:'Aguardando aceite',scheduled:'A iniciar',active:'Vigente',completed:'Concluído',expired:'Vencido'}[status]||status;
+    function standalonePaymentLabel(sale){
+      return sale.paymentStatus==='paid'?'Recebido':'Pendente';
     }
     function renderStandaloneSales(){
       if(!$('standaloneRows'))return;
@@ -5256,29 +5226,23 @@
       const filter=$('standaloneFilter')?.value||'';
       const rows=all.filter(sale=>{
         const key=[sale.client?.name,sale.client?.document,sale.label,sale.seller,sale.client?.phone].join(' ').toLowerCase();
-        return (!search||key.includes(search)) && (!filter||standaloneState(sale)===filter);
+        const paid=sale.paymentStatus==='paid'?'paid':'pending';
+        return (!search||key.includes(search)) && (!filter||paid===filter);
       });
       $('standaloneCount').textContent=all.length;
-      $('standaloneAwaiting').textContent=all.filter(x=>standaloneState(x)==='pending').length;
-      $('standaloneActive').textContent=all.filter(x=>standaloneState(x)==='active').length;
+      $('standaloneAwaiting').textContent=all.filter(x=>x.paymentStatus!=='paid').length;
+      $('standaloneActive').textContent=all.filter(x=>x.paymentStatus==='paid').length;
       $('standaloneRevenue').textContent=money(all.reduce((sum,x)=>sum+Number(x.total||0),0));
       $('standaloneRows').innerHTML=rows.map(sale=>{
-        const status=standaloneState(sale),used=Object.keys(sale.usage||{}).length,limit=Number(sale.quantity||1);
-        const id=safe(sale.id),clientId=safe(sale.client.id),token=safe(sale.contractToken||'');
-        const statusClass={pending:'warning',scheduled:'info',active:'success',completed:'info',expired:'danger'}[status]||'gray';
-        const registerEnabled=used<limit && status==='active' && can('servicesRegister');
+        const date=sale.saleDate||String(sale.createdAt||'').slice(0,10);
         return `<tr>
           <td><div class="customer-cell"><div class="customer-avatar">${safe(initials(sale.client.name))}</div><div><strong>${safe(sale.client.name||'Cliente')}</strong><span>${safe(sale.client.document||'Sem documento')}</span></div></div></td>
-          <td><strong>${safe(sale.label||SERVICES[sale.serviceType]?.label||'Serviço')}</strong><div class="small muted">${safe(sale.seller||'Sem vendedor')} · ${safe(sale.paymentStatus==='paid'?'Pago':'Pagamento pendente')}</div></td>
-          <td><strong>${money(Number(sale.total||0))}</strong><div class="small muted">${money(Number(sale.unitPrice||0))} por utilização</div></td>
-          <td><div class="avulsa-progress"><strong>${used} de ${limit}</strong><div class="progress-line" style="margin-top:7px"><span style="width:${Math.min(100,Math.round(used/Math.max(1,limit)*100))}%"></span></div></div></td>
-          <td>${safe(formatDate(sale.start))}<div class="small muted">até ${safe(formatDate(sale.end))}</div></td>
-          <td><span class="badge ${statusClass}">${standaloneStatusLabel(status)}</span></td>
-          <td><div class="actions" style="justify-content:flex-start;flex-wrap:wrap">
-            <button type="button" class="btn btn-soft btn-sm" onclick="openContractByToken('${token}')">▤ Contrato</button>
-            <button type="button" class="btn btn-ghost btn-sm" onclick="copyStandaloneContractLink('${clientId}','${id}')" title="Copiar link para enviar ao cliente">Link</button>
-            ${registerEnabled?`<button type="button" class="btn btn-primary btn-sm" onclick="openStandaloneUsage('${clientId}','${id}')">＋ Uso</button>`:''}
-          </div></td>
+          <td><strong>${safe(sale.label||SERVICES[sale.serviceType]?.label||'Serviço')}</strong><div class="small muted">${safe(sale.payment||'—')}</div></td>
+          <td class="mono">${Number(sale.quantity||1)}</td>
+          <td><strong>${money(Number(sale.total||0))}</strong><div class="small muted">${money(Number(sale.unitPrice||0))} por unidade</div></td>
+          <td><span class="badge ${sale.paymentStatus==='paid'?'success':'warning'}">${standalonePaymentLabel(sale)}</span></td>
+          <td class="mono">${safe(date?formatDate(date):'—')}</td>
+          <td><strong>${safe(sale.seller||'Não informado')}</strong><div class="small muted" style="max-width:240px;overflow-wrap:anywhere">${safe(sale.notes||'Sem observações')}</div></td>
         </tr>`;
       }).join('');
       $('standaloneEmpty').classList.toggle('hidden',rows.length>0);
@@ -5305,7 +5269,7 @@
         input.dataset.clientId=client?.id||'';
       }
       $('standaloneMissingDocumentFields').classList.toggle('hidden',!missing);
-      input.required=missing;
+      input.required=false;
       if(!missing)input.value='';
       if(missing){
         $('standaloneClientHint').textContent=`${client.name||'Cliente'} · CPF/CNPJ pendente · ${client.planActive===false?'sem plano ativo':'plano atual preservado'}`;
@@ -5329,7 +5293,8 @@
       const isNew=$('standaloneClientMode').value==='new';
       $('standaloneExistingFields').classList.toggle('hidden',isNew);
       $('standaloneNewFields').classList.toggle('hidden',!isNew);
-      ['standaloneNewName','standaloneNewDocument'].forEach(id=>$(id).required=isNew);
+      $('standaloneNewName').required=isNew;
+      $('standaloneNewDocument').required=false;
       $('standaloneClientSelect').required=!isNew;
       standaloneFormError();
       refreshStandalonePrice();
@@ -5353,7 +5318,7 @@
       const client=$('standaloneClientMode').value==='new'?$('standaloneNewName').value:standaloneSelectedClient()?.name;
       const type=$('standaloneService').value;
       const serviceLabel=getConfiguredPlan(standaloneSaleDocument())?.benefits?.[type]?.label||SERVICES[type]?.label||'Selecione o serviço';
-      $('standaloneSaleSummary').innerHTML=`<span class="avulsa-badge">Venda independente · sem renovação automática</span><div style="margin-top:9px"><strong>Cliente:</strong> ${safe(client||'A definir')}<br><strong>Serviço:</strong> ${safe(serviceLabel)}<br><strong>Quantidade:</strong> ${Number.isInteger(qty)&&qty>0?qty:'—'}<br><strong>Valor total:</strong> <strong style="font-size:19px;color:var(--primary)">${money(amount)}</strong><br><strong>Vigência:</strong> ${safe($('standaloneStart').value?formatDate($('standaloneStart').value):'A definir')} a ${safe($('standaloneEnd').value?formatDate($('standaloneEnd').value):'A definir')}</div><div class="small muted" style="margin-top:7px">Ao salvar, será gerado contrato avulso. Nenhuma informação de plano existente será sobrescrita.</div>`;
+      $('standaloneSaleSummary').innerHTML=`<span class="avulsa-badge">Venda avulsa direta · sem aceite</span><div style="margin-top:9px"><strong>Cliente:</strong> ${safe(client||'A definir')}<br><strong>Serviço:</strong> ${safe(serviceLabel)}<br><strong>Quantidade:</strong> ${Number.isInteger(qty)&&qty>0?qty:'—'}<br><strong>Valor total:</strong> <strong style="font-size:19px;color:var(--primary)">${money(amount)}</strong></div><div class="small muted" style="margin-top:7px">A venda será registrada diretamente no histórico. Não haverá aceite digital, contrato, vigência nem controle de utilização. O plano atual do cliente permanece inalterado.</div>`;
     }
     function openStandaloneSale(clientId=''){
       if(!can('clientsEdit')){showToast('Você não possui permissão para registrar vendas avulsas.','error');return;}
@@ -5362,8 +5327,6 @@
       $('standaloneExistingDocument').dataset.clientId='';
       $('standaloneClientMode').value='existing';
       $('standaloneClientSearch').value='';
-      $('standaloneStart').value=todayISO();
-      $('standaloneEnd').value=addYear(todayISO());
       $('standaloneQty').value='1';
       $('standaloneSeller').value=state.currentProfile?.name||'';
       $('standaloneService').innerHTML=Object.entries(SERVICES).map(([key,item])=>`<option value="${key}">${safe(item.label)}</option>`).join('');
@@ -5389,28 +5352,26 @@
         const needsDocument=!newMode && standaloneClientNeedsDocument(existing);
         const document=String(standaloneSaleDocument()||'').trim();
         const digits=documentDigits(document);
-        if(digits.length!==11&&digits.length!==14){
+        // CPF/CNPJ é opcional nesta venda sem emissão de contrato. Se informado,
+        // exigimos um comprimento válido e impedimos duplicidade de cadastro.
+        if(digits.length && digits.length!==11 && digits.length!==14){
           const field=needsDocument?'standaloneExistingDocument':newMode?'standaloneNewDocument':'';
-          const message=needsDocument
-            ? 'O cliente selecionado ainda não possui CPF/CNPJ. Preencha o campo destacado acima (11 dígitos para CPF ou 14 para CNPJ). O cadastro será atualizado ao salvar a venda.'
-            : 'Informe um CPF com 11 dígitos ou CNPJ com 14 dígitos para gerar o contrato.';
+          const message='Se informar CPF/CNPJ, digite 11 números para CPF ou 14 para CNPJ. Você também pode deixar o campo em branco.';
           standaloneFormError(message,field);
           throw new Error(message);
         }
-        if(state.clients.some(c=>(newMode || c.id!==existing?.id) && documentDigits(c.document||'')===digits))throw new Error('Este CPF/CNPJ já está vinculado a outro cliente. Selecione o cadastro correto para não duplicar.');
+        if(digits.length && state.clients.some(c=>(newMode || c.id!==existing?.id) && documentDigits(c.document||'')===digits))throw new Error('Este CPF/CNPJ já está vinculado a outro cliente. Selecione o cadastro correto.');
         const type=$('standaloneService').value;
         if(!Object.hasOwn(SERVICES,type))throw new Error('Escolha um serviço válido.');
         const quantity=Number($('standaloneQty').value),unitPrice=Number($('standaloneUnitPrice').value);
         if(!Number.isInteger(quantity)||quantity<1||quantity>999)throw new Error('Quantidade deve ser um número inteiro de 1 a 999.');
         if(!Number.isFinite(unitPrice)||unitPrice<=0)throw new Error('Informe o preço unitário maior que zero.');
-        const start=$('standaloneStart').value,end=$('standaloneEnd').value;
-        if(!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||end<start)throw new Error('Confira as datas de início e término da vigência.');
         const total=Math.round(quantity*unitPrice*100)/100;
         const customer=newMode?{
           name:$('standaloneNewName').value.trim(),document,documentType:getClientType(document),
           phone:$('standaloneNewPhone').value.trim(),email:$('standaloneNewEmail').value.trim(),city:$('standaloneNewCity').value.trim(),address:$('standaloneNewAddress').value.trim(),
           planActive:false,saleMode:'plan',services:emptyServices(),planBenefits:{},source:'Venda Avulsa'
-        }:{...existing,document,documentType:getClientType(document)};
+        }:{...existing};
         if(!customer.name)throw new Error('Informe o nome do cliente.');
         const config=getConfiguredPlan(document)?.benefits?.[type]||DEFAULT_PLAN_SETTINGS[getClientType(document)].benefits[type];
         const label=config?.label||SERVICES[type].label;
@@ -5420,15 +5381,8 @@
         const notes=$('standaloneNotes').value.trim();
         const saleId=uid();
         const clientId=newMode?state.serviceApi.doc(state.serviceApi.collection(state.db,'clients')).id:existing.id;
-        const benefit={label,description:config?.description||'',limit:quantity,contractText:saleBenefitContractText(config||{label},quantity,type),standalonePrice:unitPrice};
-        const saleData={
-          ...customer,saleMode:'single_service',planLabel:label,planBenefits:{[type]:benefit},
-          planPrice:total,planPriceCustom:true,planStart:start,planEnd:end,payment,paymentStatus,seller,notes
-        };
+        const record={serviceType:type,label,quantity,unitPrice:Math.round(unitPrice*100)/100,total,payment,paymentStatus,seller,notes,saleDate:todayISO(),createdAt:new Date().toISOString(),createdBy:state.currentUser?.uid||''};
         button.disabled=true;button.textContent='Salvando venda...';
-        const contract=await createContractRecord(clientId,saleData,'standalone_sale');
-        contract.contractKind='standalone_sale';contract.standaloneSaleId=saleId;
-        const record={serviceType:type,label,quantity,unitPrice:Math.round(unitPrice*100)/100,total,start,end,payment,paymentStatus,seller,notes,contractToken:contract.token,contractNumber:contract.number,createdAt:new Date().toISOString(),createdBy:state.currentUser?.uid||'',usage:{}};
         const batch=state.serviceApi.writeBatch(state.db);
         if(newMode){
           batch.set(state.serviceApi.doc(state.db,'clients',clientId),{
@@ -5436,24 +5390,18 @@
           });
         }else{
           batch.set(state.serviceApi.doc(state.db,'clients',clientId,'standaloneSales',saleId),record);
-          // A atualização do documento do cliente é atômica com a venda e o contrato.
-          // Não modifica dados do plano, benefícios nem contratos anteriores.
-          if(needsDocument){
+          if(needsDocument && digits.length){
             batch.update(state.serviceApi.doc(state.db,'clients',clientId),{
               document,documentType:getClientType(document),updatedAt:state.serviceApi.serverTimestamp()
             });
           }
         }
-        batch.set(state.serviceApi.doc(state.db,'publicContracts',contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
+        // Não criar nada em /publicContracts: a venda é concluída diretamente.
         await batch.commit();
-        // O registro do contrato fica disponível no próprio modal imediatamente,
-        // sem aguardar o evento assíncrono de sincronização do Realtime Database.
-        state.standaloneContracts.unshift(contract);
         try{await logActivity('standalone',clientId,'Venda avulsa registrada',`${customer.name} · ${label} (${quantity}) · ${money(total)} · ${seller}`);}catch(err){console.warn('Venda salva, mas histórico não registrado',err);}
         closeModal('standaloneModalBackdrop');
-        showToast('Venda avulsa salva! Contrato gerado e pronto para envio.');
+        showToast('Venda avulsa registrada com sucesso. Não é necessário aceite.');
         renderStandaloneSales();
-        renderContractModal(contract);openModal('contractModalBackdrop');
       }catch(err){
         console.error('Falha ao salvar venda avulsa',err);
         if($('standaloneFormError')?.classList.contains('hidden'))standaloneFormError('Não foi possível salvar: '+(err.message||'erro desconhecido'));
@@ -5461,50 +5409,11 @@
       }
       finally{button.disabled=false;button.textContent=original;}
     }
-    function copyStandaloneContractLink(clientId,saleId){
-      const client=state.clients.find(c=>c.id===clientId),sale=client?.standaloneSales?.[saleId];
-      if(!sale?.contractToken){showToast('Contrato não localizado.','error');return;}
-      copyText(getContractLink(sale.contractToken));
-    }
-    window.copyStandaloneContractLink=copyStandaloneContractLink;
-    function openStandaloneUsage(clientId,saleId){
-      const c=state.clients.find(x=>x.id===clientId),sale=c?.standaloneSales?.[saleId];
-      if(!sale)return showToast('Venda não localizada.','error');
-      if(!can('servicesRegister'))return showToast('Sem permissão para registrar utilização.','error');
-      if(standaloneState({...sale,client:c,id:saleId})!=='active')return showToast('Esta venda precisa de contrato aceito e vigência ativa.','error');
-      const used=Object.keys(sale.usage||{}).length;
-      if(used>=Number(sale.quantity||1))return showToast('Todas as utilizações foram registradas.','error');
-      $('standaloneUsageForm').reset();
-      $('standaloneUsageClientId').value=clientId;
-      $('standaloneUsageSaleId').value=saleId;
-      $('standaloneUsageDate').value=todayISO();
-      $('standaloneUsageOperator').value=state.currentProfile?.name||'';
-      $('standaloneUsageInfo').innerHTML=`<strong>${safe(sale.label)}</strong><br>Cliente: ${safe(c.name)}<br>Registrar utilização ${used+1} de ${sale.quantity}.`;
-      openModal('standaloneUsageBackdrop');
-    }
-    window.openStandaloneUsage=openStandaloneUsage;
-    async function registerStandaloneUsage(event){
-      event.preventDefault();
-      const clientId=$('standaloneUsageClientId').value,saleId=$('standaloneUsageSaleId').value;
-      const c=state.clients.find(x=>x.id===clientId),sale=c?.standaloneSales?.[saleId];
-      if(!c||!sale||!can('servicesRegister'))return showToast('Registro não autorizado.','error');
-      if(standaloneState({...sale,client:c,id:saleId})!=='active')return showToast('Contrato não aceito, vencido ou utilizações esgotadas.','error');
-      const count=Object.keys(sale.usage||{}).length;
-      if(count>=Number(sale.quantity||1))return showToast('Limite de utilizações atingido.','error');
-      const button=$('standaloneUsageSubmit');button.disabled=true;
-      try{
-        const ref=state.serviceApi.doc(state.db,'clients',clientId,'standaloneSales',saleId,'usage',uid());
-        await state.serviceApi.setDoc(ref,{date:$('standaloneUsageDate').value,operator:$('standaloneUsageOperator').value.trim(),notes:$('standaloneUsageNotes').value.trim(),createdAt:new Date().toISOString(),createdBy:state.currentUser?.uid||''});
-        try{await logActivity('service',clientId,'Utilização de serviço avulso',`${c.name} · ${sale.label} · ${count+1} de ${sale.quantity}`);}catch(err){console.warn(err);}
-        closeModal('standaloneUsageBackdrop');showToast('Utilização registrada com sucesso.');
-      }catch(err){showToast('Erro ao registrar utilização: '+err.message,'error');}
-      finally{button.disabled=false;}
-    }
     function exportStandaloneSales(){
       if(!can('reportsExport'))return;
-      const fields=['Cliente','CPF/CNPJ','Serviço','Quantidade','Utilizadas','Preço unitário','Valor total','Pagamento','Situação pagamento','Vendedor','Início','Fim','Status','Nº contrato','Link do contrato'];
+      const fields=['Cliente','CPF/CNPJ','Serviço','Quantidade','Preço unitário','Valor total','Pagamento','Situação pagamento','Vendedor','Data da venda','Observações'];
       const quote=x=>'"'+String(x??'').replace(/"/g,'""')+'"';
-      const rows=standaloneAllSales().map(s=>[s.client.name,s.client.document,s.label,s.quantity,Object.keys(s.usage||{}).length,s.unitPrice,s.total,s.payment,s.paymentStatus,s.seller,s.start,s.end,standaloneStatusLabel(standaloneState(s)),s.contractNumber,getContractLink(s.contractToken)]);
+      const rows=standaloneAllSales().map(s=>[s.client.name,s.client.document,s.label,s.quantity,s.unitPrice,s.total,s.payment,s.paymentStatus==='paid'?'Pago':'Pendente',s.seller,s.saleDate||String(s.createdAt||'').slice(0,10),s.notes||'']);
       const csv='\uFEFF'+[fields,...rows].map(row=>row.map(quote).join(';')).join('\r\n');
       const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
       const a=document.createElement('a');a.href=url;a.download='ig_energia_vendas_avulsas_'+todayISO()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
@@ -6296,12 +6205,11 @@
     $("standaloneExistingDocument")?.addEventListener("input",()=>{standaloneFormError();refreshStandalonePrice(true);});
     $("standaloneNewDocument")?.addEventListener("input",()=>{standaloneFormError();refreshStandalonePrice(true);});
     $("standaloneService")?.addEventListener("change",refreshStandalonePrice);
-    ["standaloneQty","standaloneUnitPrice","standaloneStart","standaloneEnd"].forEach(id=>$(id)?.addEventListener("input",updateStandaloneSummary));
+    ["standaloneQty","standaloneUnitPrice"].forEach(id=>$(id)?.addEventListener("input",updateStandaloneSummary));
     $("standaloneForm")?.addEventListener("submit",saveStandaloneSale);
     $("standaloneSearch")?.addEventListener("input",renderStandaloneSales);
     $("standaloneFilter")?.addEventListener("change",renderStandaloneSales);
     $("standaloneCsvBtn")?.addEventListener("click",exportStandaloneSales);
-    $("standaloneUsageForm")?.addEventListener("submit",registerStandaloneUsage);
     $("backClients").addEventListener("click",()=>navigate("clients"));
     $("newMaintenanceFromClient").addEventListener("click",()=>openMaintenanceForClient(state.selectedClientId));
     $("newStandaloneFromClient")?.addEventListener("click",()=>openStandaloneSale(state.selectedClientId));
