@@ -1540,7 +1540,7 @@
             <div class="hero-copy">
               <h2>Venda Avulsa</h2>
               <p>Venda um serviço do monitoramento de forma independente, para clientes já cadastrados ou novos. O plano atual, suas utilizações e seu contrato permanecem intactos.</p>
-              <p style="font-size:10px;color:var(--accent);margin-top:8px">Módulo Venda Avulsa · versão 13/10/2026</p>
+              <p style="font-size:10px;color:var(--accent);margin-top:8px">Módulo Venda Avulsa · correção de cadastro 19/10/2026</p>
             </div>
             <div class="avulsa-hero-actions"><button id="standaloneNewBtn" type="button" class="btn btn-primary" data-permission="clientsEdit">＋ Nova venda avulsa</button></div>
           </div>
@@ -1946,6 +1946,11 @@
                 <input id="standaloneClientSearch" placeholder="Digite nome, documento ou cidade para filtrar">
                 <select id="standaloneClientSelect" style="margin-top:8px"><option value="">Selecione um cliente</option></select>
                 <span id="standaloneClientHint" class="small muted">Selecione um cliente para preencher os dados automaticamente.</span>
+                <div id="standaloneMissingDocumentFields" class="field hidden" style="margin-top:12px;padding:14px;border:1px solid #d8e4ba;border-left:4px solid var(--accent);border-radius:9px;background:#f9fcf2">
+                  <label for="standaloneExistingDocument" style="color:var(--primary)">CPF ou CNPJ para emissão do contrato *</label>
+                  <input id="standaloneExistingDocument" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="Informe os 11 dígitos do CPF ou os 14 do CNPJ">
+                  <span id="standaloneExistingDocumentHint" class="small muted">Este cadastro não possui CPF/CNPJ. Preencha o documento aqui: ao concluir a venda, ele será atualizado automaticamente no cadastro do cliente, sem alterar seu plano.</span>
+                </div>
               </div>
               <div class="field full hidden" id="standaloneNewFields">
                 <div class="form-grid avulsa-new-fields">
@@ -1959,6 +1964,7 @@
               </div>
             </div>
           </div>
+          <div id="standaloneFormError" class="service-contract-form-note hidden" role="alert" aria-live="assertive" style="margin:14px 0;border-color:#f1b5b5;border-left-color:#b63838;background:#fff5f5;color:#842626"></div>
           <div class="avulsa-form-section">
             <h4>2. Serviço vendido — somente um item por venda</h4>
             <div class="form-grid">
@@ -5280,8 +5286,36 @@
     function standaloneSelectedClient(){
       return state.clients.find(c=>c.id===$('standaloneClientSelect').value)||null;
     }
+    function standaloneClientNeedsDocument(client){
+      const size=documentDigits(client?.document||'').length;
+      return !!client && size!==11 && size!==14;
+    }
     function standaloneSaleDocument(){
-      return $('standaloneClientMode').value==='new'?$('standaloneNewDocument').value:standaloneSelectedClient()?.document||'';
+      if($('standaloneClientMode').value==='new')return $('standaloneNewDocument').value;
+      const client=standaloneSelectedClient();
+      if(!client)return '';
+      return standaloneClientNeedsDocument(client)?$('standaloneExistingDocument').value:(client.document||'');
+    }
+    function syncStandaloneExistingDocument(){
+      const client=$('standaloneClientMode').value==='new'?null:standaloneSelectedClient();
+      const missing=standaloneClientNeedsDocument(client);
+      const input=$('standaloneExistingDocument');
+      if(input.dataset.clientId!==(client?.id||'')){
+        input.value='';
+        input.dataset.clientId=client?.id||'';
+      }
+      $('standaloneMissingDocumentFields').classList.toggle('hidden',!missing);
+      input.required=missing;
+      if(!missing)input.value='';
+      if(missing){
+        $('standaloneClientHint').textContent=`${client.name||'Cliente'} · CPF/CNPJ pendente · ${client.planActive===false?'sem plano ativo':'plano atual preservado'}`;
+      }
+    }
+    function standaloneFormError(message='',fieldId=''){
+      const box=$('standaloneFormError');
+      if(box){box.textContent=message;box.classList.toggle('hidden',!message);}
+      const field=fieldId?$(fieldId):null;
+      if(field){field.focus();field.scrollIntoView({block:'center',behavior:'smooth'});}
     }
     function refreshStandaloneClientOptions(){
       const select=$('standaloneClientSelect'),current=select.value;
@@ -5297,9 +5331,11 @@
       $('standaloneNewFields').classList.toggle('hidden',!isNew);
       ['standaloneNewName','standaloneNewDocument'].forEach(id=>$(id).required=isNew);
       $('standaloneClientSelect').required=!isNew;
+      standaloneFormError();
       refreshStandalonePrice();
     }
-    function refreshStandalonePrice(){
+    function refreshStandalonePrice(preservePrice=false){
+      syncStandaloneExistingDocument();
       const client=standaloneSelectedClient(),newMode=$('standaloneClientMode').value==='new';
       const document=standaloneSaleDocument();
       if(client&&!newMode){
@@ -5308,7 +5344,7 @@
       const type=$('standaloneService').value;
       const base=getConfiguredPlan(document)?.benefits?.[type]||DEFAULT_PLAN_SETTINGS[getClientType(document)]?.benefits?.[type]||{};
       $('standaloneServiceDescription').textContent=`${base.description||SERVICES[type]?.label||'Serviço independente'}${Number(base.standalonePrice||0)>0?' · Preço-base: '+money(Number(base.standalonePrice)):''}`;
-      $('standaloneUnitPrice').value=Number(base.standalonePrice||0)>0?Number(base.standalonePrice).toFixed(2):'';
+      if(!preservePrice)$('standaloneUnitPrice').value=Number(base.standalonePrice||0)>0?Number(base.standalonePrice).toFixed(2):'';
       updateStandaloneSummary();
     }
     function updateStandaloneSummary(){
@@ -5322,6 +5358,8 @@
     function openStandaloneSale(clientId=''){
       if(!can('clientsEdit')){showToast('Você não possui permissão para registrar vendas avulsas.','error');return;}
       $('standaloneForm').reset();
+      standaloneFormError();
+      $('standaloneExistingDocument').dataset.clientId='';
       $('standaloneClientMode').value='existing';
       $('standaloneClientSearch').value='';
       $('standaloneStart').value=todayISO();
@@ -5347,10 +5385,19 @@
         if(newMode&&!can('clientsCreate'))throw new Error('Você não tem permissão para cadastrar novos clientes.');
         const existing=standaloneSelectedClient();
         if(!newMode&&!existing)throw new Error('Selecione um cliente existente.');
-        const document=String(newMode?$('standaloneNewDocument').value:existing.document||'').trim();
+        standaloneFormError();
+        const needsDocument=!newMode && standaloneClientNeedsDocument(existing);
+        const document=String(standaloneSaleDocument()||'').trim();
         const digits=documentDigits(document);
-        if(digits.length!==11&&digits.length!==14)throw new Error('Informe CPF com 11 dígitos ou CNPJ com 14 dígitos.');
-        if(newMode && state.clients.some(c=>documentDigits(c.document||'')===digits))throw new Error('Este CPF/CNPJ já existe. Selecione o cadastro do cliente para não duplicar.');
+        if(digits.length!==11&&digits.length!==14){
+          const field=needsDocument?'standaloneExistingDocument':newMode?'standaloneNewDocument':'';
+          const message=needsDocument
+            ? 'O cliente selecionado ainda não possui CPF/CNPJ. Preencha o campo destacado acima (11 dígitos para CPF ou 14 para CNPJ). O cadastro será atualizado ao salvar a venda.'
+            : 'Informe um CPF com 11 dígitos ou CNPJ com 14 dígitos para gerar o contrato.';
+          standaloneFormError(message,field);
+          throw new Error(message);
+        }
+        if(state.clients.some(c=>(newMode || c.id!==existing?.id) && documentDigits(c.document||'')===digits))throw new Error('Este CPF/CNPJ já está vinculado a outro cliente. Selecione o cadastro correto para não duplicar.');
         const type=$('standaloneService').value;
         if(!Object.hasOwn(SERVICES,type))throw new Error('Escolha um serviço válido.');
         const quantity=Number($('standaloneQty').value),unitPrice=Number($('standaloneUnitPrice').value);
@@ -5363,7 +5410,7 @@
           name:$('standaloneNewName').value.trim(),document,documentType:getClientType(document),
           phone:$('standaloneNewPhone').value.trim(),email:$('standaloneNewEmail').value.trim(),city:$('standaloneNewCity').value.trim(),address:$('standaloneNewAddress').value.trim(),
           planActive:false,saleMode:'plan',services:emptyServices(),planBenefits:{},source:'Venda Avulsa'
-        }:existing;
+        }:{...existing,document,documentType:getClientType(document)};
         if(!customer.name)throw new Error('Informe o nome do cliente.');
         const config=getConfiguredPlan(document)?.benefits?.[type]||DEFAULT_PLAN_SETTINGS[getClientType(document)].benefits[type];
         const label=config?.label||SERVICES[type].label;
@@ -5389,6 +5436,13 @@
           });
         }else{
           batch.set(state.serviceApi.doc(state.db,'clients',clientId,'standaloneSales',saleId),record);
+          // A atualização do documento do cliente é atômica com a venda e o contrato.
+          // Não modifica dados do plano, benefícios nem contratos anteriores.
+          if(needsDocument){
+            batch.update(state.serviceApi.doc(state.db,'clients',clientId),{
+              document,documentType:getClientType(document),updatedAt:state.serviceApi.serverTimestamp()
+            });
+          }
         }
         batch.set(state.serviceApi.doc(state.db,'publicContracts',contract.token),{...contract,generatedAt:state.serviceApi.serverTimestamp()});
         await batch.commit();
@@ -5400,7 +5454,11 @@
         showToast('Venda avulsa salva! Contrato gerado e pronto para envio.');
         renderStandaloneSales();
         renderContractModal(contract);openModal('contractModalBackdrop');
-      }catch(err){console.error('Falha ao salvar venda avulsa',err);showToast('Não foi possível salvar: '+(err.message||'erro desconhecido'),'error');}
+      }catch(err){
+        console.error('Falha ao salvar venda avulsa',err);
+        if($('standaloneFormError')?.classList.contains('hidden'))standaloneFormError('Não foi possível salvar: '+(err.message||'erro desconhecido'));
+        showToast('Não foi possível salvar: '+(err.message||'erro desconhecido'),'error');
+      }
       finally{button.disabled=false;button.textContent=original;}
     }
     function copyStandaloneContractLink(clientId,saleId){
@@ -6234,8 +6292,9 @@
     $("standaloneNewBtn")?.addEventListener("click",()=>openStandaloneSale());
     $("standaloneClientMode")?.addEventListener("change",updateStandaloneClientMode);
     $("standaloneClientSearch")?.addEventListener("input",refreshStandaloneClientOptions);
-    $("standaloneClientSelect")?.addEventListener("change",refreshStandalonePrice);
-    $("standaloneNewDocument")?.addEventListener("input",refreshStandalonePrice);
+    $("standaloneClientSelect")?.addEventListener("change",()=>{standaloneFormError();refreshStandalonePrice();});
+    $("standaloneExistingDocument")?.addEventListener("input",()=>{standaloneFormError();refreshStandalonePrice(true);});
+    $("standaloneNewDocument")?.addEventListener("input",()=>{standaloneFormError();refreshStandalonePrice(true);});
     $("standaloneService")?.addEventListener("change",refreshStandalonePrice);
     ["standaloneQty","standaloneUnitPrice","standaloneStart","standaloneEnd"].forEach(id=>$(id)?.addEventListener("input",updateStandaloneSummary));
     $("standaloneForm")?.addEventListener("submit",saveStandaloneSale);
